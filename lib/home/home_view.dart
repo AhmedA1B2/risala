@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_bg/custom_bg_of_home.dart';
 import 'package:risala/custom/custom_bottom_bar/bottom_bar_animation/bottom_bar_animation1.dart';
 import 'package:risala/custom/custom_list_items/custom_list/custom_list1.dart';
-import 'package:risala/my_views/adhan/adhan_view/adhan_view.dart';
+import 'package:risala/my_views/adhan/adhan_view/moadhn_view.dart';
 import 'package:risala/my_views/qibla/qibla_view/qibla_view.dart';
 import 'package:risala/my_views/sabhuh/sabhuh_view/sabhuh_view.dart';
 
