@@ -6,7 +6,6 @@ import 'package:adhan/adhan.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
-import 'package:risala/Notifications/notification_service.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen2.dart';
 import 'package:risala/main.dart';
 import 'package:risala/models/translation.dart';

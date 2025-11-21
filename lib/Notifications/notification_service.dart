@@ -1,11 +1,9 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
-import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 
 class NotificationService {
   NotificationService._privateConstructor();
@@ -34,25 +32,20 @@ class NotificationService {
     );
   }
 
-  Future<void> showAdhanNotification({
-    required int id,
-    required String title,
-    required String body,
-  }) async {
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'adhan_channel',
-      'إشعارات الأذان',
-      channelDescription: 'إشعار عند وقت الأذان',
-      importance: Importance.max,
-      priority: Priority.high,
-      fullScreenIntent: true,
-      icon: '@mipmap/ic_launcher',
-    );
+  Future<void> showAdhanNotification() async {
+    const platform = MethodChannel("adhan_control");
+    await platform.invokeMethod("showAdhanNotification");
+  }
 
-    const NotificationDetails platformDetails = NotificationDetails(
-        android: androidDetails, iOS: DarwinNotificationDetails());
+  void listenFromAndroid() {
+    const platform = MethodChannel("adhan_control");
 
-    await notificationsPlugin.show(id, title, body, platformDetails);
+    platform.setMethodCallHandler((call) async {
+      if (call.method == "stopAdhan") {
+        print("🛑 Android طلب إيقاف الأذان");
+        final service = FlutterBackgroundService();
+        service.invoke("stopAdhan");
+      }
+    });
   }
 }

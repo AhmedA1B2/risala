@@ -27,7 +27,7 @@ class _HomeViewState extends State<HomeView> {
             : showRightView == 1
                 ? const QiblaView()
                 : showRightView == 2
-                    ? const AdhanView()
+                    ? const SizedBox() //const AdhanView()
                     : showRightView == 3
                         ? const SabhuhView()
                         : const SizedBox(),
