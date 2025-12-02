@@ -108,7 +108,7 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                         padding: const EdgeInsets.all(12),
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
-                        height: 250,
+                        height: 220,
                         width: animatedContainerWidth,
                         decoration: BoxDecoration(
                           color: dilutionamberColor,
@@ -121,7 +121,7 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                     // صورة على اليسار
                     Positioned(
                       left: 0,
-                      top: -50,
+                      top: -65,
                       child: Transform.translate(
                         offset: const Offset(-50, 0),
                         child: SizedBox(
@@ -136,7 +136,7 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                     // صورة على اليمين
                     Positioned(
                       right: 0,
-                      top: -50,
+                      top: -65,
                       child: Transform.translate(
                         offset: const Offset(50, 0),
                         child: SizedBox(

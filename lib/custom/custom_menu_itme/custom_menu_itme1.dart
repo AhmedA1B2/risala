@@ -72,7 +72,7 @@ class _CustomMenuItmeState extends State<CustomMenuItme> {
                     textDirection: TextDirection.rtl,
                     style: const TextStyle(
                       color: blackColor,
-                      fontSize: 22,
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Amiri',
                     ),
