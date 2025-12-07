@@ -23,7 +23,7 @@ class MainActivity : FlutterActivity() {
             when (call.method) {
 
                 "showAdhanNotification" -> {
-                    showAdhanNotification()
+                    showBasicNotification()
                     result.success(null)
                 }
 
@@ -36,9 +36,8 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun showAdhanNotification() {
+    private fun showBasicNotification() {
         val channelId = "adhan_channel"
-
         val notificationManager =
             getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
@@ -52,8 +51,8 @@ class MainActivity : FlutterActivity() {
         }
 
         val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("وقت الأذان")
-            .setContentText("اضغط لإيقاف الأذان")
+            .setContentTitle("إشعار")
+            .setContentText("هذا إشعار عادي بدون تشغيل صوت")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setAutoCancel(true)
             .build()

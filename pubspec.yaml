@@ -32,16 +32,12 @@ dependencies:
     sdk: flutter 
   shared_preferences: ^2.5.3
   http: ^1.2.2
-  audioplayers: ^5.2.1
   android_alarm_manager_plus: ^5.0.0
   flutter_local_notifications: ^19.5.0
   timezone: ^0.10.1
 
   #\
   just_audio: ^0.9.39
-  just_audio_background: ^0.0.1-beta.13
-  audio_session: ^0.1.15
-  audio_service: ^0.18.13
   flutter_background_service: ^5.1.0
 
 
@@ -94,7 +90,6 @@ flutter:
     - assets/json/reciters/reciters.json
     - assets/language/the_translation.json
     - assets/images/
-    - assets/audio/adhan/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

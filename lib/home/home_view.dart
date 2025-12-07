@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_bg/custom_bg_of_home.dart';
 import 'package:risala/custom/custom_bottom_bar/bottom_bar_animation/bottom_bar_animation1.dart';
 import 'package:risala/custom/custom_list_items/custom_list/custom_list1.dart';
-import 'package:risala/my_views/adhan/adhan_view/moadhn_view.dart';
 import 'package:risala/my_views/qibla/qibla_view/qibla_view.dart';
 import 'package:risala/my_views/sabhuh/sabhuh_view/sabhuh_view.dart';
 
@@ -13,10 +12,9 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-double showRightView = 0;
-double topBorderRadius = 10;
-
 class _HomeViewState extends State<HomeView> {
+  double showRightView = 0;
+  double topBorderRadius = 10;
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -61,7 +59,7 @@ class _HomeViewState extends State<HomeView> {
             icons: const [
               Icons.menu_book_sharp,
               Icons.track_changes_rounded,
-              Icons.mosque_rounded,
+              Icons.edit_notifications,
               Icons.spa_sharp,
             ],
           ),

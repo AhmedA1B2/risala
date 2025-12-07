@@ -11,12 +11,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-    <!-- 🧭 أذونات الحساسات -->
+    <!-- 🧭 الحساسات -->
     <uses-permission android:name="android.permission.BODY_SENSORS" />
     <uses-feature android:name="android.hardware.sensor.compass" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" />
 
-    <!-- 🔔 أذونات الإشعارات -->
+    <!-- 🔔 الإشعارات -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -24,7 +24,6 @@
 
     <!-- 🔊 خدمات الخلفية -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
     <application
         android:label="risala"
@@ -33,10 +32,9 @@
 
         <!-- 🏠 النشاط الرئيسي -->
         <activity
-            android:name="com.ryanheise.audioservice.AudioServiceActivity"
+            android:name="io.flutter.embedding.android.FlutterActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
@@ -76,30 +74,12 @@
             android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsReceiver" />
 
-        <!-- 🎧 خدمة الصوت الخاصة بـ just_audio_background -->
-        <service
-            android:name="com.ryanheise.just_audio.BackgroundAudioService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-            </intent-filter>
-        </service>
-
-        <!-- 🎵 خدمة AudioService الأساسية -->
-        <service
-            android:name="com.ryanheise.audioservice.AudioService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
-
         <!-- ⚙️ خدمة flutter_background_service -->
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback"
+            android:foregroundServiceType="location|dataSync"
             tools:replace="android:exported" />
 
         <!-- ⏰ إعدادات android_alarm_manager_plus -->

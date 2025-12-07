@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:risala/custom/custom_bottom_bar/bottom_bar_animation/bottom_bar_animation2.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen2.dart';
 import 'package:risala/custom/custom_snack_bar/custom_snack_bar.dart';
@@ -12,7 +13,6 @@ import 'package:risala/my_views/quran/custom/custom_app_bar.dart';
 import 'package:risala/my_views/quran/custom/custom_surah_name.dart';
 import 'package:risala/my_views/quran/custom/custom_surah_page.dart';
 import 'package:http/http.dart' as http;
-import 'package:audioplayers/audioplayers.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
@@ -39,6 +39,7 @@ class _QuranViewState extends State<QuranView> {
   final String tokenEndpoint = "https://oauth2.quran.foundation/oauth2/token";
   final ScrollController _scrollController = ScrollController();
   final AudioPlayer _player = AudioPlayer();
+  late int surahNumber = widget.surahNumber;
 
   String? accessToken;
   IconData iconData = Icons.play_arrow;
@@ -85,7 +86,7 @@ class _QuranViewState extends State<QuranView> {
   }
 
   Future<void> loadSurahName() async {
-    surahName = await getSurahNameByNumber(widget.surahNumber);
+    surahName = await getSurahNameByNumber(surahNumber);
     setState(() {});
   }
 
@@ -128,37 +129,15 @@ class _QuranViewState extends State<QuranView> {
   ////////////////////////////////////////////////////////////////////////////
   // تشغيل السورة
   Future<void> playSurah(int surah, {int reciterId = 1}) async {
-    setState(() {
-      isloading = true;
-    });
+    if (isloading) return;
+
+    setState(() => isloading = true);
+
     if (accessToken == null) await fetchAccessToken();
     if (accessToken == null) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: CustomSnackBar(
-            text:
-                translation!.error.isNotEmpty ? translation!.error : "هناك خطأ",
-          ),
-          backgroundColor: const Color.fromARGB(0, 255, 193, 7),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      setState(() => isloading = false);
       return;
     }
-
-    // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: CustomSnackBar(
-          text: translation!.playing.isNotEmpty
-              ? translation!.playing
-              : "يتم التشغيل",
-        ),
-        backgroundColor: const Color.fromARGB(0, 255, 193, 7),
-        duration: const Duration(seconds: 2),
-      ),
-    );
 
     final url =
         "https://apis.quran.foundation/content/api/v4/chapter_recitations/$reciterId/$surah";
@@ -175,52 +154,34 @@ class _QuranViewState extends State<QuranView> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final audioUrl = data['audio_file']?['audio_url'];
+        final audioUrl = data["audio_file"]?["audio_url"];
+
         if (audioUrl != null) {
           await _player.stop();
-          await _player.play(UrlSource(audioUrl));
+          await _player.setUrl(audioUrl);
+          _player.play();
         }
       } else if (response.statusCode == 403) {
         accessToken = null;
         await playSurah(surah, reciterId: reciterId);
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: CustomSnackBar(
-            text:
-                translation!.error.isNotEmpty ? translation!.error : "هناك خطأ",
-          ),
-          backgroundColor: const Color.fromARGB(0, 255, 193, 7),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      debugPrint("🔥 استثناء: $e");
+      debugPrint("🔥 استثناء في السورة: $e");
     }
-    setState(() {
-      isloading = false;
-    });
+
+    setState(() => isloading = false);
   }
 
   ////////////////////////////////////////////////////////////////////////////
   // تشغيل الآية
   Future<void> playAyah(String verseKey, int recitationId) async {
-    setState(() {
-      isloading = true;
-    });
+    if (isloading) return;
+
+    setState(() => isloading = true);
+
     if (accessToken == null) await fetchAccessToken();
     if (accessToken == null) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: CustomSnackBar(
-            text: "هناك خطأ",
-          ),
-          backgroundColor: Color.fromARGB(0, 255, 193, 7),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      setState(() => isloading = false);
       return;
     }
 
@@ -238,48 +199,34 @@ class _QuranViewState extends State<QuranView> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        String? relativePath = data["verse"]["audio"]["url"];
+        final relativePath = data["verse"]["audio"]["url"];
+
         if (relativePath != null) {
           final audioUrl = "https://verses.quran.com/$relativePath";
+
           await _player.stop();
-          await _player.play(UrlSource(audioUrl));
+          await _player.setUrl(audioUrl);
+          _player.play();
         }
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: CustomSnackBar(
-            text: "هناك خطأ",
-          ),
-          backgroundColor: Color.fromARGB(0, 255, 193, 7),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      print("❌ استثناء: $e");
+      debugPrint("❌ استثناء في الآية: $e");
     }
-    setState(() {
-      isloading = false;
-    });
+
+    setState(() => isloading = false);
   }
 
   ////////////////////////////////////////////////////////////////////////////
   // تشغيل الكلمة
   Future<void> playWordByPosition(
-      String verseKey, int wordPosition, int recitationId) async {
-    setState(() {
-      isloading = true;
-    });
+      String verseKey, int position, int recitationId) async {
+    if (isloading) return;
+
+    setState(() => isloading = true);
 
     if (accessToken == null) await fetchAccessToken();
     if (accessToken == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: CustomSnackBar(text: "هناك خطأ في الوصول"),
-          backgroundColor: Color.fromARGB(0, 255, 193, 7),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      setState(() => isloading = false);
       return;
     }
 
@@ -289,7 +236,7 @@ class _QuranViewState extends State<QuranView> {
           "https://apis.quran.foundation/content/api/v4/verses/by_key/$verseKey?words=true&audio=$recitationId",
         ),
         headers: {
-          "Accept": 'application/json',
+          "Accept": "application/json",
           "x-auth-token": accessToken!,
           "x-client-id": clientId,
         },
@@ -299,9 +246,8 @@ class _QuranViewState extends State<QuranView> {
         final data = json.decode(response.body);
         final words = data["verse"]["words"] as List<dynamic>;
 
-        // البحث بالكلمة حسب الترتيب (position)
         final word = words.firstWhere(
-          (w) => w["position"] == wordPosition,
+          (w) => w["position"] == position,
           orElse: () => null,
         );
 
@@ -312,34 +258,17 @@ class _QuranViewState extends State<QuranView> {
           }
 
           await _player.stop();
-          await _player.play(UrlSource(audioUrl));
+          await _player.setUrl(audioUrl);
+          _player.play();
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content:
-                  CustomSnackBar(text: "لم يتم العثور على الصوت لهذه الكلمة"),
-              backgroundColor: Color.fromARGB(0, 255, 193, 7),
-              duration: Duration(seconds: 2),
-            ),
-          );
+          print("لم يتم العثور على الصوت لهذه الكلمة");
         }
-      } else {
-        print("❌ فشل في جلب البيانات: ${response.statusCode}");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: CustomSnackBar(text: "حدث خطأ أثناء التشغيل"),
-          backgroundColor: Color.fromARGB(0, 255, 193, 7),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      print("❌ استثناء: $e");
+      debugPrint("❌ استثناء في الكلمة: $e");
     }
 
-    setState(() {
-      isloading = false;
-    });
+    setState(() => isloading = false);
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -366,7 +295,7 @@ class _QuranViewState extends State<QuranView> {
   ////////////////////////////////////////////////////////////////////////////
   // النزول للآية المحفوظة
   void goToSavedVerse() {
-    if (ayasaved != null && surahsaved == widget.surahNumber) {
+    if (ayasaved != null && surahsaved == surahNumber) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final context = verseContexts[ayasaved!];
         if (context != null) {
@@ -417,6 +346,8 @@ class _QuranViewState extends State<QuranView> {
     loadAllTranslations();
     loadSurahName();
 
+    surahNumber = surahNumber;
+
     loadData();
     if (widget.x == 1) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -429,11 +360,17 @@ class _QuranViewState extends State<QuranView> {
       });
     }
 
-    _player.onPlayerComplete.listen((event) {
-      setState(() {
-        positionsOfMusic = null; // تعود للقيم الطبيعية
-        sizeoficonOfMusic = null;
-      });
+    _player.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        setState(() {
+          positionsOfMusic = null;
+          sizeoficonOfMusic = null;
+          _player.stop();
+        });
+
+        // يعيد التشغيل إلى البداية لو أردت
+        _player.seek(Duration.zero);
+      }
     });
   }
 
@@ -559,7 +496,7 @@ class _QuranViewState extends State<QuranView> {
                   if (onOff == translation!.turnOn) {
                     onOff = translation!.turnOff;
                     iconData = Icons.stop;
-                    playSurah(widget.surahNumber, reciterId: idOfReciter);
+                    playSurah(surahNumber, reciterId: idOfReciter);
                     setState(() {
                       highlightedVerse = null;
                     });
@@ -573,7 +510,7 @@ class _QuranViewState extends State<QuranView> {
               ),
               CustomSurahName(surahName: surahName ?? ""),
               CustomSurahPage(
-                surahNumber: widget.surahNumber,
+                surahNumber: surahNumber,
                 selectedVerse: highlightedVerse,
                 onVerseContext: (verseNum, ctx) {
                   verseContexts[verseNum] = ctx;
@@ -604,6 +541,31 @@ class _QuranViewState extends State<QuranView> {
                   });
                 },
               ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: scandColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: mainColor),
+                ),
+                child: IconButton(
+                  color: mainColor,
+                  onPressed: () {
+                    setState(() {
+                      surahNumber += 1;
+                      loadSurahName();
+                    });
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    size: 36,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 80,
+              )
             ],
           ),
           highlightedVerse != null && highlightedWord == null
@@ -625,18 +587,18 @@ class _QuranViewState extends State<QuranView> {
                       if (highlightedVerse == null) return;
 
                       if (index == 0) {
-                        playAyah("${widget.surahNumber}:${highlightedVerse!}",
-                            idOfReciter);
+                        playAyah(
+                            "${surahNumber}:${highlightedVerse!}", idOfReciter);
 
                         setState(() {
                           positionsOfMusic = 0;
                           sizeoficonOfMusic = 42;
                         });
                       } else if (index == 1 && highlightedVerse != null) {
-                        saveMyAya(highlightedVerse!, widget.surahNumber,
-                            surahName ?? "");
+                        saveMyAya(
+                            highlightedVerse!, surahNumber, surahName ?? "");
                         ayasaved = highlightedVerse;
-                        surahsaved = widget.surahNumber;
+                        surahsaved = surahNumber;
 
                         // انتظر الإطار ثم انزل
                         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -673,7 +635,7 @@ class _QuranViewState extends State<QuranView> {
                           color: mainColor,
                           onPressed: () async {
                             await playWordByPosition(
-                                "${widget.surahNumber}:${highlightedWordVerse!}",
+                                "${surahNumber}:${highlightedWordVerse!}",
                                 highlightedWord!,
                                 7);
                           },
@@ -698,8 +660,7 @@ class _QuranViewState extends State<QuranView> {
                           child: Padding(
                             padding: const EdgeInsets.all(22.0),
                             child: FutureBuilder<String?>(
-                              future: getTafsir(
-                                  widget.surahNumber, highlightedVerse!),
+                              future: getTafsir(surahNumber, highlightedVerse!),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
