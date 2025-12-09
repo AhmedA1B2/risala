@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:risala/Notifications/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -11,6 +12,12 @@ void main() async {
 
   // تهيئة إشعارات الأذان
   await NotificationService.instance.init();
+
+   // Initialize Hive
+  await Hive.initFlutter();
+
+  // Open notifications box
+  await Hive.openBox('notifications');
 
   sharedPref = await SharedPreferences.getInstance();
   await WakelockPlus.enable();

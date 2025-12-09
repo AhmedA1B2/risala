@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:risala/Notifications/notification_service.dart';
 import 'package:timezone/data/latest.dart';
 import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
@@ -91,34 +92,39 @@ class _NotificationHomeState extends State<NotificationHome> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        TextButton(
-            onPressed: () {
-              showInstantNotification(
-                  id: 0,
-                  title: "showInstantNotification",
-                  body: "dwkb f ufyw fuyvre fuyerf eruyferf");
-            },
-            child: const Center(
-              child: Text(
-                "showInstantNotification",
-              ),
-            )),
-        TextButton(
-            onPressed: () {
-              scheduleReminder(
-                  id: 1,
-                  title: "scheduleReminder",
-                  body: "dwkb f ufyw fuyvre fuyerf eruyferf");
-            },
-            child: const Center(
-              child: Text(
-                "scheduleReminder",
-              ),
-            ))
-      ],
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextButton(
+              onPressed: () {
+                showInstantNotification(
+                    id: 0,
+                    title: "showInstantNotification",
+                    body: "dwkb f ufyw fuyvre fuyerf eruyferf");
+              },
+              child: const Center(
+                child: Text(
+                  "showInstantNotification",
+                ),
+              )),
+          TextButton(
+              onPressed: () {
+                NotificationService.instance.scheduledNotification(
+                  title: "title",
+                  body: "body",
+                  hour: 14,
+                  minute: 38,
+                  daysOfWeek: [1, 4, 5],
+                );
+              },
+              child: const Center(
+                child: Text(
+                  "scheduleReminder",
+                ),
+              ))
+        ],
+      ),
     );
   }
 }
