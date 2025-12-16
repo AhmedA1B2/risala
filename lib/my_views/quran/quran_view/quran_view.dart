@@ -435,7 +435,7 @@ class _QuranViewState extends State<QuranView> {
 
   List<Reciters> reciters = [];
   Reciters? selectedReciter;
-  int idOfReciter = sharedPref.getInt("idOfReciter") ?? 1;
+  int idOfReciter = sharedPref.getInt("idOfReciter") ?? 4;
 
   void loadData() async {
     reciters = await loadReciters();

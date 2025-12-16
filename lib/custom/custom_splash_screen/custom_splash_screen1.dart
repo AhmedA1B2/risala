@@ -3,6 +3,8 @@ import 'package:risala/main.dart';
 import 'package:risala/main_view/main_view.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:risala/Notifications/notification_service.dart';
 
 class CustomSplashScreen1 extends StatefulWidget {
   const CustomSplashScreen1({super.key});
@@ -16,39 +18,53 @@ class _CustomSplashScreen1State extends State<CustomSplashScreen1> {
 
   @override
   void initState() {
-    //////////////////////
-    _reloadFontSettings();
-    //////////////////////
-    Future.delayed(
-      const Duration(milliseconds: 100),
-      () {
-        setState(() {
-          heightofContainer = 60;
-        });
-      },
-    );
+    super.initState();
 
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainView()),
-      );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initServices();
     });
 
-    super.initState();
+    _reloadFontSettings();
+    _startAnimation();
+    _goToMain();
   }
 
-  //////////////////////
-  //////////////////////
-  //////////////////////
+  Future<void> _initServices() async {
+    try {
+      await WakelockPlus.enable();
+      await NotificationService.instance.init();
+    } catch (e) {
+      debugPrint("wakelock error: $e");
+    }
+  }
+
+  // ========================
+
+  void _startAnimation() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+      setState(() {
+        heightofContainer = 60;
+      });
+    });
+  }
+
+  void _goToMain() {
+    Future.delayed(const Duration(milliseconds: 3000), () {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainView()),
+      );
+    });
+  }
+
   void _reloadFontSettings() {
     quranfontSize = sharedPref.getDouble("valueOfSize2") ?? 36;
     mytitlefontSize = sharedPref.getDouble("valueOfSize") ?? 26;
     quranfontFamily = sharedPref.getString("selectedValue2") ?? "Amiri";
   }
-  //////////////////////
-  //////////////////////
-  //////////////////////
+  // ========================
 
   @override
   Widget build(BuildContext context) {

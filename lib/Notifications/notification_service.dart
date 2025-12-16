@@ -13,12 +13,14 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  /// ================= INIT =================
   Future<void> init() async {
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Africa/Cairo'));
 
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
+
     const iosSettings = DarwinInitializationSettings(
       requestSoundPermission: true,
       requestBadgePermission: true,
@@ -26,134 +28,135 @@ class NotificationService {
     );
 
     await notificationsPlugin.initialize(
-      const InitializationSettings(android: androidSettings, iOS: iosSettings),
-      onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        // عند الضغط على الإشعار لإيقاف الأذان
-        final service = FlutterBackgroundService();
-        service.invoke("stopAdhan");
-        print("🛑 المستخدم ضغط على الإشعار لإيقاف الأذان");
+      const InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      ),
+      onDidReceiveNotificationResponse: (response) {
+        FlutterBackgroundService().invoke("stopAdhan");
+        print("🛑 تم الضغط على الإشعار وإيقاف الأذان");
       },
     );
   }
 
-  /// جدولة إشعار حسب أيام الأسبوع
-  /// [daysOfWeek] أيام الأسبوع: الإثنين=1 ... الأحد=7
+  /// ================= SCHEDULE =================
+  /// daysOfWeek: الإثنين=1 ... الأحد=7
   Future<void> scheduledNotification({
-    required List<int> daysOfWeek,
-    required int hour,
-    required int minute,
-    required String title,
-    required String body,
-  }) async {
-    final now = tz.TZDateTime.now(tz.local);
+  required List<int> daysOfWeek,
+  required int hour,
+  required int minute,
+  required String title,
+  required String body,
+}) async {
+  final now = tz.TZDateTime.now(tz.local);
 
-    for (var day in daysOfWeek) {
-      tz.TZDateTime scheduledDate = tz.TZDateTime(
-        tz.local,
-        now.year,
-        now.month,
-        now.day,
-        hour,
-        minute,
-      );
+  final box = await Hive.openBox("saved_notifications");
 
-      while (scheduledDate.weekday != day || scheduledDate.isBefore(now)) {
-        scheduledDate = scheduledDate.add(const Duration(days: 1));
-      }
+  /// ID واحد فقط للإشعار
+  final int mainId =
+      daysOfWeek.first * 100000 + hour * 100 + minute;
 
-      int id = day * 10000 + hour * 100 + minute;
+  /// أسماء الأيام
+  final List<String> daysNames =
+      daysOfWeek.map(_dayName).toList();
 
-      // جدولة الإشعار
-      await notificationsPlugin.zonedSchedule(
-        id,
-        title,
-        body,
-        scheduledDate,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'weekly_channel_id',
-            'Weekly Notifications',
-            channelDescription: 'Weekly scheduled notifications',
-            importance: Importance.max,
-            priority: Priority.high,
-          ),
-          iOS: DarwinNotificationDetails(),
-        ),
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      );
+  /// 🔔 جدولة إشعار لكل يوم
+  for (final day in daysOfWeek) {
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
 
-      List<String> daysOfWeekToString = [];
-
-      for (int day in daysOfWeek) {
-        switch (day) {
-          case 1:
-            daysOfWeekToString.add("الإثنين");
-            break;
-          case 2:
-            daysOfWeekToString.add("الثلاثاء");
-            break;
-          case 3:
-            daysOfWeekToString.add("الأربعاء");
-            break;
-          case 4:
-            daysOfWeekToString.add("الخميس");
-            break;
-          case 5:
-            daysOfWeekToString.add("الجمعة");
-            break;
-          case 6:
-            daysOfWeekToString.add("السبت");
-            break;
-          case 7:
-            daysOfWeekToString.add("الأحد");
-            break;
-        }
-      }
-
-      int idOfHive = now.year +
-          now.month +
-          now.day +
-          hour +
-          minute +
-          now.minute +
-          now.second +
-          now.millisecond * body.length +
-          title.length +
-          daysOfWeek.length;
-
-      // حفظ الإشعار في Hive
-      final box = await Hive.openBox("saved_notifications");
-      await box.put(
-          idOfHive,
-          SavedNotification(
-            id: idOfHive,
-            title: title,
-            body: body,
-            hour: hour,
-            minute: minute,
-            days: daysOfWeekToString,
-          ).toMap());
+    while (scheduledDate.weekday != day ||
+        scheduledDate.isBefore(now)) {
+      scheduledDate =
+          scheduledDate.add(const Duration(days: 1));
     }
+
+    /// ID مختلف لكل يوم (للنظام فقط)
+    final int systemId =
+        mainId + day;
+
+    await notificationsPlugin.zonedSchedule(
+      systemId,
+      title,
+      body,
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'weekly_channel_id',
+          'Weekly Notifications',
+          channelDescription: 'Weekly scheduled notifications',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+      matchDateTimeComponents:
+          DateTimeComponents.dayOfWeekAndTime,
+      androidScheduleMode:
+          AndroidScheduleMode.exactAllowWhileIdle,
+    );
   }
 
-  /// حذف كل الإشعارات
+  /// 💾 حفظ الإشعار مرة واحدة فقط
+  await box.put(
+    mainId,
+    SavedNotification(
+      id: mainId,
+      title: title,
+      body: body,
+      hour: hour,
+      minute: minute,
+      days: daysNames,
+    ).toMap(),
+  );
+}
+
+  /// ================= CANCEL =================
   Future<void> cancelAllNotifications() async {
     await notificationsPlugin.cancelAll();
-
     final box = await Hive.openBox("saved_notifications");
     await box.clear();
   }
 
-  Future<void> cancelNotifications(int id) async {
+  Future<void> cancelNotification(int id) async {
     await notificationsPlugin.cancel(id);
     final box = await Hive.openBox("saved_notifications");
     await box.delete(id);
   }
 
+  /// ================= GET =================
   Future<List<SavedNotification>> getSavedNotifications() async {
     final box = await Hive.openBox("saved_notifications");
+    return box.values
+        .map((e) => SavedNotification.fromMap(e))
+        .toList();
+  }
 
-    return box.values.map((data) => SavedNotification.fromMap(data)).toList();
+  /// ================= UTILS =================
+  String _dayName(int day) {
+    switch (day) {
+      case 1:
+        return "الإثنين";
+      case 2:
+        return "الثلاثاء";
+      case 3:
+        return "الأربعاء";
+      case 4:
+        return "الخميس";
+      case 5:
+        return "الجمعة";
+      case 6:
+        return "السبت";
+      case 7:
+        return "الأحد";
+      default:
+        return "";
+    }
   }
 }

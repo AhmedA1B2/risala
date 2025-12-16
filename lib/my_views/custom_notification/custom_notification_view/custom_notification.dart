@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risala/Notifications/notification_service.dart';
 import 'package:risala/Notifications/saved_notification.dart';
+import 'package:risala/main_view/main_view.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_button_icon.dart';
 import 'package:risala/my_views/custom_notification/custom_notification_view/add_custom_notification.dart';
 import 'package:risala/vars/colors.dart';
@@ -59,7 +60,7 @@ class _CustomNotificationState extends State<CustomNotification> {
                                 iconColor: Colors.red,
                                 onPressed: () async {
                                   await NotificationService.instance
-                                      .cancelNotifications(item.id);
+                                      .cancelNotification(item.id);
                                   savedList.removeAt(index);
                                   setState(() {});
                                 },
@@ -130,6 +131,11 @@ class _CustomNotificationState extends State<CustomNotification> {
                     onPressed: () async {
                       await NotificationService.instance
                           .cancelAllNotifications();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const MainView()),
+                      );
                       setState(() {});
                     },
                   ),

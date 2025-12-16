@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen1.dart';
 import 'package:risala/custom/custom_menu_animation/custom_menu_animation5.dart';
 import 'package:risala/custom/custom_search_bar/custom_search_bar.dart';
@@ -67,6 +68,15 @@ class _MainViewState extends State<MainView> {
   void initState() {
     loadAllTranslations();
     super.initState();
+    _requestNotificationPermission();
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    final status = await Permission.notification.status;
+
+    if (!status.isGranted) {
+      await Permission.notification.request();
+    }
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:risala/Notifications/notification_service.dart';
+import 'package:risala/main_view/main_view.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_button_icon.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_button_text.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_text_field.dart';
@@ -56,6 +57,10 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
     setState(() {
       colorsOfweek = List.filled(8, whiteColor);
     });
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const MainView()),
+    );
   }
 
   @override

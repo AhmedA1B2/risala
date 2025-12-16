@@ -2,6 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.risala">
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+
     <!-- ⚙️ أذونات النظام -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
