@@ -7,10 +7,10 @@ class CustomMenuButton1 extends StatefulWidget {
   final void Function()? onTap;
 
   @override
-  State<CustomMenuButton1> createState() => _CustomMenuButton1State();
+  CustomMenuButton1State createState() => CustomMenuButton1State();
 }
 
-class _CustomMenuButton1State extends State<CustomMenuButton1>
+class CustomMenuButton1State extends State<CustomMenuButton1>
     with TickerProviderStateMixin {
   double turns = 0.0;
   bool isClicked = false;
@@ -26,6 +26,12 @@ class _CustomMenuButton1State extends State<CustomMenuButton1>
     }
     isClicked = !isClicked;
     setState(() {});
+  }
+
+  void closeButtonMenu() {
+    if (isClicked) {
+      animation();
+    }
   }
 
   @override

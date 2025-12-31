@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen1.dart';
 import 'package:risala/custom/custom_menu_animation/custom_menu_animation5.dart';
+import 'package:risala/custom/custom_menu_button/custom_menu_button1.dart';
 import 'package:risala/custom/custom_search_bar/custom_search_bar.dart';
 import 'package:risala/home/home_view.dart';
 import 'package:risala/main.dart';
@@ -9,6 +12,7 @@ import 'package:risala/menu/menu.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/quran/quran_view/quran_view.dart';
 import 'package:risala/translation/translation.dart';
+import 'package:risala/vars/colors.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -18,13 +22,42 @@ class MainView extends StatefulWidget {
 }
 
 class _MainViewState extends State<MainView> {
+  final GlobalKey<CustomMenuAnimation5State> menuKey =
+      GlobalKey<CustomMenuAnimation5State>();
+  final GlobalKey<CustomMenuButton1State> buttonMenuKey =
+      GlobalKey<CustomMenuButton1State>();
+
   int? surahsaved = sharedPref.getInt('surahsaved');
   String? namesaved = sharedPref.getString('namesaved');
 
+  bool isMenuOpen = false;
+
+  List<Map<String, dynamic>>? searchResults;
+  Translation? translation;
+
+  Future<void> loadAllTranslations() async {
+    final list = await loadTranslation(sharedPref.getString("selectedValue"));
+    setState(() {
+      translation = list.first;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadAllTranslations();
+    _requestNotificationPermission();
+  }
+
+  Future<void> _requestNotificationPermission() async {
+    final status = await Permission.notification.status;
+    if (!status.isGranted) {
+      await Permission.notification.request();
+    }
+  }
+
   Future<void> _openQuranViewSaved() async {
     if (surahsaved != null && namesaved != null) {
-      print("surahsaved! ===== ${surahsaved!}");
-      print("surahsaved ===== $surahsaved");
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -35,10 +68,6 @@ class _MainViewState extends State<MainView> {
         ),
       );
 
-      print("2surahsaved! ===== ${surahsaved!}");
-      print("2surahsaved ===== $surahsaved");
-
-      // لما يرجع من صفحة QuranView يتم التحديث
       setState(() {
         surahsaved = sharedPref.getInt('surahsaved');
         namesaved = sharedPref.getString('namesaved');
@@ -46,104 +75,90 @@ class _MainViewState extends State<MainView> {
     }
   }
 
-  List<Map<String, dynamic>>? searchResults;
-
-  //////////////////////////////////////////////
-  /////////////////////////////////////////////
-
-  Translation? translation;
-
-  String? surah;
-  String? verse;
-
-  Future<void> loadAllTranslations() async {
-    final list = await loadTranslation(
-        sharedPref.getString("selectedValue")); // هذا يرجع قائمة من Translation
-    setState(() {
-      translation = list.first; // أو اختر حسب اللغة
-    });
-  }
-
-  @override
-  void initState() {
-    loadAllTranslations();
-    super.initState();
-    _requestNotificationPermission();
-  }
-
-  Future<void> _requestNotificationPermission() async {
-    final status = await Permission.notification.status;
-
-    if (!status.isGranted) {
-      await Permission.notification.request();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return translation == null
-        ? const Center(child: CustomLoadingScreen1())
-        : CustomMenuAnimation5(
-            title: translation!.theQuran.isNotEmpty
-                ? translation!.theQuran
-                : "ٱلْقُرْآنُ",
-            onPressedBookMark: _openQuranViewSaved,
-            mainView: searchResults == null
-                ? const HomeView()
-                : ListView.builder(
-                    itemCount: searchResults!.length,
-                    itemBuilder: (context, index) {
-                      final verse = searchResults![index];
-                      return ListTile(
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => QuranView(
-                                surahNumber: verse['surah_number'],
-                                searchedVerse: verse['verse_number'],
-                                x: 2,
-                              ),
+    if (translation == null) {
+      return const Center(child: CustomLoadingScreen1());
+    }
+
+    return CustomMenuAnimation5(
+      key: menuKey,
+      title: translation!.theQuran.isNotEmpty
+          ? translation!.theQuran
+          : "ٱلْقُرْآنُ",
+      onPressedBookMark: _openQuranViewSaved,
+      onMenuChanged: (value) {
+        setState(() {
+          isMenuOpen = value;
+        });
+      },
+      buttonMenuKey: buttonMenuKey,
+      mainView: Stack(
+        children: [
+          searchResults == null
+              ? const HomeView()
+              : ListView.builder(
+                  itemCount: searchResults!.length,
+                  itemBuilder: (context, index) {
+                    final verse = searchResults![index];
+                    return ListTile(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => QuranView(
+                              surahNumber: verse['surah_number'],
+                              searchedVerse: verse['verse_number'],
+                              x: 2,
                             ),
-                          );
-                        },
-                        title: Text(
-                          verse['content'],
-                          textAlign: TextAlign.right,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                        subtitle: Text(
-                          "${translation!.surah.isNotEmpty ? translation!.surah : "سورة"} ${verse['surah_number']} - ${translation!.verse.isNotEmpty ? translation!.verse : "آية"}  ${verse['verse_number']}",
-                          textAlign: TextAlign.right,
-                        ),
-                      );
-                    },
-                  ),
-            menu: Menu(
-              explanatoryTextForTitle:
-                  translation!.explanatoryTextForTitle.isNotEmpty
-                      ? translation!.explanatoryTextForTitle
-                      : "هذا هو شكل خط العناوين",
-              explanatoryTextForAya:
-                  translation!.explanatoryTextForAya.isNotEmpty
-                      ? translation!.explanatoryTextForAya
-                      : "هذا هو شكل خط الايات",
-              saveText:
-                  translation!.save.isNotEmpty ? translation!.save : "حفظ",
-            ),
-            searchWidget: CustomSearchBar(
-              onResults: (results) {
-                setState(() {
-                  searchResults = results;
-                });
+                          ),
+                        );
+                      },
+                      title: Text(
+                        verse['content'],
+                        textAlign: TextAlign.right,
+                      ),
+                      subtitle: Text(
+                        "${translation!.surah} ${verse['surah_number']} - ${translation!.verse} ${verse['verse_number']}",
+                        textAlign: TextAlign.right,
+                      ),
+                    );
+                  },
+                ),
+          if (isMenuOpen)
+            GestureDetector(
+              onTap: () {
+                menuKey.currentState?.closeMenu();
+                buttonMenuKey.currentState?.closeButtonMenu();
               },
-              aya: translation!.verse.isNotEmpty ? translation!.verse : "آية",
-              surah:
-                  translation!.surah.isNotEmpty ? translation!.surah : "سورة",
-              hintText: translation!.searchHintText.isNotEmpty
-                  ? translation!.searchHintText
-                  : "ابحث عن آية أو سورة...",
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 3, sigmaY: 5),
+                child: Container(
+                  color: blackColor.withOpacity(0.15),
+                ),
+              ),
             ),
-          );
+        ],
+      ),
+      menu: Menu(
+        explanatoryTextForTitle: translation!.explanatoryTextForTitle,
+        explanatoryTextForAya: translation!.explanatoryTextForAya,
+        saveText: translation!.save,
+      ),
+      searchWidget: CustomSearchBar(
+        onSearchBarChanged: (value) {
+          menuKey.currentState?.closeMenu();
+          buttonMenuKey.currentState?.closeButtonMenu();
+        },
+        onResults: (results) {
+          setState(() {
+            searchResults = results;
+          });
+        },
+        aya: translation!.verse,
+        surah: translation!.surah,
+        hintText: translation!.searchHintText,
+      ),
+    );
   }
 }

@@ -1,8 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_icon_button/custom_icon_button_bookmark.dart';
 import 'package:risala/custom/custom_menu_button/custom_menu_button1.dart';
 import 'package:risala/main.dart';
-
 import 'package:risala/vars/colors.dart';
 
 class CustomMenuAnimation5 extends StatefulWidget {
@@ -13,6 +14,8 @@ class CustomMenuAnimation5 extends StatefulWidget {
     this.onPressedBookMark,
     required this.searchWidget,
     required this.title,
+    required this.onMenuChanged,
+    required this.buttonMenuKey, 
   });
 
   final Widget mainView;
@@ -20,21 +23,29 @@ class CustomMenuAnimation5 extends StatefulWidget {
   final void Function()? onPressedBookMark;
   final Widget searchWidget;
   final String title;
+  final GlobalKey<CustomMenuButton1State> buttonMenuKey;
+
+  final ValueChanged<bool> onMenuChanged;
 
   @override
-  State<CustomMenuAnimation5> createState() => _CustomMenuAnimation5State();
+  CustomMenuAnimation5State createState() =>
+      CustomMenuAnimation5State();
 }
 
-class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
+class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
   int itView = 0;
   double animatedContainerWidth = 80;
 
+  /// فتح / إغلاق المينيو بالأنيميشن
   void animation() async {
     if (itView == 0) {
       setState(() {
         itView = 1;
         animatedContainerWidth = 80;
       });
+
+      widget.onMenuChanged(true);
+
       await Future.delayed(const Duration(milliseconds: 50));
 
       setState(() {
@@ -50,11 +61,17 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
       setState(() {
         itView = 0;
       });
+
+      widget.onMenuChanged(false);
     }
   }
 
-  //////////////////////////////////////////////////////////////
-  /////////////////////////////////////////////////////////////
+  /// إغلاق المينيو من الخارج (Blur)
+  void closeMenu() {
+    if (itView != 0) {
+      animation();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,17 +90,21 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: CustomMenuButton1(
+                        key: widget.buttonMenuKey,
                         onTap: animation,
                       ),
                     ),
                     Text(
                       widget.title,
                       style: const TextStyle(
-                          color: whiteColor, fontSize: 32, fontFamily: 'Amiri'),
+                        color: whiteColor,
+                        fontSize: 32,
+                        fontFamily: 'Amiri',
+                      ),
                     ),
                     CustomIconButtonBookmark(
                       onPressed: widget.onPressedBookMark,
-                    )
+                    ),
                   ],
                 ),
                 widget.searchWidget,
@@ -95,6 +116,7 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
       body: Stack(
         children: [
           widget.mainView,
+
           if (itView != 0)
             Padding(
               padding: const EdgeInsets.all(12),
@@ -105,11 +127,11 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: AnimatedContainer(
-                        padding: const EdgeInsets.all(12),
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeInOut,
                         height: 220,
                         width: animatedContainerWidth,
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: dilutionamberColor,
                           border: Border.all(color: blackColor, width: 2),
@@ -118,7 +140,8 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                         child: widget.menu,
                       ),
                     ),
-                    // صورة على اليسار
+
+                    // صورة يسار
                     Positioned(
                       left: 0,
                       top: -65,
@@ -128,12 +151,12 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                           width: 75,
                           child: Image.asset(
                             "assets/images/${sharedPref.getInt("myTheme") ?? 0}.png",
-                            fit: BoxFit.contain,
                           ),
                         ),
                       ),
                     ),
-                    // صورة على اليمين
+
+                    // صورة يمين
                     Positioned(
                       right: 0,
                       top: -65,
@@ -143,7 +166,6 @@ class _CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                           width: 75,
                           child: Image.asset(
                             "assets/images/${sharedPref.getInt("myTheme") ?? 0}.png",
-                            fit: BoxFit.contain,
                           ),
                         ),
                       ),

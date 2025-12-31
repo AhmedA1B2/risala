@@ -462,8 +462,10 @@ class _QuranViewState extends State<QuranView> {
                     isExpanded: true, // ✅ مهم حتى لا يخرج النص من الحاوية
                     menuWidth: 220, // ✅ حجم القائمة
                     menuMaxHeight: 300, // ✅ التحكم في ارتفاع القائمة اختياري
-                    hint: const Text(
-                      "اختر القارئ",
+                    hint: Text(
+                      sharedPref.getInt("idOfReciter") != null
+                          ? "القارئ  ${sharedPref.getInt("idOfReciter")}"
+                          : "اختر القارئ",
                       overflow:
                           TextOverflow.ellipsis, // ✅ يقص النص إذا كان طويلاً
                     ),
@@ -496,7 +498,8 @@ class _QuranViewState extends State<QuranView> {
                   if (onOff == translation!.turnOn) {
                     onOff = translation!.turnOff;
                     iconData = Icons.stop;
-                    playSurah(surahNumber, reciterId: idOfReciter);
+                    playSurah(surahNumber,
+                        reciterId: idOfReciter); //idOfReciter
                     setState(() {
                       highlightedVerse = null;
                     });
@@ -551,11 +554,15 @@ class _QuranViewState extends State<QuranView> {
                 ),
                 child: IconButton(
                   color: mainColor,
-                  onPressed: () {
-                    setState(() {
-                      surahNumber += 1;
-                      loadSurahName();
-                    });
+                  onPressed: () async {
+                    await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => QuranView(
+                            surahNumber: surahNumber + 1,
+                            x: 0,
+                          ),
+                        ));
                   },
                   icon: const Icon(
                     Icons.arrow_back,

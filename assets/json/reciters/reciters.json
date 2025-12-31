@@ -2,110 +2,110 @@
   "recitations": [
     {
       "id": 1,
-      "reciter_name": "AbdulBaset AbdulSamad",
+      "reciter_name": "عبد الباسط عبد الصمد",
       "style": "Mujawwad",
       "translated_name": {
-        "name": "AbdulBaset AbdulSamad",
-        "language_name": "english"
+        "name": "عبد الباسط عبد الصمد",
+        "language_name": "arabic"
       }
     },
     {
       "id": 2,
-      "reciter_name": "AbdulBaset AbdulSamad",
+      "reciter_name": "عبد الباسط عبد الصمد",
       "style": "Murattal",
       "translated_name": {
-        "name": "AbdulBaset AbdulSamad",
-        "language_name": "english"
+        "name": "عبد الباسط عبد الصمد",
+        "language_name": "arabic"
       }
     },
     {
       "id": 3,
-      "reciter_name": "Abdur-Rahman as-Sudais",
+      "reciter_name": "عبد الرحمن السديس",
       "style": null,
       "translated_name": {
-        "name": "Abdur-Rahman as-Sudais",
-        "language_name": "english"
+        "name": "عبد الرحمن السديس",
+        "language_name": "arabic"
       }
     },
     {
       "id": 4,
-      "reciter_name": "Abu Bakr al-Shatri",
+      "reciter_name": "أبو بكر الشاطري",
       "style": null,
       "translated_name": {
-        "name": "Abu Bakr al-Shatri",
-        "language_name": "english"
+        "name": "أبو بكر الشاطري",
+        "language_name": "arabic"
       }
     },
     {
       "id": 5,
-      "reciter_name": "Hani ar-Rifai",
+      "reciter_name": "هاني الرفاعي",
       "style": null,
       "translated_name": {
-        "name": "Hani ar-Rifai",
-        "language_name": "english"
+        "name": "هاني الرفاعي",
+        "language_name": "arabic"
       }
     },
     {
       "id": 6,
-      "reciter_name": "Mahmoud Khalil Al-Husary",
+      "reciter_name": "محمود خليل الحصري",
       "style": null,
       "translated_name": {
-        "name": "Mahmoud Khalil Al-Husary",
-        "language_name": "english"
+        "name": "محمود خليل الحصري",
+        "language_name": "arabic"
       }
     },
     {
       "id": 7,
-      "reciter_name": "Mishari Rashid al-`Afasy",
+      "reciter_name": "مشاري راشد العفاسي",
       "style": null,
       "translated_name": {
-        "name": "Mishari Rashid al-`Afasy",
-        "language_name": "english"
+        "name": "مشاري راشد العفاسي",
+        "language_name": "arabic"
       }
     },
     {
       "id": 8,
-      "reciter_name": "Mohamed Siddiq al-Minshawi",
+      "reciter_name": "محمد صديق المنشاوي",
       "style": "Mujawwad",
       "translated_name": {
-        "name": "Mohamed Siddiq al-Minshawi",
-        "language_name": "english"
+        "name": "محمد صديق المنشاوي",
+        "language_name": "arabic"
       }
     },
     {
       "id": 9,
-      "reciter_name": "Mohamed Siddiq al-Minshawi",
+      "reciter_name": "محمد صديق المنشاوي",
       "style": "Murattal",
       "translated_name": {
-        "name": "Mohamed Siddiq al-Minshawi",
-        "language_name": "english"
+        "name": "محمد صديق المنشاوي",
+        "language_name": "arabic"
       }
     },
     {
       "id": 10,
-      "reciter_name": "Sa`ud ash-Shuraym",
+      "reciter_name": "سعود الشريم",
       "style": null,
       "translated_name": {
-        "name": "Sa`ud ash-Shuraym",
-        "language_name": "english"
+        "name": "سعود الشريم",
+        "language_name": "arabic"
       }
     },
     {
       "id": 11,
-      "reciter_name": "Mohamed al-Tablawi",
+      "reciter_name": "مجهول",
       "style": null,
       "translated_name": {
-        "name": "Mohamed al-Tablawi",
-        "language_name": "english"
+        "name": "مجهول",
+        "language_name": "arabic"
       }
     },
     {
       "id": 12,
-      "reciter_name": "Mahmoud Khalil Al-Husary",
+      "reciter_name": "تعليم طريقة القراءة",
       "style": "Muallim",
       "translated_name": {
-        "name": "Mahmoud Khalil Al-Husary",
-        "language_name": "english"
+        "name": "تعليم طريقة القراءة",
+        "language_name": "arabic"
       }
     }
   ]
