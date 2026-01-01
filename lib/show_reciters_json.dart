@@ -57,6 +57,7 @@ class _ShowRecitersJsonState extends State<ShowRecitersJson> {
       final response = await http.get(
         Uri.parse(
             "https://apis.quran.foundation/content/api/v4/resources/recitations"),
+            //"https://apis.quran.foundation/content/api/v4/resources/chapter_reciters" قراء السور
         headers: {
           "Accept": "application/json",
           "x-auth-token": accessToken!,

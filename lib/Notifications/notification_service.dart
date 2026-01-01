@@ -42,80 +42,77 @@ class NotificationService {
   /// ================= SCHEDULE =================
   /// daysOfWeek: الإثنين=1 ... الأحد=7
   Future<void> scheduledNotification({
-  required List<int> daysOfWeek,
-  required int hour,
-  required int minute,
-  required String title,
-  required String body,
-}) async {
-  final now = tz.TZDateTime.now(tz.local);
+    required List<int> daysOfWeek,
+    required int hour,
+    required int minute,
+    required String title,
+    required String body,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
 
-  final box = await Hive.openBox("saved_notifications");
+    final box = await Hive.openBox("saved_notifications");
 
-  /// ID واحد فقط للإشعار
-  final int mainId =
-      daysOfWeek.first * 100000 + hour * 100 + minute;
+    /// ID واحد فقط للإشعار
+    final int mainId = daysOfWeek.first * now.microsecond +
+        hour * now.millisecond +
+        minute * now.second +
+        now.minute +
+        now.hour;
 
-  /// أسماء الأيام
-  final List<String> daysNames =
-      daysOfWeek.map(_dayName).toList();
+    /// أسماء الأيام
+    final List<String> daysNames = daysOfWeek.map(_dayName).toList();
 
-  /// 🔔 جدولة إشعار لكل يوم
-  for (final day in daysOfWeek) {
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
+    /// 🔔 جدولة إشعار لكل يوم
+    for (final day in daysOfWeek) {
+      tz.TZDateTime scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
 
-    while (scheduledDate.weekday != day ||
-        scheduledDate.isBefore(now)) {
-      scheduledDate =
-          scheduledDate.add(const Duration(days: 1));
+      while (scheduledDate.weekday != day || scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      /// ID مختلف لكل يوم (للنظام فقط)
+      final int systemId = mainId + day;
+
+      await notificationsPlugin.zonedSchedule(
+        systemId,
+        title,
+        body,
+        scheduledDate,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'weekly_channel_id',
+            'Weekly Notifications',
+            channelDescription: 'Weekly scheduled notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(),
+        ),
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
     }
 
-    /// ID مختلف لكل يوم (للنظام فقط)
-    final int systemId =
-        mainId + day;
-
-    await notificationsPlugin.zonedSchedule(
-      systemId,
-      title,
-      body,
-      scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'weekly_channel_id',
-          'Weekly Notifications',
-          channelDescription: 'Weekly scheduled notifications',
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-        iOS: DarwinNotificationDetails(),
-      ),
-      matchDateTimeComponents:
-          DateTimeComponents.dayOfWeekAndTime,
-      androidScheduleMode:
-          AndroidScheduleMode.exactAllowWhileIdle,
+    /// 💾 حفظ الإشعار مرة واحدة فقط
+    await box.put(
+      mainId,
+      SavedNotification(
+        id: mainId,
+        title: title,
+        body: body,
+        hour: hour,
+        minute: minute,
+        days: daysNames,
+      ).toMap(),
     );
   }
-
-  /// 💾 حفظ الإشعار مرة واحدة فقط
-  await box.put(
-    mainId,
-    SavedNotification(
-      id: mainId,
-      title: title,
-      body: body,
-      hour: hour,
-      minute: minute,
-      days: daysNames,
-    ).toMap(),
-  );
-}
 
   /// ================= CANCEL =================
   Future<void> cancelAllNotifications() async {
@@ -125,7 +122,13 @@ class NotificationService {
   }
 
   Future<void> cancelNotification(int id) async {
-    await notificationsPlugin.cancel(id);
+    await notificationsPlugin.cancel(id + 1);
+    await notificationsPlugin.cancel(id + 2);
+    await notificationsPlugin.cancel(id + 3);
+    await notificationsPlugin.cancel(id + 4);
+    await notificationsPlugin.cancel(id + 5);
+    await notificationsPlugin.cancel(id + 6);
+    await notificationsPlugin.cancel(id + 7);
     final box = await Hive.openBox("saved_notifications");
     await box.delete(id);
   }
@@ -133,9 +136,7 @@ class NotificationService {
   /// ================= GET =================
   Future<List<SavedNotification>> getSavedNotifications() async {
     final box = await Hive.openBox("saved_notifications");
-    return box.values
-        .map((e) => SavedNotification.fromMap(e))
-        .toList();
+    return box.values.map((e) => SavedNotification.fromMap(e)).toList();
   }
 
   /// ================= UTILS =================
