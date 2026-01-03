@@ -8,10 +8,12 @@ class BottomBarAnimation1 extends StatefulWidget {
     super.key,
     required this.icons,
     required this.onIconTap,
+    required this.keyBottomBarAnimation1,
   });
 
   /// مرر أي عدد من الأيقونات
   final List<IconData> icons;
+  final List<GlobalKey> keyBottomBarAnimation1;
   final Function(int index) onIconTap;
 
   @override
@@ -52,6 +54,7 @@ class _BottomBarAnimation1State extends State<BottomBarAnimation1>
     return BottomBarItme1(
       children: List.generate(widget.icons.length, (i) {
         return IconBarItme(
+          key: widget.keyBottomBarAnimation1[i],
           size: sizeoficon[i],
           iconbar: widget.icons[i],
           isonpress: AnimatedContainer(

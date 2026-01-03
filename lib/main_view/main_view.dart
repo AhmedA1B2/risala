@@ -6,6 +6,7 @@ import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loadin
 import 'package:risala/custom/custom_menu_animation/custom_menu_animation5.dart';
 import 'package:risala/custom/custom_menu_button/custom_menu_button1.dart';
 import 'package:risala/custom/custom_search_bar/custom_search_bar.dart';
+import 'package:risala/custom/custom_tutorial/tutorial_overlay.dart';
 import 'package:risala/home/home_view.dart';
 import 'package:risala/main.dart';
 import 'package:risala/menu/menu.dart';
@@ -27,6 +28,17 @@ class _MainViewState extends State<MainView> {
   final GlobalKey<CustomMenuButton1State> buttonMenuKey =
       GlobalKey<CustomMenuButton1State>();
 
+//tutorial
+
+  final GlobalKey keyBottomBarForTuorial1 = GlobalKey();
+  final GlobalKey keyBottomBarForTuorial2 = GlobalKey();
+  final GlobalKey keyBottomBarForTuorial3 = GlobalKey();
+  final GlobalKey keyBottomBarForTuorial4 = GlobalKey();
+
+  late TutorialOverlay tutorial;
+
+//tutorial
+
   int? surahsaved = sharedPref.getInt('surahsaved');
   String? namesaved = sharedPref.getString('namesaved');
 
@@ -47,6 +59,41 @@ class _MainViewState extends State<MainView> {
     super.initState();
     loadAllTranslations();
     _requestNotificationPermission();
+
+    print("-----------${sharedPref.getBool('oldUser')}------------");
+
+//tutorial
+    if (sharedPref.getBool("oldUser") != true) {
+      tutorial = TutorialOverlay(
+        context: context,
+        steps: [
+          TutorialStep(
+              key: keyBottomBarForTuorial4,
+              text:
+                  "هنا السبحة توجد فيها بعض الأذكار وستكون هناك المزيد من الأذكار مستقبلا"),
+          TutorialStep(
+              key: keyBottomBarForTuorial3,
+              text:
+                  "هنا تعرض إشعاراتك المخصصة، ومن هنا يمكنك إضافة إشعارات جديدة."),
+          TutorialStep(
+              key: keyBottomBarForTuorial2,
+              text:
+                  "هنا توجد البوصلة التي تشير إلى القبلة. قد لا تكون الاتجاهات دقيقة في بعض الشبكات وفي بعض الأجهزة."),
+          TutorialStep(
+              key: keyBottomBarForTuorial1,
+              text:
+                  "هنا الصفحة الرئيسية حيث يوجد القرآن الكريم وتعرض السور هنا "),
+          TutorialStep(
+              key: buttonMenuKey,
+              text:
+                  "هذه القائمة يمكنك تحكم منها ببعض الإعدادات وتغيير اللغة متى شئت."),
+        ],
+      );
+
+      // تشغيل بعد بناء الواجهة
+      WidgetsBinding.instance.addPostFrameCallback((_) => tutorial.start());
+    }
+//tutorial
   }
 
   Future<void> _requestNotificationPermission() async {
@@ -91,12 +138,25 @@ class _MainViewState extends State<MainView> {
         setState(() {
           isMenuOpen = value;
         });
+        if (sharedPref.getBool("oldUser") != true) {
+          tutorial.next();
+        }
       },
       buttonMenuKey: buttonMenuKey,
       mainView: Stack(
         children: [
           searchResults == null
-              ? const HomeView()
+              ? HomeView(
+                  keyBottomBarForTuorial1: keyBottomBarForTuorial1,
+                  keyBottomBarForTuorial2: keyBottomBarForTuorial2,
+                  keyBottomBarForTuorial3: keyBottomBarForTuorial3,
+                  keyBottomBarForTuorial4: keyBottomBarForTuorial4,
+                  onTutorialNext: () {
+                    if (sharedPref.getBool("oldUser") != true) {
+                      tutorial.next();
+                    }
+                  },
+                )
               : ListView.builder(
                   itemCount: searchResults!.length,
                   itemBuilder: (context, index) {

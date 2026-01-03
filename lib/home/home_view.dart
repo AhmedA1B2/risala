@@ -7,7 +7,19 @@ import 'package:risala/my_views/qibla/qibla_view/qibla_view.dart';
 import 'package:risala/my_views/sabhuh/sabhuh_view/sabhuh_view.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  const HomeView(
+      {super.key,
+      required this.keyBottomBarForTuorial1,
+      required this.keyBottomBarForTuorial2,
+      required this.keyBottomBarForTuorial3,
+      required this.keyBottomBarForTuorial4,
+      required this.onTutorialNext});
+
+  final GlobalKey keyBottomBarForTuorial1;
+  final GlobalKey keyBottomBarForTuorial2;
+  final GlobalKey keyBottomBarForTuorial3;
+  final GlobalKey keyBottomBarForTuorial4;
+  final VoidCallback onTutorialNext;
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -34,6 +46,12 @@ class _HomeViewState extends State<HomeView> {
           bottom: 8,
           width: MediaQuery.of(context).size.width,
           child: BottomBarAnimation1(
+            keyBottomBarAnimation1: [
+              widget.keyBottomBarForTuorial1,
+              widget.keyBottomBarForTuorial2,
+              widget.keyBottomBarForTuorial3,
+              widget.keyBottomBarForTuorial4
+            ],
             onIconTap: (index) {
               if (index == 0) {
                 setState(() {
@@ -56,6 +74,7 @@ class _HomeViewState extends State<HomeView> {
                   showRightView = 3;
                 });
               }
+              widget.onTutorialNext();
             },
             icons: const [
               Icons.menu_book_sharp,
