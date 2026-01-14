@@ -24,9 +24,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.14,
+      height: MediaQuery.of(context).size.height * 0.2,
       width: double.infinity,
-      decoration:  BoxDecoration(
+      decoration: BoxDecoration(
         color: scandColor,
         borderRadius: const BorderRadius.vertical(
           bottom: Radius.circular(20),
@@ -35,25 +35,33 @@ class _CustomAppBarState extends State<CustomAppBar> {
           bottom: BorderSide(color: blackColor, width: 2),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        textDirection: TextDirection.rtl,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          widget.topButton,
-          CustomTitle(text: widget.surahName),
-          GestureDetector(
-            onTap: widget.onPressed,
-            child: Row(
-              children: [
-                CustomTitle(text: widget.onOff),
-                Icon(
-                  widget.iconData,
-                  color: mainColor,
-                  size: 32,
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: CustomTitle(text: widget.surahName),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            textDirection: TextDirection.rtl,
+            children: [
+              widget.topButton,
+              GestureDetector(
+                onTap: widget.onPressed,
+                child: Row(
+                  children: [
+                    CustomTitle(text: widget.onOff),
+                    Icon(
+                      widget.iconData,
+                      color: mainColor,
+                      size: 32,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          )
+              )
+            ],
+          ),
         ],
       ),
     );

@@ -6,6 +6,7 @@ import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loadin
 import 'package:risala/custom/custom_menu_animation/custom_menu_animation5.dart';
 import 'package:risala/custom/custom_menu_button/custom_menu_button1.dart';
 import 'package:risala/custom/custom_search_bar/custom_search_bar.dart';
+import 'package:risala/custom/custom_snack_bar/custom_snack_bar.dart';
 import 'package:risala/custom/custom_tutorial/tutorial_overlay.dart';
 import 'package:risala/home/home_view.dart';
 import 'package:risala/main.dart';
@@ -119,6 +120,19 @@ class _MainViewState extends State<MainView> {
         surahsaved = sharedPref.getInt('surahsaved');
         namesaved = sharedPref.getString('namesaved');
       });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: CustomSnackBar(
+            text: translation!.dontSaved.isNotEmpty
+                ? translation!.dontSaved
+                : "لم يتم حفظ أي اية",
+          ),
+          backgroundColor: const Color.fromARGB(0, 255, 193, 7),
+          elevation: 0,
+          duration: const Duration(seconds: 2),
+        ),
+      );
     }
   }
 

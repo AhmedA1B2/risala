@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:risala/Notifications/notification_service.dart';
+import 'package:risala/custom/custom_choose%20_lang/custom_choose_lang_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:risala/custom/custom_splash_screen/custom_splash_screen1.dart';
 
@@ -20,15 +21,15 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    // bool adhanPlayed = sharedPref.getBool("adhanPlayed") ?? false;
-    // adhanPlayed ? const MoadhnView() :
-    return const MaterialApp(
+    final bool oldUser = sharedPref.getBool("oldUser") ?? false;
+    return MaterialApp(
       //debugShowCheckedModeBanner: false,
-      home: CustomSplashScreen1(),
+      home:
+          oldUser ? const CustomSplashScreen1() : const CustomChooseLangView(),
     );
   }
 }
 //flutter run --release
+//flutter build apk --split-per-abi

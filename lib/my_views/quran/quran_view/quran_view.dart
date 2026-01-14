@@ -185,6 +185,8 @@ class _QuranViewState extends State<QuranView> {
       return;
     }
 
+    if (recitationId > 10) recitationId = 10;
+
     try {
       final response = await http.get(
         Uri.parse(
@@ -284,6 +286,7 @@ class _QuranViewState extends State<QuranView> {
           text: translation!.saved.isNotEmpty ? translation!.saved : "تم الحفظ",
         ),
         backgroundColor: const Color.fromARGB(0, 255, 193, 7),
+        elevation: 0,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -436,6 +439,7 @@ class _QuranViewState extends State<QuranView> {
   List<Reciters> reciters = [];
   Reciters? selectedReciter;
   int idOfReciter = sharedPref.getInt("idOfReciter") ?? 4;
+  int numOfReciter = sharedPref.getInt("numOfReciter") ?? 4;
 
   void loadData() async {
     reciters = await loadReciters();
@@ -463,8 +467,8 @@ class _QuranViewState extends State<QuranView> {
                     menuWidth: 220, // ✅ حجم القائمة
                     menuMaxHeight: 300, // ✅ التحكم في ارتفاع القائمة اختياري
                     hint: Text(
-                      sharedPref.getInt("idOfReciter") != null
-                          ? "القارئ  ${sharedPref.getInt("idOfReciter")}"
+                      sharedPref.getInt("numOfReciter") != null
+                          ? "القارئ  ${sharedPref.getInt("numOfReciter")}"
                           : "اختر القارئ",
                       overflow:
                           TextOverflow.ellipsis, // ✅ يقص النص إذا كان طويلاً
@@ -485,6 +489,7 @@ class _QuranViewState extends State<QuranView> {
                       setState(() {
                         selectedReciter = value;
                         sharedPref.setInt("idOfReciter", value!.id);
+                        sharedPref.setInt("numOfReciter", value.number);
                         idOfReciter = value.id;
                       });
                     },

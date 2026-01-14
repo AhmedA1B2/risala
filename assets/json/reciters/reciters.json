@@ -2,111 +2,262 @@
   "recitations": [
     {
       "id": 1,
-      "reciter_name": "عبد الباسط عبد الصمد",
-      "style": "Mujawwad",
-      "translated_name": {
-        "name": "عبد الباسط عبد الصمد",
-        "language_name": "arabic"
-      }
+      "number": 1,
+      "ar": { "reciter_name": "عبد الباسط عبد الصمد" },
+      "en": { "reciter_name": "Abdul Basit Abdul Samad" },
+      "sp": { "reciter_name": "Abdul Basit Abdul Samad" },
+      "it": { "reciter_name": "Abdul Basit Abdul Samad" },
+      "in": { "reciter_name": "Abdul Basit Abdul Samad" },
+      "cn": { "reciter_name": "阿卜杜勒·巴西特·阿卜杜勒·萨马德" },
+      "bn": { "reciter_name": "আব্দুল বাসিত আব্দুস সামাদ" },
+      "ru": { "reciter_name": "Абдул Басит Абдул Самад" },
+      "jp": { "reciter_name": "アブドゥル・バースィト・アブドゥッサマド" }
     },
     {
       "id": 2,
-      "reciter_name": "عبد الباسط عبد الصمد",
-      "style": "Murattal",
-      "translated_name": {
-        "name": "عبد الباسط عبد الصمد",
-        "language_name": "arabic"
-      }
+      "number": 2,
+      "ar": { "reciter_name": "عبد الباسط عبد الصمد" },
+      "en": { "reciter_name": "Abdul Basit Abdul Samad" },
+      "sp": { "reciter_name": "Abdul Basit Abdul Samad" },
+      "it": { "reciter_name": "Abdul Basit Abdul Samad" },
+      "in": { "reciter_name": "Abdul Basit Abdul Samad" },
+      "cn": { "reciter_name": "阿卜杜勒·巴西特·阿卜杜勒·萨马德" },
+      "bn": { "reciter_name": "আব্দুল বাসিত আব্দুস সামাদ" },
+      "ru": { "reciter_name": "Абдул Басит Абдул Самад" },
+      "jp": { "reciter_name": "アブドゥル・バースィト・アブドゥッサマド" }
     },
     {
       "id": 3,
-      "reciter_name": "عبد الرحمن السديس",
-      "style": null,
-      "translated_name": {
-        "name": "عبد الرحمن السديس",
-        "language_name": "arabic"
-      }
+      "number": 3,
+      "ar": { "reciter_name": "عبد الرحمن السديس" },
+      "en": { "reciter_name": "Abdul Rahman Al-Sudais" },
+      "sp": { "reciter_name": "Abdul Rahman Al-Sudais" },
+      "it": { "reciter_name": "Abdul Rahman Al-Sudais" },
+      "in": { "reciter_name": "Abdul Rahman Al-Sudais" },
+      "cn": { "reciter_name": "阿卜杜勒·拉赫曼·苏代斯" },
+      "bn": { "reciter_name": "আব্দুর রহমান সুদাইস" },
+      "ru": { "reciter_name": "Абдул Рахман Ас-Судайс" },
+      "jp": { "reciter_name": "アブドゥル・ラフマーン・アッ＝スダイス" }
     },
     {
       "id": 4,
-      "reciter_name": "أبو بكر الشاطري",
-      "style": null,
-      "translated_name": {
-        "name": "أبو بكر الشاطري",
-        "language_name": "arabic"
-      }
+      "number": 4,
+      "ar": { "reciter_name": "أبو بكر الشاطري" },
+      "en": { "reciter_name": "Abu Bakr Al-Shatri" },
+      "sp": { "reciter_name": "Abu Bakr Al-Shatri" },
+      "it": { "reciter_name": "Abu Bakr Al-Shatri" },
+      "in": { "reciter_name": "Abu Bakr Al-Shatri" },
+      "cn": { "reciter_name": "阿布·巴克尔·沙特里" },
+      "bn": { "reciter_name": "আবু বকর আশ-শাত্রি" },
+      "ru": { "reciter_name": "Абу Бакр Аш-Шатри" },
+      "jp": { "reciter_name": "アブー・バクル・アッ＝シャートリー" }
     },
     {
       "id": 5,
-      "reciter_name": "هاني الرفاعي",
-      "style": null,
-      "translated_name": {
-        "name": "هاني الرفاعي",
-        "language_name": "arabic"
-      }
+      "number": 5,
+      "ar": { "reciter_name": "هاني الرفاعي" },
+      "en": { "reciter_name": "Hani Al-Rifai" },
+      "sp": { "reciter_name": "Hani Al-Rifai" },
+      "it": { "reciter_name": "Hani Al-Rifai" },
+      "in": { "reciter_name": "Hani Al-Rifai" },
+      "cn": { "reciter_name": "哈尼·里法伊" },
+      "bn": { "reciter_name": "হানি আল-রিফাই" },
+      "ru": { "reciter_name": "Хани Ар-Рифаи" },
+      "jp": { "reciter_name": "ハーニー・アル＝リファーイ" }
     },
     {
       "id": 6,
-      "reciter_name": "محمود خليل الحصري",
-      "style": null,
-      "translated_name": {
-        "name": "محمود خليل الحصري",
-        "language_name": "arabic"
-      }
+      "number": 6,
+      "ar": { "reciter_name": "محمود خليل الحصري" },
+      "en": { "reciter_name": "Mahmoud Khalil Al-Husary" },
+      "sp": { "reciter_name": "Mahmoud Khalil Al-Husary" },
+      "it": { "reciter_name": "Mahmoud Khalil Al-Husary" },
+      "in": { "reciter_name": "Mahmoud Khalil Al-Husary" },
+      "cn": { "reciter_name": "马哈茂德·哈利勒·胡萨里" },
+      "bn": { "reciter_name": "মাহমুদ খলিল আল-হুসারি" },
+      "ru": { "reciter_name": "Махмуд Халиль Аль-Хусари" },
+      "jp": { "reciter_name": "マフムード・ハリール・アル＝フサリー" }
     },
     {
       "id": 7,
-      "reciter_name": "مشاري راشد العفاسي",
-      "style": null,
-      "translated_name": {
-        "name": "مشاري راشد العفاسي",
-        "language_name": "arabic"
-      }
+      "number": 7,
+      "ar": { "reciter_name": "مشاري راشد العفاسي" },
+      "en": { "reciter_name": "Mishary Rashid Alafasy" },
+      "sp": { "reciter_name": "Mishary Rashid Alafasy" },
+      "it": { "reciter_name": "Mishary Rashid Alafasy" },
+      "in": { "reciter_name": "Mishary Rashid Alafasy" },
+      "cn": { "reciter_name": "米沙里·拉希德·阿拉法西" },
+      "bn": { "reciter_name": "মিশারি রাশিদ আল আফাসি" },
+      "ru": { "reciter_name": "Мишари Рашид Аль-Афаси" },
+      "jp": { "reciter_name": "ミシャーリー・ラシード・アル＝アファーシー" }
     },
     {
       "id": 8,
-      "reciter_name": "محمد صديق المنشاوي",
-      "style": "Mujawwad",
-      "translated_name": {
-        "name": "محمد صديق المنشاوي",
-        "language_name": "arabic"
-      }
+      "number": 8,
+      "ar": { "reciter_name": "محمد صديق المنشاوي" },
+      "en": { "reciter_name": "Mohammad Siddiq Al-Minshawi" },
+      "sp": { "reciter_name": "Mohammad Siddiq Al-Minshawi" },
+      "it": { "reciter_name": "Mohammad Siddiq Al-Minshawi" },
+      "in": { "reciter_name": "Mohammad Siddiq Al-Minshawi" },
+      "cn": { "reciter_name": "穆罕默德·西迪克·曼沙维" },
+      "bn": { "reciter_name": "মুহাম্মদ সিদ্দীক আল মিনশাওয়ি" },
+      "ru": { "reciter_name": "Мухаммад Сиддик Аль-Миншави" },
+      "jp": { "reciter_name": "ムハンマド・シッディーク・アル＝ミンシャーウィー" }
     },
     {
       "id": 9,
-      "reciter_name": "محمد صديق المنشاوي",
-      "style": "Murattal",
-      "translated_name": {
-        "name": "محمد صديق المنشاوي",
-        "language_name": "arabic"
-      }
+      "number": 9,
+      "ar": { "reciter_name": "محمد صديق المنشاوي" },
+      "en": { "reciter_name": "Mohammad Siddiq Al-Minshawi" },
+      "sp": { "reciter_name": "Mohammad Siddiq Al-Minshawi" },
+      "it": { "reciter_name": "Mohammad Siddiq Al-Minshawi" },
+      "in": { "reciter_name": "Mohammad Siddiq Al-Minshawi" },
+      "cn": { "reciter_name": "穆罕默德·西迪克·曼沙维" },
+      "bn": { "reciter_name": "মুহাম্মদ সিদ্দীক আল মিনশাওয়ি" },
+      "ru": { "reciter_name": "Мухаммад Сиддик Аль-Миншави" },
+      "jp": { "reciter_name": "ムハンマド・シッディーク・アル＝ミンシャーウィー" }
     },
-    {
-      "id": 10,
-      "reciter_name": "سعود الشريم",
-      "style": null,
-      "translated_name": {
-        "name": "سعود الشريم",
-        "language_name": "arabic"
-      }
-    },
-    {
-      "id": 11,
-      "reciter_name": "مجهول",
-      "style": null,
-      "translated_name": {
-        "name": "مجهول",
-        "language_name": "arabic"
-      }
-    },
-    {
-      "id": 12,
-      "reciter_name": "تعليم طريقة القراءة",
-      "style": "Muallim",
-      "translated_name": {
-        "name": "تعليم طريقة القراءة",
-        "language_name": "arabic"
-      }
-    }
-  ]
+{
+  "id": 10,
+  "number": 10,
+  "ar": { "reciter_name": "سعود الشريم" },
+  "en": { "reciter_name": "Saud Al-Shuraim" },
+  "sp": { "reciter_name": "Saud Al-Shuraim" },
+  "it": { "reciter_name": "Saud Al-Shuraim" },
+  "in": { "reciter_name": "Saud Al-Shuraim" },
+  "cn": { "reciter_name": "苏欧德·舒莱姆" },
+  "bn": { "reciter_name": "সউদ আশ-শুরাইম" },
+  "ru": { "reciter_name": "Сауд Аш-Шурайм" },
+  "jp": { "reciter_name": "サウード・アッ＝シュライム" }
+},
+{
+  "id": 11,
+  "number": 11,
+  "ar": { "reciter_name": "مجهول" },
+  "en": { "reciter_name": "Unknown" },
+  "sp": { "reciter_name": "Desconocido" },
+  "it": { "reciter_name": "Sconosciuto" },
+  "in": { "reciter_name": "Tidak Diketahui" },
+  "cn": { "reciter_name": "未知" },
+  "bn": { "reciter_name": "অজানা" },
+  "ru": { "reciter_name": "Неизвестно" },
+  "jp": { "reciter_name": "不明" }
+},
+{
+  "id": 12,
+  "number": 12,
+  "ar": { "reciter_name": "تعليم طريقة القراءة" },
+  "en": { "reciter_name": "Teaching Recitation Method" },
+  "sp": { "reciter_name": "Enseñanza del método de recitación" },
+  "it": { "reciter_name": "Insegnamento del metodo di recitazione" },
+  "in": { "reciter_name": "Pengajaran Metode Tilawah" },
+  "cn": { "reciter_name": "诵读方法教学" },
+  "bn": { "reciter_name": "তিলাওয়াত পদ্ধতি শিক্ষা" },
+  "ru": { "reciter_name": "Обучение методу чтения" },
+  "jp": { "reciter_name": "朗誦方法の指導" }
+},
+{
+  "id": 13,
+  "number": 13,
+  "ar": { "reciter_name": "سعد الغامدي" },
+  "en": { "reciter_name": "Saad Al-Ghamdi" },
+  "sp": { "reciter_name": "Saad Al-Ghamdi" },
+  "it": { "reciter_name": "Saad Al-Ghamdi" },
+  "in": { "reciter_name": "Saad Al-Ghamdi" },
+  "cn": { "reciter_name": "萨阿德·加姆迪" },
+  "bn": { "reciter_name": "সা‘দ আল-ঘামদি" },
+  "ru": { "reciter_name": "Саад Аль-Гамди" },
+  "jp": { "reciter_name": "サアド・アル＝ガームディー" }
+},
+{
+  "id": 19,
+  "number": 14,
+  "ar": { "reciter_name": "أحمد بن علي العجمي" },
+  "en": { "reciter_name": "Ahmed ibn Ali Al-Ajmy" },
+  "sp": { "reciter_name": "Ahmed ibn Ali Al-Ajmy" },
+  "it": { "reciter_name": "Ahmed ibn Ali Al-Ajmy" },
+  "in": { "reciter_name": "Ahmed ibn Ali Al-Ajmy" },
+  "cn": { "reciter_name": "艾哈迈德·本·阿里·阿吉米" },
+  "bn": { "reciter_name": "আহমদ ইবনে আলী আল আজমি" },
+  "ru": { "reciter_name": "Ахмед ибн Али Аль-Аджми" },
+  "jp": { "reciter_name": "アフマド・イブン・アリー・アル＝アジュミー" }
+},
+{
+  "id": 158,
+  "number": 15,
+  "ar": { "reciter_name": "عبد الله علي جابر" },
+  "en": { "reciter_name": "Abdullah Ali Jabir" },
+  "sp": { "reciter_name": "Abdullah Ali Jabir" },
+  "it": { "reciter_name": "Abdullah Ali Jabir" },
+  "in": { "reciter_name": "Abdullah Ali Jabir" },
+  "cn": { "reciter_name": "阿卜杜拉·阿里·贾比尔" },
+  "bn": { "reciter_name": "আব্দুল্লাহ আলী জাবির" },
+  "ru": { "reciter_name": "Абдулла Али Джабир" },
+  "jp": { "reciter_name": "アブドゥッラー・アリー・ジャービル" }
+},
+{
+  "id": 159,
+  "number": 16,
+  "ar": { "reciter_name": "ماهر المعيقلي" },
+  "en": { "reciter_name": "Maher Al-Muaiqly" },
+  "sp": { "reciter_name": "Maher Al-Muaiqly" },
+  "it": { "reciter_name": "Maher Al-Muaiqly" },
+  "in": { "reciter_name": "Maher Al-Muaiqly" },
+  "cn": { "reciter_name": "马希尔·穆艾克利" },
+  "bn": { "reciter_name": "মাহের আল-মুয়াইক্বলি" },
+  "ru": { "reciter_name": "Махир Аль-Муайкли" },
+  "jp": { "reciter_name": "マーヒル・アル＝ムアイクリ" }
+},
+{
+  "id": 160,
+  "number": 17,
+  "ar": { "reciter_name": "بندر بليلة" },
+  "en": { "reciter_name": "Bandar Baleela" },
+  "sp": { "reciter_name": "Bandar Baleela" },
+  "it": { "reciter_name": "Bandar Baleela" },
+  "in": { "reciter_name": "Bandar Baleela" },
+  "cn": { "reciter_name": "班达尔·巴里拉" },
+  "bn": { "reciter_name": "বান্দার বালিলা" },
+  "ru": { "reciter_name": "Бандар Балиля" },
+  "jp": { "reciter_name": "バンダル・バリラ" }
+},
+{
+  "id": 161,
+  "number": 18,
+  "ar": { "reciter_name": "خليفة الطنيجي" },
+  "en": { "reciter_name": "Khalifah Al Tunaiji" },
+  "sp": { "reciter_name": "Khalifah Al Tunaiji" },
+  "it": { "reciter_name": "Khalifah Al Tunaiji" },
+  "in": { "reciter_name": "Khalifah Al Tunaiji" },
+  "cn": { "reciter_name": "哈里法·图奈吉" },
+  "bn": { "reciter_name": "খলিফা আত-তুনাইজি" },
+  "ru": { "reciter_name": "Халифа Ат-Тунайджи" },
+  "jp": { "reciter_name": "ハリーファ・アッ＝トゥナイジー" }
+},
+{
+  "id": 174,
+  "number": 19,
+  "ar": { "reciter_name": "ياسر الدوسري" },
+  "en": { "reciter_name": "Yasser Al-Dossary" },
+  "sp": { "reciter_name": "Yasser Al-Dossary" },
+  "it": { "reciter_name": "Yasser Al-Dossary" },
+  "in": { "reciter_name": "Yasser Al-Dossary" },
+  "cn": { "reciter_name": "亚西尔·杜萨里" },
+  "bn": { "reciter_name": "ইয়াসির আদ-দুসারি" },
+  "ru": { "reciter_name": "Ясир Ад-Досари" },
+  "jp": { "reciter_name": "ヤーセル・アッ＝ドゥーサリー" }
+},
+{
+  "id": 175,
+  "number": 20,
+  "ar": { "reciter_name": "عبد الله حماد أبو شريدة" },
+  "en": { "reciter_name": "Abdullah Hamad Abu Sharida" },
+  "sp": { "reciter_name": "Abdullah Hamad Abu Sharida" },
+  "it": { "reciter_name": "Abdullah Hamad Abu Sharida" },
+  "in": { "reciter_name": "Abdullah Hamad Abu Sharida" },
+  "cn": { "reciter_name": "阿卜杜拉·哈马德·阿布·沙里达" },
+  "bn": { "reciter_name": "আব্দুল্লাহ হামাদ আবু শরিদা" },
+  "ru": { "reciter_name": "Абдулла Хамад Абу Шарида" },
+  "jp": { "reciter_name": "アブドゥッラー・ハマド・アブー・シャリーダ" }
 }
+  ]}

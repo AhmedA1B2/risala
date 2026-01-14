@@ -16,6 +16,7 @@ class Translation {
   String error;
   String playing;
   String saved;
+  String dontSaved;
   String verse;
   String surah;
   String searchHintText;
@@ -62,6 +63,7 @@ class Translation {
     required this.error,
     required this.playing,
     required this.saved,
+    required this.dontSaved,
     required this.verse,
     required this.surah,
     required this.searchHintText,
@@ -112,6 +114,7 @@ class Translation {
       error: data["error"] ?? "",
       playing: data["playing"] ?? "",
       saved: data["saved"] ?? "",
+      dontSaved: data["dontSaved"] ?? "",
       verse: data["verse"] ?? "",
       surah: data["surah"] ?? "",
       searchHintText: data["searchHintText"] ?? "",
