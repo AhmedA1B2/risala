@@ -10,6 +10,7 @@ class CustomSearchBar extends StatefulWidget {
   final String aya;
   final String surah;
   final String hintText;
+  final void Function()? onSearchBarTap;
   final void Function(String)? onSearchBarChanged;
 
   const CustomSearchBar(
@@ -18,7 +19,8 @@ class CustomSearchBar extends StatefulWidget {
       required this.aya,
       required this.surah,
       required this.hintText,
-      this.onSearchBarChanged});
+      this.onSearchBarChanged,
+      this.onSearchBarTap});
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -143,7 +145,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: TextField(
-            onChanged: widget.onSearchBarChanged,
+            onTap: widget.onSearchBarTap,
+            onChanged: (val) {
+              widget.onSearchBarChanged;
+              searchQuran();
+            },
             controller: textEditingController,
             decoration: InputDecoration(
               hintText: widget.hintText,

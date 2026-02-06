@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:risala/custom/custom_bottom_bar/bottom_bar_animation/bottom_bar_animation2.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen2.dart';
 import 'package:risala/custom/custom_snack_bar/custom_snack_bar.dart';
+import 'package:risala/custom/custom_snack_bar/custom_snack_bar_icon.dart';
 import 'package:risala/main.dart';
 import 'package:risala/models/reciters.dart';
 import 'package:risala/models/tafsir.dart';
@@ -90,13 +92,51 @@ class _QuranViewState extends State<QuranView> {
     setState(() {});
   }
 
+  Future<bool> checkInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+      return false;
+    } on SocketException catch (_) {
+      return false;
+    }
+  }
+
   ////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
-  // الحصول على توكن
   Future<void> fetchAccessToken() async {
     setState(() {
       isloading = true;
     });
+
+    // فحص الاتصال
+    bool online = await checkInternet();
+
+    if (!online) {
+      if (mounted) {
+        // التأكد أن الشاشة لا تزال معروضة
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const CustomSnackBarIcon(
+              icon: Icons.wifi_off_rounded,
+            ),
+            backgroundColor: const Color.fromARGB(0, 255, 193, 7),
+            elevation: 0,
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).size.height * 0.4),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+
+      setState(() {
+        isloading = false;
+      });
+      return;
+    }
+
     try {
       final auth =
           'Basic ' + base64Encode(utf8.encode('$clientId:$clientSecret'));
@@ -121,23 +161,33 @@ class _QuranViewState extends State<QuranView> {
     } catch (e) {
       debugPrint("🔥 استثناء أثناء الحصول على التوكن: $e");
     }
-    setState(() {
-      isloading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isloading = false;
+      });
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
-  // تشغيل السورة
+  // 3. تشغيل السورة
   Future<void> playSurah(int surah, {int reciterId = 1}) async {
     if (isloading) return;
 
     setState(() => isloading = true);
 
-    if (accessToken == null) await fetchAccessToken();
     if (accessToken == null) {
       setState(() => isloading = false);
+
+      await fetchAccessToken();
+    }
+
+    if (accessToken == null) {
       return;
     }
+
+    setState(() => isloading = true);
+    onOff = translation!.turnOff;
+    iconData = Icons.stop;
 
     final url =
         "https://apis.quran.foundation/content/api/v4/chapter_recitations/$reciterId/$surah";
@@ -162,14 +212,24 @@ class _QuranViewState extends State<QuranView> {
           _player.play();
         }
       } else if (response.statusCode == 403) {
+        // التوكن انتهى، نجلب توكن جديد
         accessToken = null;
+        setState(() => isloading = false); // نوقف التحميل قبل الاستدعاء العودية
         await playSurah(surah, reciterId: reciterId);
+        return; // نخرج حتى لا نكمل الكود في الأسفل مرتين
       }
     } catch (e) {
       debugPrint("🔥 استثناء في السورة: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("حدث خطأ أثناء تشغيل السورة")),
+        );
+      }
     }
 
-    setState(() => isloading = false);
+    if (mounted) {
+      setState(() => isloading = false);
+    }
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -177,14 +237,16 @@ class _QuranViewState extends State<QuranView> {
   Future<void> playAyah(String verseKey, int recitationId) async {
     if (isloading) return;
 
-    setState(() => isloading = true);
-
     if (accessToken == null) await fetchAccessToken();
     if (accessToken == null) {
       setState(() => isloading = false);
       return;
     }
-
+    setState(() {
+      isloading = true;
+      positionsOfMusic = 0;
+      sizeoficonOfMusic = 42;
+    });
     if (recitationId > 10) recitationId = 10;
 
     try {
@@ -501,8 +563,6 @@ class _QuranViewState extends State<QuranView> {
                 onPressed: () {
                   if (translation == null) return; // أو إظهار رسالة مؤقتة
                   if (onOff == translation!.turnOn) {
-                    onOff = translation!.turnOff;
-                    iconData = Icons.stop;
                     playSurah(surahNumber,
                         reciterId: idOfReciter); //idOfReciter
                     setState(() {
@@ -601,11 +661,6 @@ class _QuranViewState extends State<QuranView> {
                       if (index == 0) {
                         playAyah(
                             "${surahNumber}:${highlightedVerse!}", idOfReciter);
-
-                        setState(() {
-                          positionsOfMusic = 0;
-                          sizeoficonOfMusic = 42;
-                        });
                       } else if (index == 1 && highlightedVerse != null) {
                         saveMyAya(
                             highlightedVerse!, surahNumber, surahName ?? "");

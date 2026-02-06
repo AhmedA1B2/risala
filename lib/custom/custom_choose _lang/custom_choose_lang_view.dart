@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:risala/custom/custom_bg/custom_bg_of_home.dart';
+import 'package:risala/custom/custom_bg/custom_bg2.dart';
 import 'package:risala/custom/custom_dialogue/custom_dialogue.dart';
 import 'package:risala/custom/custom_splash_screen/custom_splash_screen1.dart';
 import 'package:risala/main.dart';
@@ -42,53 +42,89 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
       backgroundColor: mainColor,
       body: Stack(
         children: [
-          const CustomBg(topMargin: 50, topBorderRadius: 1000),
+          const CustomBg2(),
           Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(),
-              Card(
-                margin: const EdgeInsets.symmetric(horizontal: 50),
-                color: scandColor,
-                child: Center(
-                  child: DropdownButton<String>(
-                    value: selectedValue,
-                    alignment: Alignment.center,
-                    dropdownColor: scandColor,
-                    style: TextStyle(color: mainColor),
-                    items: [
-                      {"code": "ar", "name": "العربية"},
-                      {"code": "en", "name": "English"},
-                      {"code": "sp", "name": "Español"},
-                      {"code": "in", "name": "Bahasa Indonesia"},
-                      {"code": "cn", "name": "中文"},
-                      {"code": "bn", "name": "বাংলা"},
-                      {"code": "it", "name": "Italiano"},
-                      {"code": "ru", "name": "Русский"},
-                      {"code": "jp", "name": "日本語"},
-                    ].map((lang) {
-                      return DropdownMenuItem(
-                        value: lang["code"],
-                        child: Text(lang["name"]!),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) _updateLanguage(value);
-                    },
+              const SizedBox(
+                width: 250,
+                child: Hero(
+                  tag: "mosq",
+                  child: Image(
+                    image: AssetImage("assets/images/mosq.png"),
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    showDialogue = true;
-                  });
-                },
-                icon: const Icon(
-                  Icons.check_circle,
-                  size: 50,
+              const SizedBox(
+                height: 40,
+              ),
+              Center(
+                child: SizedBox(
+                  height: 250,
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                        color: whiteColor,
+                        boxShadow: const [
+                          BoxShadow(
+                              blurRadius: 12,
+                              color: blackColor,
+                              offset: Offset(0, 1))
+                        ],
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const SizedBox(),
+                        Card(
+                          margin: const EdgeInsets.symmetric(horizontal: 50),
+                          color: scandColor,
+                          child: Center(
+                            child: DropdownButton<String>(
+                              value: selectedValue,
+                              alignment: Alignment.center,
+                              dropdownColor: scandColor,
+                              style: TextStyle(color: mainColor),
+                              items: [
+                                {"code": "ar", "name": "العربية"},
+                                {"code": "en", "name": "English"},
+                                {"code": "sp", "name": "Español"},
+                                {"code": "in", "name": "Bahasa Indonesia"},
+                                {"code": "cn", "name": "中文"},
+                                {"code": "bn", "name": "বাংলা"},
+                                {"code": "it", "name": "Italiano"},
+                                {"code": "ru", "name": "Русский"},
+                                {"code": "jp", "name": "日本語"},
+                              ].map((lang) {
+                                return DropdownMenuItem(
+                                  value: lang["code"],
+                                  child: Text(lang["name"]!),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                if (value != null) _updateLanguage(value);
+                              },
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              showDialogue = true;
+                            });
+                          },
+                          icon: Icon(
+                            Icons.check_circle,
+                            color: scandColor,
+                            size: 80,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              )
+              ),
             ],
           ),
           if (showDialogue)

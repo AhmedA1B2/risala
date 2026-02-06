@@ -220,6 +220,10 @@ class _MainViewState extends State<MainView> {
         saveText: translation!.save,
       ),
       searchWidget: CustomSearchBar(
+        onSearchBarTap: () {
+          menuKey.currentState?.closeMenu();
+          buttonMenuKey.currentState?.closeButtonMenu();
+        },
         onSearchBarChanged: (value) {
           menuKey.currentState?.closeMenu();
           buttonMenuKey.currentState?.closeButtonMenu();

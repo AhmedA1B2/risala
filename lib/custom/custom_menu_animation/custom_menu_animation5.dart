@@ -15,7 +15,7 @@ class CustomMenuAnimation5 extends StatefulWidget {
     required this.searchWidget,
     required this.title,
     required this.onMenuChanged,
-    required this.buttonMenuKey, 
+    required this.buttonMenuKey,
   });
 
   final Widget mainView;
@@ -28,8 +28,7 @@ class CustomMenuAnimation5 extends StatefulWidget {
   final ValueChanged<bool> onMenuChanged;
 
   @override
-  CustomMenuAnimation5State createState() =>
-      CustomMenuAnimation5State();
+  CustomMenuAnimation5State createState() => CustomMenuAnimation5State();
 }
 
 class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
@@ -116,7 +115,6 @@ class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
       body: Stack(
         children: [
           widget.mainView,
-
           if (itView != 0)
             Padding(
               padding: const EdgeInsets.all(12),
