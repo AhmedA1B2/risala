@@ -1,9 +1,8 @@
 class Translation {
-  // الحقول الأساسية (اختياري حسب حاجتك)
   final String key;
   final String text;
 
-  // الحقول العامة
+  // الحقول الأساسية
   final String theQuran;
   final String ok;
   final String languageAndText;
@@ -48,13 +47,32 @@ class Translation {
   final String calculationMethod;
   final String almadhhab;
 
-  // الحقول الجديدة (Tutorial & Confirmation)
+  // التعليمات (Tutorial)
   final String tutorialTasbih;
   final String tutorialNotifications;
   final String tutorialCompass;
   final String tutorialHome;
   final String tutorialMenu;
+
+  // تأكيد اللغة
   final String confirmLanguageChange;
+
+  // أيام الأسبوع
+  final String saturday;
+  final String sunday;
+  final String monday;
+  final String tuesday;
+  final String wednesday;
+  final String thursday;
+  final String friday;
+
+  // الإشعارات والكل
+  final String all;
+  final String addNotificationTitle;
+  final String addNotificationBody;
+  
+  // الحقل الجديد
+  final String chooseTime;
 
   Translation({
     required this.key,
@@ -102,17 +120,26 @@ class Translation {
     required this.prayerTimesIn,
     required this.calculationMethod,
     required this.almadhhab,
-    // الحقول الجديدة في الـ Constructor
     required this.tutorialTasbih,
     required this.tutorialNotifications,
     required this.tutorialCompass,
     required this.tutorialHome,
     required this.tutorialMenu,
     required this.confirmLanguageChange,
+    required this.saturday,
+    required this.sunday,
+    required this.monday,
+    required this.tuesday,
+    required this.wednesday,
+    required this.thursday,
+    required this.friday,
+    required this.all,
+    required this.addNotificationTitle,
+    required this.addNotificationBody,
+    required this.chooseTime,
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
-    // الوصول للبيانات بناءً على هيكلة الـ JSON الخاص بك
     final data = (json is List) ? json[0][langCode][0] : json[langCode][0];
 
     return Translation(
@@ -161,13 +188,23 @@ class Translation {
       prayerTimesIn: data["prayerTimesIn"] ?? "",
       calculationMethod: data["calculationMethod"] ?? "",
       almadhhab: data["almadhhab"] ?? "",
-      // جلب الحقول الجديدة من الـ JSON
       tutorialTasbih: data["tutorialTasbih"] ?? "",
       tutorialNotifications: data["tutorialNotifications"] ?? "",
       tutorialCompass: data["tutorialCompass"] ?? "",
       tutorialHome: data["tutorialHome"] ?? "",
       tutorialMenu: data["tutorialMenu"] ?? "",
       confirmLanguageChange: data["confirmLanguageChange"] ?? "",
+      saturday: data["saturday"] ?? "",
+      sunday: data["sunday"] ?? "",
+      monday: data["monday"] ?? "",
+      tuesday: data["tuesday"] ?? "",
+      wednesday: data["wednesday"] ?? "",
+      thursday: data["thursday"] ?? "",
+      friday: data["friday"] ?? "",
+      all: data["all"] ?? "",
+      addNotificationTitle: data["addNotificationTitle"] ?? "",
+      addNotificationBody: data["addNotificationBody"] ?? "",
+      chooseTime: data["chooseTime"] ?? "",
     );
   }
 }

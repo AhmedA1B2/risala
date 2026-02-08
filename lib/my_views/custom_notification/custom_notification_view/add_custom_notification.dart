@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:risala/Notifications/notification_service.dart';
+import 'package:risala/main.dart';
 import 'package:risala/main_view/main_view.dart';
+import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_button_icon.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_button_text.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_text_field.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_time_field.dart';
+import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 
 class AddCustomNotification extends StatefulWidget {
@@ -22,9 +25,26 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
   final GlobalKey<CustomTimeFieldState> timeFieldKey =
       GlobalKey<CustomTimeFieldState>();
 
+  Translation? translation;
+
+  @override
+  void initState() {
+    super.initState();
+    loadAllTranslations();
+  }
+
+  Future<void> loadAllTranslations() async {
+    final list = await loadTranslation(sharedPref.getString("selectedValue"));
+    if (list.isNotEmpty) {
+      setState(() {
+        translation = list.first;
+      });
+    }
+  }
+
   void savedNotification() {
     final selectedTime = timeFieldKey.currentState?.selectedTime;
-    if (selectedTime == null) return; // لم يتم اختيار الوقت بعد
+    if (selectedTime == null) return;
 
     List<int> selectedDays = [];
     List<int> dayNumbers = [5, 6, 7, 1, 2, 3, 4]; // ترتيب الأيام حسب الأزرار
@@ -37,7 +57,7 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
       selectedDays = [1, 2, 3, 4, 5, 6, 7];
     }
 
-    if (selectedDays.isEmpty) return; // لم يتم اختيار أي يوم
+    if (selectedDays.isEmpty) return;
 
     NotificationService.instance.scheduledNotification(
       title: controllerOfTitle.text,
@@ -47,16 +67,15 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
       daysOfWeek: selectedDays,
     );
 
-    // مسح الحقول بعد الحفظ (اختياري)
     controllerOfTitle.clear();
     controllerOfBody.clear();
     timeFieldKey.currentState?.controller.clear();
     timeFieldKey.currentState?.selectedTime = null;
 
-    // إعادة تعيين ألوان الأيام
     setState(() {
       colorsOfweek = List.filled(8, whiteColor);
     });
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const MainView()),
@@ -65,6 +84,13 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
 
   @override
   Widget build(BuildContext context) {
+    // حل مشكلة الـ Null: إذا كانت البيانات لم تُحمل بعد، نعرض مؤشر تحميل
+    if (translation == null) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: ListView(
@@ -74,76 +100,43 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              CustomButtonText(
-                color: colorsOfweek[0],
-                onPressed: () {
-                  setState(() {
-                    colorsOfweek[0] =
-                        colorsOfweek[0] == whiteColor ? mainColor : whiteColor;
-                  });
-                },
-                text: 'الجمعة',
-              ),
-              CustomButtonText(
-                color: colorsOfweek[1],
-                onPressed: () {
-                  setState(() {
-                    colorsOfweek[1] =
-                        colorsOfweek[1] == whiteColor ? mainColor : whiteColor;
-                  });
-                },
-                text: 'السبت',
-              ),
-              CustomButtonText(
-                color: colorsOfweek[2],
-                onPressed: () {
-                  setState(() {
-                    colorsOfweek[2] =
-                        colorsOfweek[2] == whiteColor ? mainColor : whiteColor;
-                  });
-                },
-                text: 'الأحد',
-              ),
-              CustomButtonText(
-                color: colorsOfweek[3],
-                onPressed: () {
-                  setState(() {
-                    colorsOfweek[3] =
-                        colorsOfweek[3] == whiteColor ? mainColor : whiteColor;
-                  });
-                },
-                text: 'الإثنين',
-              ),
-              CustomButtonText(
-                color: colorsOfweek[4],
-                onPressed: () {
-                  setState(() {
-                    colorsOfweek[4] =
-                        colorsOfweek[4] == whiteColor ? mainColor : whiteColor;
-                  });
-                },
-                text: 'الثلاثاء',
-              ),
-              CustomButtonText(
-                color: colorsOfweek[5],
-                onPressed: () {
-                  setState(() {
-                    colorsOfweek[5] =
-                        colorsOfweek[5] == whiteColor ? mainColor : whiteColor;
-                  });
-                },
-                text: 'الأربعاء',
-              ),
-              CustomButtonText(
-                color: colorsOfweek[6],
-                onPressed: () {
-                  setState(() {
-                    colorsOfweek[6] =
-                        colorsOfweek[6] == whiteColor ? mainColor : whiteColor;
-                  });
-                },
-                text: 'الخميس',
-              ),
+              _buildDayButton(
+                  0,
+                  translation!.friday.isNotEmpty
+                      ? translation!.friday
+                      : 'الجمعة'),
+              _buildDayButton(
+                  1,
+                  translation!.saturday.isNotEmpty
+                      ? translation!.saturday
+                      : 'السبت'),
+              _buildDayButton(
+                  2,
+                  translation!.sunday.isNotEmpty
+                      ? translation!.sunday
+                      : 'الأحد'),
+              _buildDayButton(
+                  3,
+                  translation!.monday.isNotEmpty
+                      ? translation!.monday
+                      : 'الإثنين'),
+              _buildDayButton(
+                  4,
+                  translation!.tuesday.isNotEmpty
+                      ? translation!.tuesday
+                      : 'الثلاثاء'),
+              _buildDayButton(
+                  5,
+                  translation!.wednesday.isNotEmpty
+                      ? translation!.wednesday
+                      : 'الأربعاء'),
+              _buildDayButton(
+                  6,
+                  translation!.thursday.isNotEmpty
+                      ? translation!.thursday
+                      : 'الخميس'),
+
+              // زر "الكل" له منطق خاص لتغيير حالة جميع الأيام
               CustomButtonText(
                 color: colorsOfweek[7],
                 onPressed: () {
@@ -155,20 +148,29 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
                     }
                   });
                 },
-                text: 'الكل',
+                text: translation!.all.isNotEmpty ? translation!.all : 'الكل',
               ),
             ],
           ),
           const SizedBox(height: 32),
-          CustomTimeField(key: timeFieldKey),
+          CustomTimeField(
+            key: timeFieldKey,
+            hintText: translation!.chooseTime.isNotEmpty
+                ? translation!.chooseTime
+                : "اختر الوقت",
+          ),
           const SizedBox(height: 16),
           CustomTextField(
-            hintText: 'اضف عنوانا للاشعار',
+            hintText: translation!.addNotificationTitle.isNotEmpty
+                ? translation!.addNotificationTitle
+                : 'اضف عنوانا للاشعار',
             controller: controllerOfTitle,
           ),
           const SizedBox(height: 16),
           CustomTextField(
-            hintText: 'اضف نص الاشعار',
+            hintText: translation!.addNotificationBody.isNotEmpty
+                ? translation!.addNotificationBody
+                : 'اضف نص الاشعار',
             controller: controllerOfBody,
           ),
           const SizedBox(height: 16),
@@ -181,6 +183,20 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
           const SizedBox(height: 100),
         ],
       ),
+    );
+  }
+
+  // دالة مساعدة لتقليل تكرار الكود في أزرار الأيام
+  Widget _buildDayButton(int index, String label) {
+    return CustomButtonText(
+      color: colorsOfweek[index],
+      onPressed: () {
+        setState(() {
+          colorsOfweek[index] =
+              colorsOfweek[index] == whiteColor ? mainColor : whiteColor;
+        });
+      },
+      text: label,
     );
   }
 }

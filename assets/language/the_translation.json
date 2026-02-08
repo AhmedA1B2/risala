@@ -50,7 +50,18 @@
         "tutorialCompass": "هنا توجد البوصلة التي تشير إلى القبلة. قد لا تكون الاتجاهات دقيقة في بعض الشبكات وفي بعض الأجهزة.",
         "tutorialHome": "هنا الصفحة الرئيسية حيث يوجد القرآن الكريم وتعرض السور هنا",
         "tutorialMenu": "هذه القائمة يمكنك التحكم منها ببعض الإعدادات وتغيير اللغة متى شئت.",
-        "confirmLanguageChange": "هل أنت متأكد من أنك تريد استخدام هذه اللغة؟"
+        "confirmLanguageChange": "هل أنت متأكد من أنك تريد استخدام هذه اللغة؟",
+        "saturday": "السبت",
+        "sunday": "الأحد",
+        "monday": "الاثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة",
+        "all": "الكل",
+        "addNotificationTitle": "أضف عنواناً للإشعار",
+        "addNotificationBody": "أضف نص الإشعار",
+        "chooseTime": "اختر الوقت"
       }
     ],
     "en": [
@@ -98,12 +109,23 @@
         "prayerTimesIn": "Prayer times in ",
         "calculationMethod": "Calculation method:",
         "almadhhab": "Madhhab:",
-        "tutorialTasbih": "Here is the Tasbih (Rosary) with some Adhkar; more will be added in the future.",
+        "tutorialTasbih": "Here is the Tasbih with some Adhkar; more will be added in the future.",
         "tutorialNotifications": "Your custom notifications are displayed here, and you can add new ones.",
         "tutorialCompass": "Here is the Qibla compass. Directions may vary in accuracy depending on the network or device.",
         "tutorialHome": "This is the Home page where the Holy Quran and Surahs are displayed.",
         "tutorialMenu": "From this menu, you can manage settings and change the language at any time.",
-        "confirmLanguageChange": "Are you sure you want to use this language?"
+        "confirmLanguageChange": "Are you sure you want to use this language?",
+        "saturday": "Saturday",
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "all": "All",
+        "addNotificationTitle": "Add a notification title",
+        "addNotificationBody": "Add notification text",
+        "chooseTime": "Choose time"
       }
     ],
     "sp": [
@@ -156,7 +178,18 @@
         "tutorialCompass": "Aquí está la brújula de la Qibla. La precisión puede variar según la red o el dispositivo.",
         "tutorialHome": "Esta es la página de inicio donde se muestran el Sagrado Corán y las Suras.",
         "tutorialMenu": "Desde este menú puedes gestionar los ajustes y cambiar el idioma cuando quieras.",
-        "confirmLanguageChange": "¿Estás seguro de que quieres usar este idioma?"
+        "confirmLanguageChange": "¿Estás seguro de que quieres usar este idioma?",
+        "saturday": "Sábado",
+        "sunday": "Domingo",
+        "monday": "Lunes",
+        "tuesday": "Martes",
+        "wednesday": "Miércoles",
+        "thursday": "Jueves",
+        "friday": "Viernes",
+        "all": "Todo",
+        "addNotificationTitle": "Añadir un título de notificación",
+        "addNotificationBody": "Añadir texto de notificación",
+        "chooseTime": "Elegir hora"
       }
     ],
     "it": [
@@ -209,7 +242,18 @@
         "tutorialCompass": "Qui c'è la bussola per la Qibla. La precisione può variare a seconda della rete o del dispositivo.",
         "tutorialHome": "Questa è la pagina principale dove vengono visualizzati il Sacro Corano e le Sure.",
         "tutorialMenu": "Da questo menu puoi gestire le impostazioni e cambiare la lingua in qualsiasi momento.",
-        "confirmLanguageChange": "Sei sicuro di voler utilizzare questa lingua?"
+        "confirmLanguageChange": "Sei sicuro di voler utilizzare questa lingua?",
+        "saturday": "Sabato",
+        "sunday": "Domenica",
+        "monday": "Lunedì",
+        "tuesday": "Martedì",
+        "wednesday": "Mercoledì",
+        "thursday": "Giovedì",
+        "friday": "Venerdì",
+        "all": "Tutto",
+        "addNotificationTitle": "Aggiungi un titolo alla notifica",
+        "addNotificationBody": "Aggiungi il testo della notifica",
+        "chooseTime": "Scegli l'orario"
       }
     ],
     "in": [
@@ -245,7 +289,7 @@
         "gradeDifference": "Perbedaan derajat:",
         "qiblaDirection": "Arah kiblat:",
         "deviceOrientationNotAvailable": "Orientasi perangkat tidak tersedia",
-        "compassCalibration": "Kalibrasi komパス",
+        "compassCalibration": "Kalibrasi kompas",
         "explanationOfCalibration": "Gerakkan ponsel Anda membentuk angka 8 jauh dari gangguan magnetik.",
         "alfajr": "Al-Fajr",
         "alshuruq": "Ash-Shuruq",
@@ -262,7 +306,18 @@
         "tutorialCompass": "Di sini terdapat kompas Qiblat. Akurasi arah mungkin berbeda tergantung pada jaringan atau perangkat.",
         "tutorialHome": "Ini adalah halaman Beranda tempat Al-Qur'an dan Surah ditampilkan.",
         "tutorialMenu": "Melalui menu ini, Anda dapat mengatur setelan dan mengubah bahasa kapan saja.",
-        "confirmLanguageChange": "Apakah Anda yakin ingin menggunakan bahasa ini?"
+        "confirmLanguageChange": "Apakah Anda yakin ingin menggunakan bahasa ini?",
+        "saturday": "Sabtu",
+        "sunday": "Minggu",
+        "monday": "Senin",
+        "tuesday": "Selasa",
+        "wednesday": "Rabu",
+        "thursday": "Kamis",
+        "friday": "Jumat",
+        "all": "Semua",
+        "addNotificationTitle": "Tambah judul notifikasi",
+        "addNotificationBody": "Tambah teks notifikasi",
+        "chooseTime": "Pilih waktu"
       }
     ],
     "cn": [
@@ -315,7 +370,18 @@
         "tutorialCompass": "这里是朝向指北针。根据网络或设备的不同，方向精度可能会有所差异。",
         "tutorialHome": "这是主页，显示《古兰经》及其各章节。",
         "tutorialMenu": "通过此菜单，您可以管理设置并随时更改语言。",
-        "confirmLanguageChange": "您确定要使用这种语言吗？"
+        "confirmLanguageChange": "您确定要使用这种语言吗？",
+        "saturday": "星期六",
+        "sunday": "星期日",
+        "monday": "星期一",
+        "tuesday": "星期二",
+        "wednesday": "星期三",
+        "thursday": "星期四",
+        "friday": "星期五",
+        "all": "全部",
+        "addNotificationTitle": "添加通知标题",
+        "addNotificationBody": "添加通知文本",
+        "chooseTime": "选择时间"
       }
     ],
     "bn": [
@@ -368,7 +434,18 @@
         "tutorialCompass": "এখানে কিবলা কম্পাস রয়েছে। নেটওয়ার্ক বা ডিভাইসের কারণে দিকনির্দেশনায় কিছুটা তারতম্য হতে পারে।",
         "tutorialHome": "এটি হোম পেজ যেখানে পবিত্র কুরআন এবং সূরাগুলো প্রদর্শিত হয়।",
         "tutorialMenu": "এই মেনু থেকে আপনি সেটিংস নিয়ন্ত্রণ করতে এবং যেকোনো সময় ভাষা পরিবর্তন করতে পারবেন।",
-        "confirmLanguageChange": "আপনি কি নিশ্চিত যে এই ভাষাটি ব্যবহার করতে চান?"
+        "confirmLanguageChange": "আপনি কি নিশ্চিত যে এই ভাষাটি ব্যবহার করতে চান?",
+        "saturday": "শনিবার",
+        "sunday": "রবিবার",
+        "monday": "সোমবার",
+        "tuesday": "মঙ্গলবার",
+        "wednesday": "বুধবার",
+        "thursday": "বৃহস্পতিবার",
+        "friday": "শুক্রবার",
+        "all": "সব",
+        "addNotificationTitle": "বিজ্ঞপ্তির শিরোনাম যোগ করুন",
+        "addNotificationBody": "বিজ্ঞপ্তির বিবরণ যোগ করুন",
+        "chooseTime": "সময় নির্বাচন করুন"
       }
     ],
     "ru": [
@@ -421,7 +498,18 @@
         "tutorialCompass": "Здесь находится компас, указывающий на Киблу. Точность может зависеть от сети и устройства.",
         "tutorialHome": "Это главная страница, где находится Священный Коран и отображаются суры.",
         "tutorialMenu": "В этом меню вы можете управлять настройками и изменять язык в любое время.",
-        "confirmLanguageChange": "Вы уверены, что хотите использовать этот язык?"
+        "confirmLanguageChange": "Вы уверены, что хотите использовать этот язык?",
+        "saturday": "Суббота",
+        "sunday": "Воскресенье",
+        "monday": "Понедельник",
+        "tuesday": "Вторник",
+        "wednesday": "Среда",
+        "thursday": "Четверг",
+        "friday": "Пятница",
+        "all": "Все",
+        "addNotificationTitle": "Добавить заголовок уведомления",
+        "addNotificationBody": "Добавить текст уведомления",
+        "chooseTime": "Выберите время"
       }
     ],
     "jp": [
@@ -474,7 +562,18 @@
         "tutorialCompass": "ここはキブラを指すコンパスです。ネットワークやデバイスによって、精度が異なる場合があります。",
         "tutorialHome": "ここは聖クルアーンと各章（スーラ）が表示されるホーム画面です。",
         "tutorialMenu": "このメニューから、設定の管理や言語の変更をいつでも行えます。",
-        "confirmLanguageChange": "本当にこの言語を使用しますか？"
+        "confirmLanguageChange": "本当にこの言語を使用しますか？",
+        "saturday": "土曜日",
+        "sunday": "日曜日",
+        "monday": "月曜日",
+        "tuesday": "火曜日",
+        "wednesday": "水曜日",
+        "thursday": "木曜日",
+        "friday": "金曜日",
+        "all": "すべて",
+        "addNotificationTitle": "通知のタイトルを追加",
+        "addNotificationBody": "通知テキストを追加",
+        "chooseTime": "時間を選択"
       }
     ]
   }

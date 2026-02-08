@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:risala/vars/colors.dart';
 
 class CustomTimeField extends StatefulWidget {
-  const CustomTimeField({super.key});
-
+  const CustomTimeField({super.key, required this.hintText});
+  final String hintText;
   @override
   State<CustomTimeField> createState() =>
       CustomTimeFieldState(); // بدل _CustomTimeFieldState
@@ -28,7 +28,7 @@ class CustomTimeFieldState extends State<CustomTimeField> {
         hintTextDirection: TextDirection.rtl,
         filled: true,
         fillColor: mainColor,
-        hintText: "اختر الوقت",
+        hintText: widget.hintText,
         prefixIcon: const Icon(Icons.access_time),
       ),
       onTap: () async {
