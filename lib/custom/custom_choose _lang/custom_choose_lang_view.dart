@@ -3,6 +3,8 @@ import 'package:risala/custom/custom_bg/custom_bg2.dart';
 import 'package:risala/custom/custom_dialogue/custom_dialogue.dart';
 import 'package:risala/custom/custom_splash_screen/custom_splash_screen1.dart';
 import 'package:risala/main.dart';
+import 'package:risala/models/translation.dart';
+import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 
 class CustomChooseLangView extends StatefulWidget {
@@ -21,18 +23,25 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
 
   double valueOfSize = sharedPref.getDouble("valueOfSize") ?? 26;
   double valueOfSize2 = sharedPref.getDouble("valueOfSize2") ?? 36;
+//
+  Translation? translation;
 
+  Future<void> loadAllTranslations(String lang) async {
+    final list = await loadTranslation(lang);
+    setState(() {
+      translation = list.first;
+    });
+  }
+
+//
   @override
   void initState() {
     super.initState();
-// تحميل الترجمات حسب اللغة الحالية
   }
 
-  /// تحديث اللغة مؤقتًا عند اختيارها من Dropdown
   void _updateLanguage(String newLang) {
     setState(() {
-      selectedValue = newLang; // اللغة الجديدة مؤقتًا
-// تحميل الترجمات حسب اللغة الجديدة
+      selectedValue = newLang;
     });
   }
 
@@ -112,6 +121,7 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
                           onPressed: () {
                             setState(() {
                               showDialogue = true;
+                              loadAllTranslations(selectedValue);
                             });
                           },
                           icon: Icon(
@@ -131,7 +141,9 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
             CustomDialogue(
               iconOk: Icons.check_circle,
               iconNo: Icons.cancel,
-              text: 'هل أنت متأكد من أنك تريد استخدام هذه اللغة ؟',
+              text: translation!.confirmLanguageChange.isNotEmpty
+                  ? translation!.confirmLanguageChange
+                  : 'هل أنت متأكد من أنك تريد استخدام هذه اللغة ؟',
               onPressediconNo: () {
                 setState(() {
                   showDialogue = false;

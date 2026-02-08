@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:risala/models/sura.dart';
-import 'package:risala/my_views/quran/quran_text/quran_text_normal.dart';
+// تم حذف import ملف الـ dart القديم هنا
 import 'package:risala/vars/colors.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
@@ -13,14 +13,15 @@ class CustomSearchBar extends StatefulWidget {
   final void Function()? onSearchBarTap;
   final void Function(String)? onSearchBarChanged;
 
-  const CustomSearchBar(
-      {super.key,
-      this.onResults,
-      required this.aya,
-      required this.surah,
-      required this.hintText,
-      this.onSearchBarChanged,
-      this.onSearchBarTap});
+  const CustomSearchBar({
+    super.key,
+    this.onResults,
+    required this.aya,
+    required this.surah,
+    required this.hintText,
+    this.onSearchBarChanged,
+    this.onSearchBarTap,
+  });
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -31,48 +32,52 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   TextEditingController textEditingController = TextEditingController();
 
   List<Surah> surahs = [];
+  List<dynamic> quranVerses = []; // قائمة لتخزين آيات القرآن من الـ JSON
+  bool isLoading = true; // لمتابعة حالة التحميل
 
   @override
   void initState() {
     super.initState();
-    loadSurahs();
+    loadAllData(); // تحميل البيانات عند بدء التشغيل
   }
 
-  // 🔹 تحميل بيانات السور من ملف JSON
-  Future<void> loadSurahs() async {
-    final String response =
-        await rootBundle.loadString('assets/json/surahs.json');
-    final List<dynamic> data = json.decode(response);
-    setState(() {
-      surahs = data.map((e) => Surah.fromMap(e)).toList();
-    });
+  // 🔹 تحميل بيانات السور والآيات معاً
+  Future<void> loadAllData() async {
+    try {
+      // تحميل ملف السور
+      final String surahsResponse = await rootBundle.loadString('assets/json/surahs.json');
+      final List<dynamic> surahsData = json.decode(surahsResponse);
+
+      // تحميل ملف القرآن الكامل (الذي أنشأناه بالبايثون)
+      final String quranResponse = await rootBundle.loadString('assets/json/quran/quran_for_search.json');
+      final List<dynamic> quranData = json.decode(quranResponse);
+
+      setState(() {
+        surahs = surahsData.map((e) => Surah.fromMap(e)).toList();
+        quranVerses = quranData;
+        isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Error loading JSON: $e");
+      setState(() => isLoading = false);
+    }
   }
 
-  // 🔹 دالة إزالة التشكيل من النص العربي
+  // 🔹 دالة إزالة التشكيل
   String removeDiacritics(String input) {
-    const diacriticsPattern =
-        r'[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED]'; // نطاق الحركات
+    const diacriticsPattern = r'[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED]';
     return input.replaceAll(RegExp(diacriticsPattern), '');
   }
 
   // 🔹 دالة حساب التشابه (Levenshtein Distance)
   double similarity(String s1, String s2) {
-    s1 = s1.trim();
-    s2 = s2.trim();
+    s1 = s1.trim(); s2 = s2.trim();
     if (s1.isEmpty || s2.isEmpty) return 0;
-
     final int len1 = s1.length;
     final int len2 = s2.length;
-    List<List<int>> dp =
-        List.generate(len1 + 1, (_) => List.filled(len2 + 1, 0));
-
-    for (int i = 0; i <= len1; i++) {
-      dp[i][0] = i;
-    }
-    for (int j = 0; j <= len2; j++) {
-      dp[0][j] = j;
-    }
-
+    List<List<int>> dp = List.generate(len1 + 1, (_) => List.filled(len2 + 1, 0));
+    for (int i = 0; i <= len1; i++) dp[i][0] = i;
+    for (int j = 0; j <= len2; j++) dp[0][j] = j;
     for (int i = 1; i <= len1; i++) {
       for (int j = 1; j <= len2; j++) {
         int cost = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
@@ -80,40 +85,36 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             .reduce((a, b) => a < b ? a : b);
       }
     }
-
-    int distance = dp[len1][len2];
-    double maxLen = len1 > len2 ? len1.toDouble() : len2.toDouble();
-    return 1.0 - (distance / maxLen);
+    return 1.0 - (dp[len1][len2] / (len1 > len2 ? len1 : len2));
   }
 
   void searchQuran() {
     String query = textEditingController.text.trim();
-    if (query.isEmpty) {
-      widget.onResults?.call(null); // ← هذا التعديل
+    if (query.isEmpty || isLoading) {
+      widget.onResults?.call(null);
       return;
     }
 
     final normalizedQuery = removeDiacritics(query);
 
     if (selectedValue == "آية") {
-      final results = quranTextNormal.where((verse) {
+      // البحث في قائمة quranVerses التي تم تحميلها من الـ JSON
+      final results = quranVerses.where((verse) {
         final content = removeDiacritics(verse['content'] as String);
         if (content.contains(normalizedQuery)) return true;
-        double sim = similarity(content, normalizedQuery);
-        return sim > 0.7;
-      }).toList();
+        return similarity(content, normalizedQuery) > 0.7;
+      }).map((v) => Map<String, dynamic>.from(v)).toList();
 
       widget.onResults?.call(results);
     } else {
+      // البحث في السور
       final results = surahs.where((s) {
         final name = removeDiacritics(s.name);
-        final queryName = removeDiacritics(query);
-        if (name.contains(queryName) ||
-            s.englishName.toLowerCase().contains(queryName.toLowerCase())) {
+        if (name.contains(normalizedQuery) || 
+            s.englishName.toLowerCase().contains(normalizedQuery.toLowerCase())) {
           return true;
         }
-        double sim = similarity(name, queryName);
-        return sim > 0.7;
+        return similarity(name, normalizedQuery) > 0.7;
       }).map((s) {
         return {
           'content': s.name,
@@ -131,8 +132,10 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     return Row(
       children: [
         IconButton(
-          onPressed: searchQuran,
-          icon: const Icon(Icons.search),
+          onPressed: isLoading ? null : searchQuran,
+          icon: isLoading 
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) 
+              : const Icon(Icons.search),
           color: mainColor,
           iconSize: 38,
         ),
@@ -147,12 +150,12 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           child: TextField(
             onTap: widget.onSearchBarTap,
             onChanged: (val) {
-              widget.onSearchBarChanged;
+              widget.onSearchBarChanged?.call(val);
               searchQuran();
             },
             controller: textEditingController,
             decoration: InputDecoration(
-              hintText: widget.hintText,
+              hintText: isLoading ? "جاري التحميل..." : widget.hintText,
               border: InputBorder.none,
             ),
             textAlign: TextAlign.right,
@@ -168,26 +171,17 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             dropdownColor: mainColor,
             value: selectedValue == "آية" ? widget.aya : widget.surah,
             iconEnabledColor: blackColor,
-            items: [
-              widget.aya,
-              widget.surah,
-            ]
-                .map(
-                  (e) => DropdownMenuItem(
-                    value: e,
-                    child: Text(
-                      e,
-                      style: const TextStyle(color: blackColor),
-                    ),
-                  ),
-                )
+            items: [widget.aya, widget.surah]
+                .map((e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e, style: const TextStyle(color: blackColor)),
+                    ))
                 .toList(),
             onChanged: (value) {
               setState(() {
-                value == widget.aya
-                    ? selectedValue = "آية"
-                    : selectedValue = "سورة";
+                selectedValue = (value == widget.aya) ? "آية" : "سورة";
               });
+              searchQuran();
             },
           ),
         )

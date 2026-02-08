@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen1.dart';
@@ -29,8 +28,7 @@ class _MainViewState extends State<MainView> {
   final GlobalKey<CustomMenuButton1State> buttonMenuKey =
       GlobalKey<CustomMenuButton1State>();
 
-//tutorial
-
+  // Tutorial Keys
   final GlobalKey keyBottomBarForTuorial1 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial2 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial3 = GlobalKey();
@@ -38,63 +36,70 @@ class _MainViewState extends State<MainView> {
 
   late TutorialOverlay tutorial;
 
-//tutorial
-
   int? surahsaved = sharedPref.getInt('surahsaved');
   String? namesaved = sharedPref.getString('namesaved');
 
   bool isMenuOpen = false;
-
   List<Map<String, dynamic>>? searchResults;
   Translation? translation;
-
-  Future<void> loadAllTranslations() async {
-    final list = await loadTranslation(sharedPref.getString("selectedValue"));
-    setState(() {
-      translation = list.first;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
+    // نبدأ بتحميل البيانات أولاً
     loadAllTranslations();
     _requestNotificationPermission();
+  }
 
-    print("-----------${sharedPref.getBool('oldUser')}------------");
+  Future<void> loadAllTranslations() async {
+    final list = await loadTranslation(sharedPref.getString("selectedValue"));
+    if (list.isNotEmpty) {
+      setState(() {
+        translation = list.first;
+      });
 
-//tutorial
-    if (sharedPref.getBool("oldUser") != true) {
-      tutorial = TutorialOverlay(
-        context: context,
-        steps: [
-          TutorialStep(
-              key: keyBottomBarForTuorial4,
-              text:
-                  "هنا السبحة توجد فيها بعض الأذكار وستكون هناك المزيد من الأذكار مستقبلا"),
-          TutorialStep(
-              key: keyBottomBarForTuorial3,
-              text:
-                  "هنا تعرض إشعاراتك المخصصة، ومن هنا يمكنك إضافة إشعارات جديدة."),
-          TutorialStep(
-              key: keyBottomBarForTuorial2,
-              text:
-                  "هنا توجد البوصلة التي تشير إلى القبلة. قد لا تكون الاتجاهات دقيقة في بعض الشبكات وفي بعض الأجهزة."),
-          TutorialStep(
-              key: keyBottomBarForTuorial1,
-              text:
-                  "هنا الصفحة الرئيسية حيث يوجد القرآن الكريم وتعرض السور هنا "),
-          TutorialStep(
-              key: buttonMenuKey,
-              text:
-                  "هذه القائمة يمكنك تحكم منها ببعض الإعدادات وتغيير اللغة متى شئت."),
-        ],
-      );
-
-      // تشغيل بعد بناء الواجهة
-      WidgetsBinding.instance.addPostFrameCallback((_) => tutorial.start());
+      // بعد التأكد من أن الترجمة جاهزة، نقوم بتهيئة التوجيه
+      if (sharedPref.getBool("oldUser") != true) {
+        _initTutorial();
+      }
     }
-//tutorial
+  }
+
+  void _initTutorial() {
+    // هذه الدالة لا تُستدعى إلا و translation مؤكد وجوده
+    tutorial = TutorialOverlay(
+      context: context,
+      steps: [
+        TutorialStep(
+            key: keyBottomBarForTuorial4,
+            text: translation!.tutorialTasbih.isNotEmpty
+                ? translation!.tutorialTasbih
+                : "هنا السبحة توجد فيها بعض الأذكار وستكون هناك المزيد من الأذكار مستقبلا"),
+        TutorialStep(
+            key: keyBottomBarForTuorial3,
+            text: translation!.tutorialNotifications.isNotEmpty
+                ? translation!.tutorialNotifications
+                : "هنا تعرض إشعاراتك المخصصة، ومن هنا يمكنك إضافة إشعارات جديدة."),
+        TutorialStep(
+            key: keyBottomBarForTuorial2,
+            text: translation!.tutorialCompass.isNotEmpty
+                ? translation!.tutorialCompass
+                : "هنا توجد البوصلة التي تشير إلى القبلة. قد لا تكون الاتجاهات دقيقة في بعض الشبكات وفي بعض الأجهزة."),
+        TutorialStep(
+            key: keyBottomBarForTuorial1,
+            text: translation!.tutorialHome.isNotEmpty
+                ? translation!.tutorialHome
+                : "هنا الصفحة الرئيسية حيث يوجد القرآن الكريم وتعرض السور هنا "),
+        TutorialStep(
+            key: buttonMenuKey,
+            text: translation!.tutorialMenu.isNotEmpty
+                ? translation!.tutorialMenu
+                : "هذه القائمة يمكنك تحكم منها ببعض الإعدادات وتغيير اللغة متى شئت."),
+      ],
+    );
+
+    // تشغيل التوجيه بعد بناء الواجهة مباشرة
+    WidgetsBinding.instance.addPostFrameCallback((_) => tutorial.start());
   }
 
   Future<void> _requestNotificationPermission() async {
@@ -121,25 +126,29 @@ class _MainViewState extends State<MainView> {
         namesaved = sharedPref.getString('namesaved');
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: CustomSnackBar(
-            text: translation!.dontSaved.isNotEmpty
-                ? translation!.dontSaved
-                : "لم يتم حفظ أي اية",
+      if (translation != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: CustomSnackBar(
+              text: translation!.dontSaved.isNotEmpty
+                  ? translation!.dontSaved
+                  : "لم يتم حفظ أي اية",
+            ),
+            backgroundColor: const Color.fromARGB(0, 255, 193, 7),
+            elevation: 0,
+            duration: const Duration(seconds: 2),
           ),
-          backgroundColor: const Color.fromARGB(0, 255, 193, 7),
-          elevation: 0,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     if (translation == null) {
-      return const Center(child: CustomLoadingScreen1());
+      return const Scaffold(
+        body: Center(child: CustomLoadingScreen1()),
+      );
     }
 
     return CustomMenuAnimation5(

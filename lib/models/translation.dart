@@ -1,50 +1,60 @@
 class Translation {
+  // الحقول الأساسية (اختياري حسب حاجتك)
   final String key;
   final String text;
 
-  String theQuran;
-  String ok;
-  String languageAndText;
-  String explanatoryTextForTitle;
-  String explanatoryTextForAya;
-  String save;
-  String support;
-  String theme;
-  String numberOfVerses;
-  String turnOff;
-  String turnOn;
-  String error;
-  String playing;
-  String saved;
-  String dontSaved;
-  String verse;
-  String surah;
-  String searchHintText;
-  String adhkar;
-  String yourCurrentLocation;
-  String locationServiceIsDisabled;
-  String locationPermissionDenied;
-  String enterCityName;
-  String cityNotFound;
-  String anErrorOccurredWhileSearchingForTheCity;
-  String gettingLocation;
-  String savedLocation;
-  String updateSite;
-  String gradeDifference;
-  String qiblaDirection;
-  String deviceOrientationNotAvailable;
-  String compassCalibration;
-  String explanationOfCalibration;
-  String alfajr;
-  String alshuruq;
-  String alzahri;
-  String aleasra;
-  String almaghribi;
-  String aleashai;
-  String timeForTheNextPrayer;
-  String prayerTimesIn;
-  String calculationMethod;
-  String almadhhab;
+  // الحقول العامة
+  final String theQuran;
+  final String ok;
+  final String languageAndText;
+  final String explanatoryTextForTitle;
+  final String explanatoryTextForAya;
+  final String save;
+  final String support;
+  final String theme;
+  final String numberOfVerses;
+  final String turnOff;
+  final String turnOn;
+  final String error;
+  final String playing;
+  final String saved;
+  final String dontSaved;
+  final String verse;
+  final String surah;
+  final String searchHintText;
+  final String adhkar;
+  final String yourCurrentLocation;
+  final String locationServiceIsDisabled;
+  final String locationPermissionDenied;
+  final String enterCityName;
+  final String cityNotFound;
+  final String anErrorOccurredWhileSearchingForTheCity;
+  final String gettingLocation;
+  final String savedLocation;
+  final String updateSite;
+  final String gradeDifference;
+  final String qiblaDirection;
+  final String deviceOrientationNotAvailable;
+  final String compassCalibration;
+  final String explanationOfCalibration;
+  final String alfajr;
+  final String alshuruq;
+  final String alzahri;
+  final String aleasra;
+  final String almaghribi;
+  final String aleashai;
+  final String timeForTheNextPrayer;
+  final String prayerTimesIn;
+  final String calculationMethod;
+  final String almadhhab;
+
+  // الحقول الجديدة (Tutorial & Confirmation)
+  final String tutorialTasbih;
+  final String tutorialNotifications;
+  final String tutorialCompass;
+  final String tutorialHome;
+  final String tutorialMenu;
+  final String confirmLanguageChange;
 
   Translation({
     required this.key,
@@ -92,10 +102,18 @@ class Translation {
     required this.prayerTimesIn,
     required this.calculationMethod,
     required this.almadhhab,
+    // الحقول الجديدة في الـ Constructor
+    required this.tutorialTasbih,
+    required this.tutorialNotifications,
+    required this.tutorialCompass,
+    required this.tutorialHome,
+    required this.tutorialMenu,
+    required this.confirmLanguageChange,
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
-    final data = json[langCode][0];
+    // الوصول للبيانات بناءً على هيكلة الـ JSON الخاص بك
+    final data = (json is List) ? json[0][langCode][0] : json[langCode][0];
 
     return Translation(
       key: '',
@@ -124,15 +142,13 @@ class Translation {
       locationPermissionDenied: data["locationPermissionDenied"] ?? "",
       enterCityName: data["enterCityName"] ?? "",
       cityNotFound: data["cityNotFound"] ?? "",
-      anErrorOccurredWhileSearchingForTheCity:
-          data["anErrorOccurredWhileSearchingForTheCity"] ?? "",
+      anErrorOccurredWhileSearchingForTheCity: data["anErrorOccurredWhileSearchingForTheCity"] ?? "",
       gettingLocation: data["gettingLocation"] ?? "",
       savedLocation: data["SavedLocation"] ?? "",
       updateSite: data["UpdateSite"] ?? "",
       gradeDifference: data["gradeDifference"] ?? "",
       qiblaDirection: data["qiblaDirection"] ?? "",
-      deviceOrientationNotAvailable:
-          data["deviceOrientationNotAvailable"] ?? "",
+      deviceOrientationNotAvailable: data["deviceOrientationNotAvailable"] ?? "",
       compassCalibration: data["compassCalibration"] ?? "",
       explanationOfCalibration: data["explanationOfCalibration"] ?? "",
       alfajr: data["alfajr"] ?? "",
@@ -145,6 +161,13 @@ class Translation {
       prayerTimesIn: data["prayerTimesIn"] ?? "",
       calculationMethod: data["calculationMethod"] ?? "",
       almadhhab: data["almadhhab"] ?? "",
+      // جلب الحقول الجديدة من الـ JSON
+      tutorialTasbih: data["tutorialTasbih"] ?? "",
+      tutorialNotifications: data["tutorialNotifications"] ?? "",
+      tutorialCompass: data["tutorialCompass"] ?? "",
+      tutorialHome: data["tutorialHome"] ?? "",
+      tutorialMenu: data["tutorialMenu"] ?? "",
+      confirmLanguageChange: data["confirmLanguageChange"] ?? "",
     );
   }
 }

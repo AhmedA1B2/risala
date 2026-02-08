@@ -3,7 +3,7 @@
     "ar": [
       {
         "theQuran": "ٱلْقُرْآنُ",
-        "ok":"حسنًا",
+        "ok": "حسنًا",
         "languageAndText": "اللغة و النص",
         "explanatoryTextForTitle": "هذا هو شكل خط العناوين",
         "explanatoryTextForAya": "هذا هو شكل خط الايات",
@@ -16,7 +16,7 @@
         "error": "هناك خطأ",
         "playing": "يتم التشغيل",
         "saved": "تم الحفظ",
-        "dontSaved":"لم يتم حفظ أي اية",
+        "dontSaved": "لم يتم حفظ أي اية",
         "verse": "آية",
         "surah": "سورة",
         "searchHintText": "ابحث عن آية أو سورة...",
@@ -24,17 +24,17 @@
         "yourCurrentLocation": "موقعك الحالي",
         "locationServiceIsDisabled": "خدمة الموقع غير مفعّلة",
         "locationPermissionDenied": "تم رفض إذن الموقع",
-        "enterCityName":"أدخل اسم المدينة",
+        "enterCityName": "أدخل اسم المدينة",
         "cityNotFound": "لم يتم العثور على المدينة",
         "anErrorOccurredWhileSearchingForTheCity": "حدث خطأ أثناء البحث عن المدينة",
-        "gettingLocation" :"جاري الحصول على الموقع...",
-        "SavedLocation" : "موقع مخزن:",
-        "UpdateSite":"تحديث الموقع",
-        "gradeDifference":"فرق الدرجات:",
-        "qiblaDirection":"اتجاه القبلة :",
-        "deviceOrientationNotAvailable":"اتجاه الجهاز: غير متوفر",
-        "compassCalibration":"معايرة البوصلة",
-        "explanationOfCalibration":"قم بتحريك الهاتف في شكل رقم 8 واضبطه بعيدًا عن مصادر التشويش المغناطيسي.",
+        "gettingLocation": "جاري الحصول على الموقع...",
+        "SavedLocation": "موقع مخزن:",
+        "UpdateSite": "تحديث الموقع",
+        "gradeDifference": "فرق الدرجات:",
+        "qiblaDirection": "اتجاه القبلة :",
+        "deviceOrientationNotAvailable": "اتجاه الجهاز: غير متوفر",
+        "compassCalibration": "معايرة البوصلة",
+        "explanationOfCalibration": "قم بتحريك الهاتف في شكل رقم 8 واضبطه بعيدًا عن مصادر التشويش المغناطيسي.",
         "alfajr": "الفجر",
         "alshuruq": "الشروق",
         "alzahri": "الظهر",
@@ -44,13 +44,19 @@
         "timeForTheNextPrayer": "باقي على الصلاة القادمة: ",
         "prayerTimesIn": "أوقات الصلاة في ",
         "calculationMethod": "طريقة الحساب:",
-        "almadhhab": "المذهب:"
+        "almadhhab": "المذهب:",
+        "tutorialTasbih": "هنا السبحة توجد فيها بعض الأذكار وستكون هناك المزيد من الأذكار مستقبلاً",
+        "tutorialNotifications": "هنا تعرض إشعاراتك المخصصة، ومن هنا يمكنك إضافة إشعارات جديدة.",
+        "tutorialCompass": "هنا توجد البوصلة التي تشير إلى القبلة. قد لا تكون الاتجاهات دقيقة في بعض الشبكات وفي بعض الأجهزة.",
+        "tutorialHome": "هنا الصفحة الرئيسية حيث يوجد القرآن الكريم وتعرض السور هنا",
+        "tutorialMenu": "هذه القائمة يمكنك التحكم منها ببعض الإعدادات وتغيير اللغة متى شئت.",
+        "confirmLanguageChange": "هل أنت متأكد من أنك تريد استخدام هذه اللغة؟"
       }
     ],
     "en": [
       {
         "theQuran": "The Quran",
-         "ok": "OK",
+        "ok": "OK",
         "languageAndText": "Language & Text",
         "explanatoryTextForTitle": "This is the title font style",
         "explanatoryTextForAya": "This is the verse font style",
@@ -63,7 +69,7 @@
         "error": "There is an error",
         "playing": "Playing",
         "saved": "Saved",
-        "dontSaved":"No verse has been saved.",
+        "dontSaved": "No verse has been saved.",
         "verse": "Verse",
         "surah": "Surah",
         "searchHintText": "Search for a verse or surah...",
@@ -71,7 +77,7 @@
         "yourCurrentLocation": "Your current location",
         "locationServiceIsDisabled": "Location service is disabled",
         "locationPermissionDenied": "Location permission denied",
-        "enterCityName":"Enter city name",
+        "enterCityName": "Enter city name",
         "cityNotFound": "City not found",
         "anErrorOccurredWhileSearchingForTheCity": "An error occurred while searching for the city",
         "gettingLocation": "Getting location...",
@@ -91,7 +97,13 @@
         "timeForTheNextPrayer": "Time remaining for the next prayer: ",
         "prayerTimesIn": "Prayer times in ",
         "calculationMethod": "Calculation method:",
-        "almadhhab": "Madhhab:"
+        "almadhhab": "Madhhab:",
+        "tutorialTasbih": "Here is the Tasbih (Rosary) with some Adhkar; more will be added in the future.",
+        "tutorialNotifications": "Your custom notifications are displayed here, and you can add new ones.",
+        "tutorialCompass": "Here is the Qibla compass. Directions may vary in accuracy depending on the network or device.",
+        "tutorialHome": "This is the Home page where the Holy Quran and Surahs are displayed.",
+        "tutorialMenu": "From this menu, you can manage settings and change the language at any time.",
+        "confirmLanguageChange": "Are you sure you want to use this language?"
       }
     ],
     "sp": [
@@ -110,7 +122,7 @@
         "error": "Hay un error",
         "playing": "Reproduciendo",
         "saved": "Guardado",
-        "dontSaved":"No se ha guardado ningún versículo",
+        "dontSaved": "No se ha guardado ningún versículo",
         "verse": "Verso",
         "surah": "Sura",
         "searchHintText": "Busca un verso o sura...",
@@ -118,7 +130,7 @@
         "yourCurrentLocation": "Tu ubicación actual",
         "locationServiceIsDisabled": "El servicio de ubicación está deshabilitado",
         "locationPermissionDenied": "Permiso de ubicación denegado",
-        "enterCityName":"Introduce el nombre de la ciudad",
+        "enterCityName": "Introduce el nombre de la ciudad",
         "cityNotFound": "Ciudad no encontrada",
         "anErrorOccurredWhileSearchingForTheCity": "Ocurrió un error al buscar la ciudad",
         "gettingLocation": "Obteniendo ubicación...",
@@ -138,10 +150,15 @@
         "timeForTheNextPrayer": "Tiempo restante para la próxima oración: ",
         "prayerTimesIn": "Horarios de oración en ",
         "calculationMethod": "Método de cálculo:",
-        "almadhhab": "Madhhab:"
+        "almadhhab": "Madhhab:",
+        "tutorialTasbih": "Aquí está el Tasbih con algunos Adhkar; se agregarán más en el futuro.",
+        "tutorialNotifications": "Aquí se muestran tus notificaciones personalizadas y puedes agregar nuevas.",
+        "tutorialCompass": "Aquí está la brújula de la Qibla. La precisión puede variar según la red o el dispositivo.",
+        "tutorialHome": "Esta es la página de inicio donde se muestran el Sagrado Corán y las Suras.",
+        "tutorialMenu": "Desde este menú puedes gestionar los ajustes y cambiar el idioma cuando quieras.",
+        "confirmLanguageChange": "¿Estás seguro de que quieres usar este idioma?"
       }
     ],
-
     "it": [
       {
         "theQuran": "Il Corano",
@@ -158,7 +175,7 @@
         "error": "C'è un errore",
         "playing": "In riproduzione",
         "saved": "Salvato",
-        "dontSaved":"Nessun versetto è stato salvato",
+        "dontSaved": "Nessun versetto è stato salvato",
         "verse": "Versetto",
         "surah": "Sura",
         "searchHintText": "Cerca un versetto o una sura...",
@@ -166,7 +183,7 @@
         "yourCurrentLocation": "La tua posizione attuale",
         "locationServiceIsDisabled": "Il servizio di posizione è disabilitato",
         "locationPermissionDenied": "Autorizzazione posizione negata",
-        "enterCityName":"Inserisci il nome della città",
+        "enterCityName": "Inserisci il nome della città",
         "cityNotFound": "Città non trovata",
         "anErrorOccurredWhileSearchingForTheCity": "Si è verificato un errore durante la ricerca della città",
         "gettingLocation": "Ottenendo la posizione...",
@@ -186,7 +203,13 @@
         "timeForTheNextPrayer": "Tempo rimanente per la prossima preghiera: ",
         "prayerTimesIn": "Orari di preghiera a ",
         "calculationMethod": "Metodo di calcolo:",
-        "almadhhab": "Madhhab:"
+        "almadhhab": "Madhhab:",
+        "tutorialTasbih": "Qui c'è il Tasbih con alcuni Adhkar; altri verranno aggiunti in futuro.",
+        "tutorialNotifications": "Qui vengono mostrate le tue notifiche personalizzate e puoi aggiungerne di nuove.",
+        "tutorialCompass": "Qui c'è la bussola per la Qibla. La precisione può variare a seconda della rete o del dispositivo.",
+        "tutorialHome": "Questa è la pagina principale dove vengono visualizzati il Sacro Corano e le Sure.",
+        "tutorialMenu": "Da questo menu puoi gestire le impostazioni e cambiare la lingua in qualsiasi momento.",
+        "confirmLanguageChange": "Sei sicuro di voler utilizzare questa lingua?"
       }
     ],
     "in": [
@@ -205,7 +228,7 @@
         "error": "Terjadi kesalahan",
         "playing": "Sedang diputar",
         "saved": "Tersimpan",
-        "dontSaved":"Tidak ada ayat yang disimpan",
+        "dontSaved": "Tidak ada ayat yang disimpan",
         "verse": "Ayat",
         "surah": "Surah",
         "searchHintText": "Cari ayat atau surah...",
@@ -213,7 +236,7 @@
         "yourCurrentLocation": "Lokasi Anda saat ini",
         "locationServiceIsDisabled": "Layanan lokasi dimatikan",
         "locationPermissionDenied": "Izin lokasi ditolak",
-        "enterCityName":"Masukkan nama kota",
+        "enterCityName": "Masukkan nama kota",
         "cityNotFound": "Kota tidak ditemukan",
         "anErrorOccurredWhileSearchingForTheCity": "Terjadi kesalahan saat mencari kota",
         "gettingLocation": "Mendapatkan lokasi...",
@@ -222,7 +245,7 @@
         "gradeDifference": "Perbedaan derajat:",
         "qiblaDirection": "Arah kiblat:",
         "deviceOrientationNotAvailable": "Orientasi perangkat tidak tersedia",
-        "compassCalibration": "Kalibrasi kompas",
+        "compassCalibration": "Kalibrasi komパス",
         "explanationOfCalibration": "Gerakkan ponsel Anda membentuk angka 8 jauh dari gangguan magnetik.",
         "alfajr": "Al-Fajr",
         "alshuruq": "Ash-Shuruq",
@@ -233,7 +256,13 @@
         "timeForTheNextPrayer": "Waktu tersisa untuk shalat berikutnya: ",
         "prayerTimesIn": "Waktu shalat di ",
         "calculationMethod": "Metode perhitungan:",
-        "almadhhab": "Mazhab:"
+        "almadhhab": "Mazhab:",
+        "tutorialTasbih": "Di sini terdapat Tasbih dengan beberapa Dzikir; lebih banyak akan ditambahkan di masa mendatang.",
+        "tutorialNotifications": "Notifikasi khusus Anda ditampilkan di sini, dan Anda dapat menambahkan yang baru.",
+        "tutorialCompass": "Di sini terdapat kompas Qiblat. Akurasi arah mungkin berbeda tergantung pada jaringan atau perangkat.",
+        "tutorialHome": "Ini adalah halaman Beranda tempat Al-Qur'an dan Surah ditampilkan.",
+        "tutorialMenu": "Melalui menu ini, Anda dapat mengatur setelan dan mengubah bahasa kapan saja.",
+        "confirmLanguageChange": "Apakah Anda yakin ingin menggunakan bahasa ini?"
       }
     ],
     "cn": [
@@ -252,7 +281,7 @@
         "error": "出现错误",
         "playing": "播放中",
         "saved": "已保存",
-        "dontSaved":"没有保存任何经文。",
+        "dontSaved": "没有保存任何经文。",
         "verse": "节",
         "surah": "章",
         "searchHintText": "搜索节或章...",
@@ -260,7 +289,7 @@
         "yourCurrentLocation": "您当前的位置",
         "locationServiceIsDisabled": "位置服务已关闭",
         "locationPermissionDenied": "位置权限被拒绝",
-        "enterCityName":"输入城市名称",
+        "enterCityName": "输入城市名称",
         "cityNotFound": "未找到城市",
         "anErrorOccurredWhileSearchingForTheCity": "搜索城市时发生错误",
         "gettingLocation": "正在获取位置...",
@@ -280,9 +309,16 @@
         "timeForTheNextPrayer": "距离下一次祷告时间: ",
         "prayerTimesIn": "祷告时间在 ",
         "calculationMethod": "计算方法:",
-        "almadhhab": "教派:"
+        "almadhhab": "教派:",
+        "tutorialTasbih": "这里是泰斯比赫（计数器），包含一些赞念词，未来会增加更多内容。",
+        "tutorialNotifications": "此处显示您的自定义通知，您可以从这里添加新通知。",
+        "tutorialCompass": "这里是朝向指北针。根据网络或设备的不同，方向精度可能会有所差异。",
+        "tutorialHome": "这是主页，显示《古兰经》及其各章节。",
+        "tutorialMenu": "通过此菜单，您可以管理设置并随时更改语言。",
+        "confirmLanguageChange": "您确定要使用这种语言吗？"
       }
-    ],"bn": [
+    ],
+    "bn": [
       {
         "theQuran": "আল-কুরআন",
         "ok": "ঠিক আছে",
@@ -298,7 +334,7 @@
         "error": "একটি ত্রুটি ঘটেছে",
         "playing": "চলছে",
         "saved": "সংরক্ষিত",
-       "dontSaved":"কোনো আয়াত সংরক্ষণ করা হয়নি.", 
+        "dontSaved": "কোনো আয়াত সংরক্ষণ করা হয়নি.",
         "verse": "আয়াত",
         "surah": "সূরা",
         "searchHintText": "একটি আয়াত বা সূরা খুঁজুন...",
@@ -306,7 +342,7 @@
         "yourCurrentLocation": "আপনার বর্তমান অবস্থান",
         "locationServiceIsDisabled": "অবস্থান পরিষেবা অক্ষম",
         "locationPermissionDenied": "অবস্থান অনুমতি অস্বীকৃত",
-        "enterCityName":"শহরের নাম লিখুন",
+        "enterCityName": "শহরের নাম লিখুন",
         "cityNotFound": "শহর পাওয়া যায়নি",
         "anErrorOccurredWhileSearchingForTheCity": "শহর খোঁজা সময় একটি ত্রুটি ঘটেছে",
         "gettingLocation": "অবস্থান নেওয়া হচ্ছে...",
@@ -326,7 +362,13 @@
         "timeForTheNextPrayer": "পরবর্তী নামাজ পর্যন্ত সময়: ",
         "prayerTimesIn": "নামাজের সময়: ",
         "calculationMethod": "হিসাব পদ্ধতি:",
-        "almadhhab": "মাজহাব:"
+        "almadhhab": "মাজহাব:",
+        "tutorialTasbih": "এখানে তাসবিহ রয়েছে যাতে কিছু যিকির আছে; ভবিষ্যতে আরও যিকির যোগ করা হবে।",
+        "tutorialNotifications": "এখানে আপনার কাস্টম বিজ্ঞপ্তিগুলো দেখা যাবে এবং নতুন বিজ্ঞপ্তি যোগ করা যাবে।",
+        "tutorialCompass": "এখানে কিবলা কম্পাস রয়েছে। নেটওয়ার্ক বা ডিভাইসের কারণে দিকনির্দেশনায় কিছুটা তারতম্য হতে পারে।",
+        "tutorialHome": "এটি হোম পেজ যেখানে পবিত্র কুরআন এবং সূরাগুলো প্রদর্শিত হয়।",
+        "tutorialMenu": "এই মেনু থেকে আপনি সেটিংস নিয়ন্ত্রণ করতে এবং যেকোনো সময় ভাষা পরিবর্তন করতে পারবেন।",
+        "confirmLanguageChange": "আপনি কি নিশ্চিত যে এই ভাষাটি ব্যবহার করতে চান?"
       }
     ],
     "ru": [
@@ -345,7 +387,7 @@
         "error": "Произошла ошибка",
         "playing": "Воспроизводится",
         "saved": "Сохранено",
-        "dontSaved":"Ни один аят не был сохранён",
+        "dontSaved": "Ни один аят не был сохранён",
         "verse": "Аят",
         "surah": "Сура",
         "searchHintText": "Поиск аята или суры...",
@@ -353,7 +395,7 @@
         "yourCurrentLocation": "Ваше текущее местоположение",
         "locationServiceIsDisabled": "Служба местоположения отключена",
         "locationPermissionDenied": "Доступ к местоположению запрещен",
-        "enterCityName":"Введите название города",
+        "enterCityName": "Введите название города",
         "cityNotFound": "Город не найден",
         "anErrorOccurredWhileSearchingForTheCity": "Произошла ошибка при поиске города",
         "gettingLocation": "Получение местоположения...",
@@ -373,7 +415,13 @@
         "timeForTheNextPrayer": "Время до следующей молитвы: ",
         "prayerTimesIn": "Время молитвы в ",
         "calculationMethod": "Метод расчета:",
-        "almadhhab": "Мазхаб:"
+        "almadhhab": "Мазхаб:",
+        "tutorialTasbih": "Здесь находятся четки (Тасбих) с некоторыми поминаниями; в будущем их станет больше.",
+        "tutorialNotifications": "Здесь отображаются ваши настроенные уведомления, и отсюда вы можете добавить новые.",
+        "tutorialCompass": "Здесь находится компас, указывающий на Киблу. Точность может зависеть от сети и устройства.",
+        "tutorialHome": "Это главная страница, где находится Священный Коран и отображаются суры.",
+        "tutorialMenu": "В этом меню вы можете управлять настройками и изменять язык в любое время.",
+        "confirmLanguageChange": "Вы уверены, что хотите использовать этот язык?"
       }
     ],
     "jp": [
@@ -392,7 +440,7 @@
         "error": "エラーが発生しました",
         "playing": "再生中",
         "saved": "保存されました",
-        "dontSaved":"どの節も保存されていません。",
+        "dontSaved": "どの節も保存されていません。",
         "verse": "節",
         "surah": "スーラ",
         "searchHintText": "節またはスーラを検索...",
@@ -400,7 +448,7 @@
         "yourCurrentLocation": "現在地",
         "locationServiceIsDisabled": "位置情報サービスが無効です",
         "locationPermissionDenied": "位置情報の許可が拒否されました",
-        "enterCityName":"都市名を入力してください",
+        "enterCityName": "都市名を入力してください",
         "cityNotFound": "都市が見つかりません",
         "anErrorOccurredWhileSearchingForTheCity": "都市を検索中にエラーが発生しました",
         "gettingLocation": "位置情報を取得中...",
@@ -420,7 +468,13 @@
         "timeForTheNextPrayer": "次の祈りまでの時間: ",
         "prayerTimesIn": "祈りの時間: ",
         "calculationMethod": "計算方法:",
-        "almadhhab": "マズハブ:"
+        "almadhhab": "マズハブ:",
+        "tutorialTasbih": "ここは数珠（タスビーフ）です。いくつかの唱念が含まれており、将来的にはさらに追加される予定です。",
+        "tutorialNotifications": "ここにカスタム通知が表示されます。ここから新しい通知を追加することも可能です。",
+        "tutorialCompass": "ここはキブラを指すコンパスです。ネットワークやデバイスによって、精度が異なる場合があります。",
+        "tutorialHome": "ここは聖クルアーンと各章（スーラ）が表示されるホーム画面です。",
+        "tutorialMenu": "このメニューから、設定の管理や言語の変更をいつでも行えます。",
+        "confirmLanguageChange": "本当にこの言語を使用しますか？"
       }
     ]
   }
