@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_menu_itme/custom_menu_itme1.dart';
-import 'package:risala/custom/custom_splash_screen/custom_splash_screen1.dart';
 import 'package:risala/main_view/main_view.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/vars/colors.dart';
@@ -219,8 +218,7 @@ class _MenuState extends State<Menu> {
 
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const CustomSplashScreen1()),
+                      MaterialPageRoute(builder: (context) => const MyApp()),
                     );
                   },
                   child: Text(

@@ -94,6 +94,7 @@ flutter:
     - assets/json/tafsir/jp.json
     - assets/json/reciters/reciters.json
     - assets/json/quran/quran_for_search.json
+    - assets/json/quran/quran.json
     - assets/language/the_translation.json
     - assets/images/
 

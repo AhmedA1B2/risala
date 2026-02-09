@@ -11,13 +11,12 @@ late SharedPreferences sharedPref;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // تهيئة الإعدادات
   await Hive.initFlutter();
   await Hive.openBox("saved_notifications");
   await NotificationService.instance.init();
   sharedPref = await SharedPreferences.getInstance();
+  await NotificationService.instance.loadAllTranslations();
 
-  // قفل التدوير باستخدام await بدلاً من .then
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

@@ -45,11 +45,13 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   Future<void> loadAllData() async {
     try {
       // تحميل ملف السور
-      final String surahsResponse = await rootBundle.loadString('assets/json/surahs.json');
+      final String surahsResponse =
+          await rootBundle.loadString('assets/json/surahs.json');
       final List<dynamic> surahsData = json.decode(surahsResponse);
 
       // تحميل ملف القرآن الكامل (الذي أنشأناه بالبايثون)
-      final String quranResponse = await rootBundle.loadString('assets/json/quran/quran_for_search.json');
+      final String quranResponse = await rootBundle
+          .loadString('assets/json/quran/quran_for_search.json');
       final List<dynamic> quranData = json.decode(quranResponse);
 
       setState(() {
@@ -71,11 +73,13 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
 
   // 🔹 دالة حساب التشابه (Levenshtein Distance)
   double similarity(String s1, String s2) {
-    s1 = s1.trim(); s2 = s2.trim();
+    s1 = s1.trim();
+    s2 = s2.trim();
     if (s1.isEmpty || s2.isEmpty) return 0;
     final int len1 = s1.length;
     final int len2 = s2.length;
-    List<List<int>> dp = List.generate(len1 + 1, (_) => List.filled(len2 + 1, 0));
+    List<List<int>> dp =
+        List.generate(len1 + 1, (_) => List.filled(len2 + 1, 0));
     for (int i = 0; i <= len1; i++) dp[i][0] = i;
     for (int j = 0; j <= len2; j++) dp[0][j] = j;
     for (int i = 1; i <= len1; i++) {
@@ -99,19 +103,24 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
 
     if (selectedValue == "آية") {
       // البحث في قائمة quranVerses التي تم تحميلها من الـ JSON
-      final results = quranVerses.where((verse) {
-        final content = removeDiacritics(verse['content'] as String);
-        if (content.contains(normalizedQuery)) return true;
-        return similarity(content, normalizedQuery) > 0.7;
-      }).map((v) => Map<String, dynamic>.from(v)).toList();
+      final results = quranVerses
+          .where((verse) {
+            final content = removeDiacritics(verse['content'] as String);
+            if (content.contains(normalizedQuery)) return true;
+            return similarity(content, normalizedQuery) > 0.7;
+          })
+          .map((v) => Map<String, dynamic>.from(v))
+          .toList();
 
       widget.onResults?.call(results);
     } else {
       // البحث في السور
       final results = surahs.where((s) {
         final name = removeDiacritics(s.name);
-        if (name.contains(normalizedQuery) || 
-            s.englishName.toLowerCase().contains(normalizedQuery.toLowerCase())) {
+        if (name.contains(normalizedQuery) ||
+            s.englishName
+                .toLowerCase()
+                .contains(normalizedQuery.toLowerCase())) {
           return true;
         }
         return similarity(name, normalizedQuery) > 0.7;
@@ -133,8 +142,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
       children: [
         IconButton(
           onPressed: isLoading ? null : searchQuran,
-          icon: isLoading 
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2)) 
+          icon: isLoading
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2))
               : const Icon(Icons.search),
           color: mainColor,
           iconSize: 38,
@@ -151,7 +163,9 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             onTap: widget.onSearchBarTap,
             onChanged: (val) {
               widget.onSearchBarChanged?.call(val);
-              searchQuran();
+              if (val.isEmpty || val == "" || val == " ") {
+                searchQuran();
+              }
             },
             controller: textEditingController,
             decoration: InputDecoration(

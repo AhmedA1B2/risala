@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:risala/Notifications/notification_service.dart';
 import 'package:risala/Notifications/saved_notification.dart';
+import 'package:risala/main.dart';
 import 'package:risala/main_view/main_view.dart';
+import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/custom_notification/custom/custom_button_icon.dart';
 import 'package:risala/my_views/custom_notification/custom_notification_view/add_custom_notification.dart';
+import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 
 class CustomNotification extends StatefulWidget {
@@ -18,11 +21,22 @@ class _CustomNotificationState extends State<CustomNotification> {
   bool isLoading = true;
   bool showAddNotificationView = false;
   bool showDetails = false;
+  Translation? translation;
 //
   @override
   void initState() {
     super.initState();
     loadNotifications();
+    loadAllTranslations();
+  }
+
+  Future<void> loadAllTranslations() async {
+    final list = await loadTranslation(sharedPref.getString("selectedValue"));
+    if (list.isNotEmpty) {
+      setState(() {
+        translation = list.first;
+      });
+    }
   }
 
   void loadNotifications() async {
@@ -101,15 +115,15 @@ class _CustomNotificationState extends State<CustomNotification> {
                                           curve: Curves.easeInOut,
                                           alignment: Alignment.topCenter,
                                           child: (item.show ?? false)
-                                              ? Wrap(
+                                              ? Column(
                                                   children: [
                                                     Text(item.body),
                                                     const SizedBox(height: 8),
                                                     Text(
-                                                        "الوقت: ${item.hour}:${item.minute}"),
+                                                        "${translation!.time.isNotEmpty ? translation!.time : 'الوقت'}: ${item.hour}:${item.minute}"),
                                                     const SizedBox(height: 8),
                                                     Text(
-                                                        "الأيام: ${item.days.join(", ")}"),
+                                                        "${translation!.days.isNotEmpty ? translation!.days : 'الأيام'}: ${item.days.join(", ")}"),
                                                   ],
                                                 )
                                               : const SizedBox.shrink(),

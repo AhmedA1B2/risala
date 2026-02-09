@@ -2,6 +2,9 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hive/hive.dart';
 import 'package:risala/Notifications/saved_notification.dart';
+import 'package:risala/main.dart';
+import 'package:risala/models/translation.dart';
+import 'package:risala/translation/translation.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -139,23 +142,66 @@ class NotificationService {
     return box.values.map((e) => SavedNotification.fromMap(e)).toList();
   }
 
+  ///==================tran===================
+  Translation? translation;
+  bool _isTranslationLoaded = false;
+
+  Future<void> loadAllTranslations() async {
+    final list =
+        await loadTranslation(sharedPref.getString("selectedValue") ?? "ar");
+    if (list.isNotEmpty) {
+      translation = list.first;
+      _isTranslationLoaded = true;
+    }
+  }
+
   /// ================= UTILS =================
   String _dayName(int day) {
+    if (!_isTranslationLoaded || translation == null) {
+      // fallback عربي ثابت
+      switch (day) {
+        case 1:
+          return "الإثنين";
+        case 2:
+          return "الثلاثاء";
+        case 3:
+          return "الأربعاء";
+        case 4:
+          return "الخميس";
+        case 5:
+          return "الجمعة";
+        case 6:
+          return "السبت";
+        case 7:
+          return "الأحد";
+        default:
+          return "";
+      }
+    }
+
     switch (day) {
       case 1:
-        return "الإثنين";
+        return translation!.monday.isNotEmpty ? translation!.monday : "الإثنين";
       case 2:
-        return "الثلاثاء";
+        return translation!.tuesday.isNotEmpty
+            ? translation!.tuesday
+            : "الثلاثاء";
       case 3:
-        return "الأربعاء";
+        return translation!.wednesday.isNotEmpty
+            ? translation!.wednesday
+            : "الأربعاء";
       case 4:
-        return "الخميس";
+        return translation!.thursday.isNotEmpty
+            ? translation!.thursday
+            : "الخميس";
       case 5:
-        return "الجمعة";
+        return translation!.friday.isNotEmpty ? translation!.friday : "الجمعة";
       case 6:
-        return "السبت";
+        return translation!.saturday.isNotEmpty
+            ? translation!.saturday
+            : "السبت";
       case 7:
-        return "الأحد";
+        return translation!.sunday.isNotEmpty ? translation!.sunday : "الأحد";
       default:
         return "";
     }

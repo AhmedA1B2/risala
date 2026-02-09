@@ -61,7 +61,9 @@
         "all": "الكل",
         "addNotificationTitle": "أضف عنواناً للإشعار",
         "addNotificationBody": "أضف نص الإشعار",
-        "chooseTime": "اختر الوقت"
+        "chooseTime": "اختر الوقت",
+        "time": "الوقت",
+        "days": "الأيام"
       }
     ],
     "en": [
@@ -125,7 +127,9 @@
         "all": "All",
         "addNotificationTitle": "Add a notification title",
         "addNotificationBody": "Add notification text",
-        "chooseTime": "Choose time"
+        "chooseTime": "Choose time",
+        "time": "Time",
+        "days": "Days"
       }
     ],
     "sp": [
@@ -189,7 +193,9 @@
         "all": "Todo",
         "addNotificationTitle": "Añadir un título de notificación",
         "addNotificationBody": "Añadir texto de notificación",
-        "chooseTime": "Elegir hora"
+        "chooseTime": "Elegir hora",
+        "time": "Tiempo",
+        "days": "Días"
       }
     ],
     "it": [
@@ -253,7 +259,9 @@
         "all": "Tutto",
         "addNotificationTitle": "Aggiungi un titolo alla notifica",
         "addNotificationBody": "Aggiungi il testo della notifica",
-        "chooseTime": "Scegli l'orario"
+        "chooseTime": "Scegli l'orario",
+        "time": "Tempo",
+        "days": "Giorni"
       }
     ],
     "in": [
@@ -317,7 +325,9 @@
         "all": "Semua",
         "addNotificationTitle": "Tambah judul notifikasi",
         "addNotificationBody": "Tambah teks notifikasi",
-        "chooseTime": "Pilih waktu"
+        "chooseTime": "Pilih waktu",
+        "time": "Waktu",
+        "days": "Hari"
       }
     ],
     "cn": [
@@ -381,7 +391,9 @@
         "all": "全部",
         "addNotificationTitle": "添加通知标题",
         "addNotificationBody": "添加通知文本",
-        "chooseTime": "选择时间"
+        "chooseTime": "选择时间",
+        "time": "时间",
+        "days": "天数"
       }
     ],
     "bn": [
@@ -445,7 +457,9 @@
         "all": "সব",
         "addNotificationTitle": "বিজ্ঞপ্তির শিরোনাম যোগ করুন",
         "addNotificationBody": "বিজ্ঞপ্তির বিবরণ যোগ করুন",
-        "chooseTime": "সময় নির্বাচন করুন"
+        "chooseTime": "সময় নির্বাচন করুন",
+        "time": "সময়",
+        "days": "দিন"
       }
     ],
     "ru": [
@@ -509,7 +523,9 @@
         "all": "Все",
         "addNotificationTitle": "Добавить заголовок уведомления",
         "addNotificationBody": "Добавить текст уведомления",
-        "chooseTime": "Выберите время"
+        "chooseTime": "Выберите время",
+        "time": "Время",
+        "days": "Дни"
       }
     ],
     "jp": [
@@ -573,7 +589,9 @@
         "all": "すべて",
         "addNotificationTitle": "通知のタイトルを追加",
         "addNotificationBody": "通知テキストを追加",
-        "chooseTime": "時間を選択"
+        "chooseTime": "時間を選択",
+        "time": "時刻",
+        "days": "日数"
       }
     ]
   }

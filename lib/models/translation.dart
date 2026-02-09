@@ -71,8 +71,10 @@ class Translation {
   final String addNotificationTitle;
   final String addNotificationBody;
   
-  // الحقل الجديد
+  // حقول الوقت والتواريخ
   final String chooseTime;
+  final String time;
+  final String days;
 
   Translation({
     required this.key,
@@ -137,6 +139,8 @@ class Translation {
     required this.addNotificationTitle,
     required this.addNotificationBody,
     required this.chooseTime,
+    required this.time,
+    required this.days,
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
@@ -205,6 +209,8 @@ class Translation {
       addNotificationTitle: data["addNotificationTitle"] ?? "",
       addNotificationBody: data["addNotificationBody"] ?? "",
       chooseTime: data["chooseTime"] ?? "",
+      time: data["time"] ?? "",
+      days: data["days"] ?? "",
     );
   }
 }

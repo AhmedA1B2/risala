@@ -1,4 +1,4 @@
-package com.example.risala
+package com.ahmed.risala
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

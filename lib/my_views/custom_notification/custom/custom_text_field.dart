@@ -7,6 +7,8 @@ class CustomTextField extends StatelessWidget {
   final bool obscureText;
   final TextEditingController? controller;
   final TextInputType keyboardType;
+  final TextStyle? hintStyle;
+  final int? maxLength;
 
   const CustomTextField({
     super.key,
@@ -15,6 +17,7 @@ class CustomTextField extends StatelessWidget {
     this.obscureText = false,
     this.controller,
     this.keyboardType = TextInputType.text,
+    this.hintStyle, this.maxLength,
   });
 
   @override
@@ -34,7 +37,7 @@ class CustomTextField extends StatelessWidget {
           ),
         ],
       ),
-      child: TextField(
+      child: TextField(maxLength: maxLength ?? null,
         cursorColor: scandColor,
         textDirection: TextDirection.rtl,
         controller: controller,
@@ -46,7 +49,7 @@ class CustomTextField extends StatelessWidget {
           filled: true,
           fillColor: mainColor,
           hintText: hintText,
-          hintStyle: const TextStyle(color: Colors.grey),
+          hintStyle: hintStyle ?? const TextStyle(color: Colors.grey),
           prefixIcon:
               prefixIcon != null ? Icon(prefixIcon, color: scandColor) : null,
           border: InputBorder.none,

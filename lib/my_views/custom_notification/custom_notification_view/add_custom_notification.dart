@@ -24,6 +24,7 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
   List<Color> colorsOfweek = List.filled(8, whiteColor);
   final GlobalKey<CustomTimeFieldState> timeFieldKey =
       GlobalKey<CustomTimeFieldState>();
+  bool titleIsEmpty = false;
 
   Translation? translation;
 
@@ -52,9 +53,6 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
       if (colorsOfweek[i] == mainColor) {
         selectedDays.add(dayNumbers[i]);
       }
-    }
-    if (colorsOfweek[7] == mainColor) {
-      selectedDays = [1, 2, 3, 4, 5, 6, 7];
     }
 
     if (selectedDays.isEmpty) return;
@@ -165,6 +163,11 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
                 ? translation!.addNotificationTitle
                 : 'اضف عنوانا للاشعار',
             controller: controllerOfTitle,
+            maxLength: 18,
+            hintStyle: titleIsEmpty
+                ? const TextStyle(
+                    color: Colors.red, fontWeight: FontWeight.bold)
+                : null,
           ),
           const SizedBox(height: 16),
           CustomTextField(
@@ -178,7 +181,19 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
             iconColor: scandColor,
             iconData: Icons.add_alert_outlined,
             size: 32,
-            onPressed: savedNotification,
+            onPressed: () {
+              if (controllerOfTitle.toString() != "" &&
+                  controllerOfTitle.toString() != " " &&
+                  controllerOfTitle.text != "" &&
+                  controllerOfTitle.text != " " &&
+                  controllerOfTitle.text.isNotEmpty) {
+                savedNotification();
+              } else {
+                setState(() {
+                  titleIsEmpty = true;
+                });
+              }
+            },
           ),
           const SizedBox(height: 100),
         ],
