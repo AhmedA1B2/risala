@@ -360,24 +360,27 @@ class _QuranViewState extends State<QuranView> {
   ////////////////////////////////////////////////////////////////////////////
   // النزول للآية المحفوظة
   void goToSavedVerse() {
-    if (ayasaved != null && surahsaved == surahNumber) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final context = verseContexts[ayasaved!];
-        if (context != null) {
-          Scrollable.ensureVisible(
-            context,
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeInOutCubic,
-            alignment: 0.15,
-          );
-          setState(() {
-            highlightedVerse = ayasaved;
-          });
-        }
-        print("IF 2 work");
-      });
-      print("IF 1 work");
-    }
+    if (ayasaved == null || surahsaved != surahNumber) return;
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      final context = verseContexts[ayasaved!];
+
+      if (context != null) {
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOutCubic,
+          alignment: 0.15,
+        );
+
+        setState(() {
+          highlightedVerse = ayasaved;
+        });
+      } else {
+        // لو لم يكن جاهزًا نعيد المحاولة
+        goToSavedVerse();
+      }
+    });
   }
 
   //  النزول للآية التي تم البحث عنها
@@ -394,6 +397,8 @@ class _QuranViewState extends State<QuranView> {
         setState(() {
           highlightedVerse = widget.searchedVerse;
         });
+      } else {
+        goToSearchedVerse();
       }
     });
   }
