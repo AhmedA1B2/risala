@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:risala/main.dart';
 import 'package:risala/models/translation.dart';
+import 'package:risala/my_views/sabhuh/custom/custom_sabhuh_item.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 
@@ -14,7 +15,9 @@ class SabhuhView extends StatefulWidget {
 }
 
 class _SabhuhViewState extends State<SabhuhView> {
-  int conter = 0;
+  int conter = sharedPref.getInt("sabhuhConter") ?? 0;
+  String myDhkar = sharedPref.getString("myDhkar") ?? "tsbyh";
+  bool isTap = false;
   bool showAdhkarView = false;
 
   List<dynamic> adhkarList = [];
@@ -24,16 +27,28 @@ class _SabhuhViewState extends State<SabhuhView> {
   void initState() {
     super.initState();
     loadAdhkar();
+    loadAllTranslations();
   }
 
   Future<void> loadAdhkar() async {
+    myDhkar = sharedPref.getString("myDhkar") ?? "tsbyh";
     final String response =
-        await rootBundle.loadString('assets/json/adhkar/adhkar.json');
-    final data = await json.decode(response);
+        await rootBundle.loadString('assets/json/adhkar/$myDhkar.json');
+    final List<dynamic> data = await json.decode(response);
+
+    String? savedDhikr = sharedPref.getString("selectedDhikrText");
+
     setState(() {
       adhkarList = data;
       if (adhkarList.isNotEmpty) {
-        selectedDhikr = adhkarList[0];
+        // البحث عن الذكر المحفوظ
+        var found = adhkarList.firstWhere(
+          (element) => element['arabic'] == savedDhikr,
+          orElse: () => null,
+        );
+
+        // إذا وجدنا المحفوظ نضعه، وإلا نضع أول عنصر في القائمة
+        selectedDhikr = found ?? adhkarList[0];
       }
     });
   }
@@ -96,6 +111,7 @@ class _SabhuhViewState extends State<SabhuhView> {
                             onPressed: () {
                               setState(() {
                                 conter = 0;
+                                sharedPref.setInt("sabhuhConter", conter);
                               });
                             },
                             icon: const Icon(
@@ -130,11 +146,12 @@ class _SabhuhViewState extends State<SabhuhView> {
                     child: Column(
                       children: [
                         Text(
-                          sharedPref.getString("selectedValue") != "ar" &&
-                                  sharedPref.getString("selectedValue") != null
-                              ? selectedDhikr![
-                                  sharedPref.getString("selectedValue")]
-                              : selectedDhikr!["arabic"],
+                          (sharedPref.getString("selectedValue") != "ar" &&
+                                  sharedPref.getString("selectedValue") != null)
+                              ? (selectedDhikr?[
+                                      sharedPref.getString("selectedValue")] ??
+                                  "")
+                              : (selectedDhikr?["arabic"] ?? ""),
                           style: TextStyle(
                             color: scandColor,
                             fontSize: 36,
@@ -144,11 +161,12 @@ class _SabhuhViewState extends State<SabhuhView> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          sharedPref.getString("selectedValue") != "ar" &&
-                                  sharedPref.getString("selectedValue") != null
-                              ? selectedDhikr![
-                                  "explanation${sharedPref.getString("selectedValue")}"]
-                              : selectedDhikr!["explanationar"] ?? "",
+                          (sharedPref.getString("selectedValue") != "ar" &&
+                                  sharedPref.getString("selectedValue") != null)
+                              ? (selectedDhikr?[
+                                      "explanation${sharedPref.getString("selectedValue")}"] ??
+                                  "")
+                              : (selectedDhikr?["explanationar"] ?? ""),
                           style: TextStyle(
                             color: dilutionScandColor,
                             fontSize: 18,
@@ -191,6 +209,7 @@ class _SabhuhViewState extends State<SabhuhView> {
                   onPressed: () {
                     setState(() {
                       conter += 1;
+                      sharedPref.setInt("sabhuhConter", conter);
                     });
                   },
                   icon: const Icon(
@@ -204,13 +223,220 @@ class _SabhuhViewState extends State<SabhuhView> {
           ),
         ),
 
+        // عرض الأذكار
+        if (showAdhkarView)
+          Expanded(
+            child: Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: whiteColor,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    )
+                  ],
+                ),
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.9,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        translation != null
+                            ? translation!.adhkar.isNotEmpty
+                                ? translation!.adhkar
+                                : "الأذكار"
+                            : "الأذكار",
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: blackColor),
+                      ),
+                    ),
+                    const Divider(),
+
+                    // الحل هنا: استخدام Expanded ليأخذ الجزء المتغير المساحة المتبقية
+                    Expanded(
+                      child: isTap
+                          ? ListView.builder(
+                              // أفضل من for loop للأداء
+                              itemCount: adhkarList.length,
+                              itemBuilder: (context, index) {
+                                var dhikr = adhkarList[index];
+                                return ListTile(
+                                  title: Column(
+                                    children: [
+                                      Text(
+                                        sharedPref.getString("selectedValue") !=
+                                                    "ar" &&
+                                                sharedPref.getString(
+                                                        "selectedValue") !=
+                                                    null
+                                            ? dhikr[sharedPref
+                                                .getString("selectedValue")]
+                                            : dhikr["arabic"],
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 22,
+                                          color: blackColor,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const Divider(),
+                                    ],
+                                  ),
+                                  onTap: () {
+                                    setState(() {
+                                      selectedDhikr = dhikr;
+                                      sharedPref.setString("selectedDhikrText",
+                                          dhikr['arabic'] ?? "");
+
+                                      showAdhkarView = false;
+                                      isTap = false;
+                                      conter = 0;
+                                    });
+                                  },
+                                );
+                              },
+                            )
+                          : GridView.count(
+                              crossAxisCount: 2,
+                              children: [
+                                CustomSabhuhItem(
+                                  text: "الصباح",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "sbah");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "المساء",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "msaa");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "الصلاة",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "slah");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "النوم",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "noom");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "تسبيح وذكر",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "tsbyh");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "الاستيقاظ",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "estyqad");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "الأذان",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "adan");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "المسجد",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "msjed");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "الوضوء",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "wdoa");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "المنزل",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "mnzl");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "الخلاء",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "khla");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                                CustomSabhuhItem(
+                                  text: "الطعام",
+                                  onTap: () {
+                                    sharedPref.setString("myDhkar", "taam");
+                                    isTap = true;
+                                    loadAdhkar();
+                                    setState(() {});
+                                  },
+                                ),
+                              ],
+                            ),
+                    ),
+                    const SizedBox(
+                      height: 60,
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
         // زر الأذكار العلوي
-        Positioned(
-          top: 40,
-          right: 16,
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          top: showAdhkarView ? 10 : 40,
+          right: showAdhkarView ? 25 : 16,
           child: GestureDetector(
             onTap: () {
               setState(() {
+                isTap = false;
                 showAdhkarView = !showAdhkarView;
               });
             },
@@ -248,70 +474,6 @@ class _SabhuhViewState extends State<SabhuhView> {
             ),
           ),
         ),
-
-        // عرض الأذكار
-        if (showAdhkarView)
-          Center(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: whiteColor,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
-                  )
-                ],
-              ),
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height * 0.5,
-              child: ListView(
-                padding: const EdgeInsets.all(12),
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      translation != null
-                          ? translation!.adhkar.isNotEmpty
-                              ? translation!.adhkar
-                              : "الأذكار"
-                          : "الأذكار",
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: blackColor),
-                    ),
-                  ),
-                  const Divider(),
-                  for (var dhikr in adhkarList)
-                    ListTile(
-                      title: Text(
-                        sharedPref.getString("selectedValue") != "ar" &&
-                                sharedPref.getString("selectedValue") != null
-                            ? dhikr[sharedPref.getString("selectedValue")]
-                            : dhikr["arabic"],
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          color: blackColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      onTap: () {
-                        setState(() {
-                          selectedDhikr = dhikr;
-                          showAdhkarView = false;
-                          conter = 0;
-                        });
-                      },
-                    ),
-                ],
-              ),
-            ),
-          ),
       ],
     );
   }

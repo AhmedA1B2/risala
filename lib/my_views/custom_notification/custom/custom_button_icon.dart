@@ -8,15 +8,17 @@ class CustomButtonIcon extends StatelessWidget {
     this.onPressed,
     required this.iconColor,
     this.size,
+    this.bgColor,
   });
   final IconData? iconData;
   final void Function()? onPressed;
   final Color iconColor;
+  final Color? bgColor;
   final double? size;
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: whiteColor,
+      color: bgColor ?? whiteColor,
       shadowColor: blackColor,
       elevation: 2,
       child: IconButton(

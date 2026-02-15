@@ -159,6 +159,7 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
           ),
           const SizedBox(height: 16),
           CustomTextField(
+            autofocus: titleIsEmpty ? true : false,
             hintText: translation!.addNotificationTitle.isNotEmpty
                 ? translation!.addNotificationTitle
                 : 'اضف عنوانا للاشعار',
@@ -171,6 +172,7 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
           ),
           const SizedBox(height: 16),
           CustomTextField(
+            autofocus: false,
             hintText: translation!.addNotificationBody.isNotEmpty
                 ? translation!.addNotificationBody
                 : 'اضف نص الاشعار',
@@ -178,9 +180,10 @@ class _AddCustomNotificationState extends State<AddCustomNotification> {
           ),
           const SizedBox(height: 16),
           CustomButtonIcon(
-            iconColor: scandColor,
+            bgColor: scandColor,
+            iconColor: mainColor,
             iconData: Icons.add_alert_outlined,
-            size: 32,
+            size: 42,
             onPressed: () {
               if (controllerOfTitle.toString() != "" &&
                   controllerOfTitle.toString() != " " &&

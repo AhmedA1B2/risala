@@ -110,6 +110,8 @@ class _MainViewState extends State<MainView> {
   }
 
   Future<void> _openQuranViewSaved() async {
+    surahsaved = sharedPref.getInt('surahsaved');
+    namesaved = sharedPref.getString('namesaved');
     if (surahsaved != null && namesaved != null) {
       await Navigator.push(
         context,

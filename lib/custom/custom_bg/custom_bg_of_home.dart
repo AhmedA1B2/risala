@@ -3,10 +3,14 @@ import 'package:risala/vars/colors.dart';
 
 class CustomBg extends StatelessWidget {
   const CustomBg(
-      {super.key, required this.topMargin, required this.topBorderRadius});
+      {super.key,
+      required this.topMargin,
+      required this.topBorderRadius,
+      this.child});
 
   final double topMargin;
   final double topBorderRadius;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +22,7 @@ class CustomBg extends StatelessWidget {
           color: scandColor,
         ),
         AnimatedContainer(
+          clipBehavior: Clip.antiAlias,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOutCubic,
           margin: EdgeInsets.only(top: topMargin),
@@ -31,6 +36,7 @@ class CustomBg extends StatelessWidget {
               BorderSide(color: blackColor, width: 2),
             ),
           ),
+          child: child,
         ),
       ],
     );

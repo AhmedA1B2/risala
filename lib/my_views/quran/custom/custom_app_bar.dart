@@ -9,12 +9,18 @@ class CustomAppBar extends StatefulWidget {
       this.onPressed,
       required this.onOff,
       required this.iconData,
-      required this.topButton});
+      required this.topButton,
+      this.onPressedPause,
+      required this.iconDataPause,
+      required this.isitplay});
   final String onOff;
   final String surahName;
   final IconData iconData;
+  final IconData iconDataPause;
   final void Function()? onPressed;
+  final void Function()? onPressedPause;
   final Widget topButton;
+  final bool isitplay;
 
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
@@ -28,9 +34,6 @@ class _CustomAppBarState extends State<CustomAppBar> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: scandColor,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(20),
-        ),
         border: const Border(
           bottom: BorderSide(color: blackColor, width: 2),
         ),
@@ -47,19 +50,36 @@ class _CustomAppBarState extends State<CustomAppBar> {
             textDirection: TextDirection.rtl,
             children: [
               widget.topButton,
-              GestureDetector(
-                onTap: widget.onPressed,
-                child: Row(
-                  children: [
-                    CustomTitle(text: widget.onOff),
-                    Icon(
-                      widget.iconData,
-                      color: mainColor,
-                      size: 32,
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: widget.onPressed,
+                    child: Row(
+                      children: [
+                        CustomTitle(text: widget.onOff),
+                        Icon(
+                          widget.iconData,
+                          color: mainColor,
+                          size: 32,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              )
+                  ),
+                  widget.isitplay
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: GestureDetector(
+                            onTap: widget.onPressedPause,
+                            child: Icon(
+                              widget.iconDataPause,
+                              color: mainColor,
+                              size: 32,
+                            ),
+                          ),
+                        )
+                      : const SizedBox(),
+                ],
+              ),
             ],
           ),
         ],

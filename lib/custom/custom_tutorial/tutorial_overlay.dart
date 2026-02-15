@@ -25,7 +25,10 @@ class TutorialOverlay {
 
   void _showStep() {
     _clearEntry();
-    if (_currentStep >= steps.length) return;
+    if (_currentStep >= steps.length) {
+      _remove();
+      return;
+    }
 
     _entry = OverlayEntry(
       builder: (context) => _TutorialAnimatedView(

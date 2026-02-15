@@ -139,28 +139,35 @@ class _CustomNotificationState extends State<CustomNotification> {
                       },
                     ),
                   ),
-                  CustomButtonIcon(
-                    iconData: Icons.delete_sweep_sharp,
-                    iconColor: Colors.red,
-                    onPressed: () async {
-                      await NotificationService.instance
-                          .cancelAllNotifications();
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const MainView()),
-                      );
-                      setState(() {});
-                    },
+                  Padding(
+                    padding: const EdgeInsetsGeometry.all(20),
+                    child: CustomButtonIcon(
+                      iconData: Icons.delete_sweep_sharp,
+                      iconColor: Colors.red,
+                      onPressed: () async {
+                        await NotificationService.instance
+                            .cancelAllNotifications();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MainView()),
+                        );
+                        setState(() {});
+                      },
+                    ),
                   ),
                 ],
               ),
-        Positioned(
-          bottom: showAddNotificationView == true
-              ? MediaQuery.of(context).size.height * 0.12
-              : MediaQuery.of(context).size.height * 0.05,
-          right: showAddNotificationView == true ? null : 50,
-          left: showAddNotificationView == true ? 50 : null,
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          bottom: MediaQuery.of(context).size.height * 0.12,
+          right: showAddNotificationView == true
+              ? MediaQuery.of(context).size.width - 150
+              : 50,
+          left: showAddNotificationView == true
+              ? 50
+              : MediaQuery.of(context).size.width - 150,
           child: Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(

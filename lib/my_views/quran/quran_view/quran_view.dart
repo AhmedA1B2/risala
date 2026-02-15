@@ -41,10 +41,13 @@ class _QuranViewState extends State<QuranView> {
   final String tokenEndpoint = "https://oauth2.quran.foundation/oauth2/token";
   final ScrollController _scrollController = ScrollController();
   final AudioPlayer _player = AudioPlayer();
+  bool isitplay = false;
+  bool isPlayerPause = false;
   late int surahNumber = widget.surahNumber;
 
   String? accessToken;
   IconData iconData = Icons.play_arrow;
+  IconData iconDataPause = Icons.pause_rounded;
 
   bool isloading = false;
 
@@ -274,6 +277,18 @@ class _QuranViewState extends State<QuranView> {
         }
       }
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const CustomSnackBarIcon(
+            icon: Icons.wifi_off_rounded,
+          ),
+          backgroundColor: const Color.fromARGB(0, 255, 193, 7),
+          elevation: 0,
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.4),
+          duration: const Duration(seconds: 2),
+        ),
+      );
       debugPrint("❌ استثناء في الآية: $e");
     }
 
@@ -469,8 +484,8 @@ class _QuranViewState extends State<QuranView> {
 
   ////////////////////////////////////////////////////////////////////////////
   ///
-  double? positionsOfMusic = null;
-  double? sizeoficonOfMusic = null;
+  double? positionsOfMusic;
+  double? sizeoficonOfMusic;
 
   ///
   /////////////////////////////////////////////////////////////////////
@@ -523,6 +538,7 @@ class _QuranViewState extends State<QuranView> {
             padding: const EdgeInsets.all(0),
             children: [
               CustomAppBar(
+                isitplay: isitplay,
                 topButton: Container(
                   width: 100,
                   decoration: BoxDecoration(
@@ -564,21 +580,38 @@ class _QuranViewState extends State<QuranView> {
                 ),
                 surahName: surahName ?? "",
                 iconData: iconData,
+                iconDataPause: iconDataPause,
                 onOff: onOff,
                 onPressed: () {
                   if (translation == null) return; // أو إظهار رسالة مؤقتة
                   if (onOff == translation!.turnOn) {
+                    isitplay = true;
+                    iconDataPause = Icons.pause;
                     playSurah(surahNumber,
                         reciterId: idOfReciter); //idOfReciter
                     setState(() {
                       highlightedVerse = null;
                     });
                   } else {
+                    isitplay = false;
                     onOff = translation!.turnOn;
                     iconData = Icons.play_arrow;
                     _player.stop();
                   }
                   setState(() {});
+                },
+                onPressedPause: () {
+                  if (isPlayerPause == false) {
+                    _player.pause();
+                    iconDataPause = Icons.play_arrow;
+                    isPlayerPause = true;
+                    setState(() {});
+                  } else {
+                    _player.play();
+                    iconDataPause = Icons.pause;
+                    isPlayerPause = false;
+                    setState(() {});
+                  }
                 },
               ),
               CustomSurahName(surahName: surahName ?? ""),
@@ -625,14 +658,15 @@ class _QuranViewState extends State<QuranView> {
                 child: IconButton(
                   color: mainColor,
                   onPressed: () async {
-                    await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => QuranView(
-                            surahNumber: surahNumber + 1,
-                            x: 0,
-                          ),
-                        ));
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QuranView(
+                          surahNumber: surahNumber + 1,
+                          x: 0,
+                        ),
+                      ),
+                    );
                   },
                   icon: const Icon(
                     Icons.arrow_back,
@@ -665,7 +699,7 @@ class _QuranViewState extends State<QuranView> {
 
                       if (index == 0) {
                         playAyah(
-                            "${surahNumber}:${highlightedVerse!}", idOfReciter);
+                            "$surahNumber:${highlightedVerse!}", idOfReciter);
                       } else if (index == 1 && highlightedVerse != null) {
                         saveMyAya(
                             highlightedVerse!, surahNumber, surahName ?? "");
@@ -707,7 +741,7 @@ class _QuranViewState extends State<QuranView> {
                           color: mainColor,
                           onPressed: () async {
                             await playWordByPosition(
-                                "${surahNumber}:${highlightedWordVerse!}",
+                                "$surahNumber:${highlightedWordVerse!}",
                                 highlightedWord!,
                                 7);
                           },

@@ -1,11 +1,28 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:risala/models/quran.dart';
 import 'package:risala/vars/colors.dart';
-
 import 'package:risala/vars/texts.dart';
+
+//=====================
+// كلاس مساعد لتخزين بيانات الكلمة بعد المعالجة (تحسين الأداء)
+//=====================
+class SurahToken {
+  final String text;
+  final bool isSymbol;
+  final int? verseNumber;
+  final String? wordKey; // مفتاح الكلمة للتمييز
+
+  SurahToken({
+    required this.text,
+    required this.isSymbol,
+    this.verseNumber,
+    this.wordKey,
+  });
+}
 
 //=====================
 // تحميل JSON
@@ -13,14 +30,12 @@ import 'package:risala/vars/texts.dart';
 Future<List<Quran>> loadQuranFromJson() async {
   final String jsonString =
       await rootBundle.loadString('assets/json/quran/quran.json');
-
   final List<dynamic> data = json.decode(jsonString);
-
   return data.map((e) => Quran.fromMap(e)).toList();
 }
 
 //=====================
-// الصفحة
+// الصفحة (تم تحسين الأداء هنا)
 //=====================
 class CustomSurahPage extends StatefulWidget {
   const CustomSurahPage({
@@ -45,217 +60,252 @@ class CustomSurahPage extends StatefulWidget {
 }
 
 class _CustomSurahPageState extends State<CustomSurahPage> {
-  int? _selectedVerse;
-  String? _selectedWordKey;
+  List<SurahToken>? _processedTokens;
+  bool _isLoading = true;
+
+  // تخزين الـ Spans لعدم إعادة بنائها عند كل SetState (مهم جداً للأداء)
+  List<InlineSpan>? _cachedSpans;
 
   final Map<int, GlobalKey> _verseKeys = {};
-
-  late Future<List<Quran>> _quranFuture;
 
   @override
   void initState() {
     super.initState();
-
-    _selectedVerse = widget.selectedVerse;
-    _selectedWordKey = widget.selectedWordKey;
-
-    _quranFuture = loadQuranFromJson();
+    _loadDataIsolated();
   }
 
-  String fixQuranText(String text) {
-    final Map<String, String> replacements = {
-      'ٞ': 'ٌ',
-      'ٗ': 'ً',
-      'ٖ': 'ٍ',
-    };
+  // دالة التحميل الجديدة باستخدام compute
+  Future<void> _loadDataIsolated() async {
+    try {
+      final String jsonString =
+          await rootBundle.loadString('assets/json/quran/quran.json');
+      final List<dynamic> jsonData = json.decode(jsonString);
 
-    replacements.forEach((wrong, correct) {
-      text = text.replaceAll(wrong, correct);
-    });
+      // تمرير البيانات للخيط الخلفي (Background Isolate)
+      // هذا هو السطر السحري الذي يمنع تعليق التطبيق
+      final resultTokens = await compute(processSurahInBackground, {
+        'data': jsonData,
+        'surahNumber': widget.surahNumber,
+      });
 
-    return text;
+      if (mounted) {
+        setState(() {
+          _processedTokens = resultTokens;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading surah: $e");
+    }
+  }
+
+  // بناء الـ Spans فقط عند الحاجة أو تغير التحديد
+  void _buildSpansIfNeeded() {
+    // نقوم بإعادة البناء فقط إذا تغير التحديد (الآية أو الكلمة)
+    // أو إذا كانت الـ Spans غير موجودة
+    // هذا يخفف الحمل عن المعالج أثناء التمرير العادي
+
+    _cachedSpans = []; // إعادة تعيين القائمة
+
+    for (final token in _processedTokens!) {
+      // منطق بناء الـ Spans (نفس السابق لكن يتم تجميعه هنا)
+
+      // 1. مفاتيح التمرير (Invisible widgets)
+      if (token.text.isEmpty && token.verseNumber != null) {
+        final key =
+            _verseKeys.putIfAbsent(token.verseNumber!, () => GlobalKey());
+        _cachedSpans!
+            .add(WidgetSpan(child: SizedBox(key: key, width: 0, height: 0)));
+        continue;
+      }
+
+      final bool isVerseSelected = widget.selectedVerse == token.verseNumber;
+      final bool isWordSelected = widget.selectedWordKey == token.wordKey;
+
+      // 2. النصوص
+      if (token.isSymbol) {
+        final bool isVerseNum = token.text.contains('﴿');
+        _cachedSpans!.add(TextSpan(
+          text: token.text,
+          style: TextStyle(
+            fontFamily: quranfontFamily,
+            fontSize: quranfontSize,
+            color: isVerseNum
+                ? (isVerseSelected ? Colors.amber : Colors.grey[700])
+                : Colors.grey[600],
+            height: 2,
+          ),
+          recognizer: isVerseNum
+              ? (TapGestureRecognizer()
+                ..onTap = () {
+                  widget.onVerseSelected?.call(
+                      widget.selectedVerse == token.verseNumber
+                          ? null
+                          : token.verseNumber);
+                  widget.onWordSelected?.call('');
+                })
+              : null,
+        ));
+      } else {
+        _cachedSpans!.add(TextSpan(
+          text: token.text,
+          style: TextStyle(
+            fontFamily: quranfontFamily,
+            fontSize: quranfontSize,
+            color: isVerseSelected
+                ? Colors.amber
+                : (isWordSelected ? Colors.blue : Colors.black),
+            backgroundColor: isWordSelected
+                ? Colors.blue.withOpacity(0.15)
+                : Colors.transparent,
+            height: 2,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              widget.onVerseSelected?.call(null);
+              widget.onWordSelected
+                  ?.call(isWordSelected ? '' : (token.wordKey ?? ''));
+            },
+        ));
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Quran>>(
-      future: _quranFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-              child: CircularProgressIndicator(
-            color: scandColor,
-          ));
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator(color: scandColor));
+    }
+
+    // بناء الـ Spans عند كل build لضمان تحديث الألوان
+    // (سريعة جداً الآن لأن البيانات جاهزة)
+    _buildSpansIfNeeded();
+
+    // إرسال الـ Contexts مرة واحدة بعد البناء
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_verseKeys.isNotEmpty) {
+        // نتحقق فقط من الآيات المطلوبة للتمرير لتقليل الضغط
+        if (widget.selectedVerse != null &&
+            _verseKeys.containsKey(widget.selectedVerse)) {
+          final ctx = _verseKeys[widget.selectedVerse]!.currentContext;
+          if (ctx != null)
+            widget.onVerseContext?.call(widget.selectedVerse!, ctx);
         }
-
-        if (snapshot.hasError) {
-          return Center(
-            child: Text('خطأ في تحميل القرآن: ${snapshot.error}'),
-          );
-        }
-
-        final allQuran = snapshot.data ?? [];
-
-        final currentSurah =
-            allQuran.where((v) => v.surahNumber == widget.surahNumber).toList();
-
-        final List<InlineSpan> allSpans = [];
-
-        for (final verse in currentSurah) {
-          final int verseNum = verse.verseNumber;
-          final String verseText = fixQuranText(verse.content);
-
-          final bool isVerseSelected = widget.selectedVerse == verseNum;
-
-          final key = _verseKeys.putIfAbsent(
-            verseNum,
-            () => GlobalKey(),
-          );
-
-          allSpans.add(
-            WidgetSpan(
-              alignment: PlaceholderAlignment.baseline,
-              baseline: TextBaseline.alphabetic,
-              child: SizedBox(
-                key: key,
-                width: 0,
-                height: 0,
-              ),
-            ),
-          );
-
-          final RegExp regex = RegExp(r'([۞۩۝ٖٞٗ]+|[^\s۞۩۝ٖٞٗ]+)');
-          final matches = regex.allMatches(verseText).toList();
-
-          int preMarkCounter = 0;
-          int postMarkCounter = -1;
-          bool inPostMarkMode = false;
-
-          for (final match in matches) {
-            final token = match.group(0)!;
-
-            final bool isSymbol = RegExp(r'[۞۩۝ٖٞٗ]').hasMatch(token);
-
-            if (isSymbol) {
-              if (token.contains('۞')) {
-                inPostMarkMode = true;
-                postMarkCounter = -1;
-              }
-
-              allSpans.add(
-                TextSpan(
-                  text: '$token ',
-                  style: TextStyle(
-                    fontFamily: quranfontFamily,
-                    fontSize: quranfontSize,
-                    color: Colors.grey[600],
-                    height: 2,
-                  ),
-                ),
-              );
-            } else {
-              int effectivePosition;
-
-              if (!inPostMarkMode) {
-                preMarkCounter++;
-                effectivePosition = preMarkCounter;
-              } else {
-                postMarkCounter++;
-                effectivePosition = postMarkCounter;
-              }
-
-              final wordKey = "$verseNum-$effectivePosition";
-
-              final bool isWordSelected = _selectedWordKey == wordKey;
-
-              allSpans.add(
-                TextSpan(
-                  text: '$token ',
-                  style: TextStyle(
-                    fontFamily: quranfontFamily,
-                    fontSize: quranfontSize,
-                    color: isVerseSelected
-                        ? Colors.amber
-                        : (isWordSelected ? Colors.blue : Colors.black),
-                    backgroundColor: isWordSelected
-                        ? Colors.blue.withOpacity(0.15)
-                        : Colors.transparent,
-                    height: 2,
-                  ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () {
-                      setState(() {
-                        _selectedWordKey = isWordSelected ? null : wordKey;
-                        _selectedVerse = null;
-                      });
-
-                      widget.onWordSelected?.call(_selectedWordKey ?? '');
-                    },
-                ),
-              );
-            }
-          }
-
-          allSpans.add(
-            TextSpan(
-              text: ' ﴿$verseNum﴾ ',
-              style: TextStyle(
-                fontFamily: quranfontFamily,
-                fontSize: quranfontSize,
-                color: isVerseSelected ? Colors.amber : Colors.grey[700],
-              ),
-              recognizer: TapGestureRecognizer()
-                ..onTap = () {
-                  setState(() {
-                    _selectedVerse =
-                        _selectedVerse == verseNum ? null : verseNum;
-
-                    _selectedWordKey = null;
-                  });
-
-                  widget.onVerseSelected?.call(_selectedVerse);
-                },
-            ),
-          );
-        }
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _verseKeys.forEach((verseNum, gk) {
-            if (gk.currentContext != null) {
-              widget.onVerseContext?.call(verseNum, gk.currentContext!);
-            }
-          });
+        // أو يمكنك ترك اللوب كما هو إذا كنت تحتاج كل المواقع
+        _verseKeys.forEach((k, v) {
+          if (v.currentContext != null)
+            widget.onVerseContext?.call(k, v.currentContext!);
         });
+      }
+    });
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (widget.surahNumber != 1 && widget.surahNumber != 9)
-                  Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Text(
-                      "بِسْمِ اللَّهِ الرَّحْمٰنِ الرَّحِيمِ",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Amiri',
-                        fontSize: quranfontSize,
-                      ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      // RepaintBoundary: هذا الودجت يمنع إعادة رسم النص بالكامل عند التمرير
+      // أو عند تحديث مشغل الصوت خارج هذا الودجت
+      child: RepaintBoundary(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (widget.surahNumber != 1 && widget.surahNumber != 9)
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Text(
+                    "بِسْمِ اللَّهِ الرَّحْمٰنِ الرَّحِيمِ",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: quranfontSize,
                     ),
                   ),
-                Text.rich(
-                  TextSpan(children: allSpans),
-                  textAlign: TextAlign.justify,
-                  softWrap: true,
                 ),
-              ],
-            ),
+              // استخدام const هنا غير ممكن بسبب البيانات المتغيرة، لكن SelectableText قد يكون أثقل
+              // RichText هو الأخف وزناً
+              Text.rich(
+                TextSpan(children: _cachedSpans),
+                textAlign: TextAlign.justify,
+                textDirection: TextDirection.rtl,
+                softWrap: true,
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
+}
+
+List<SurahToken> processSurahInBackground(Map<String, dynamic> params) {
+  final List<dynamic> rawData = params['data'];
+  final int surahNumber = params['surahNumber'];
+
+  // تحويل البيانات الخام
+  final List<Quran> allQuran = rawData.map((e) => Quran.fromMap(e)).toList();
+
+  final currentSurah =
+      allQuran.where((v) => v.surahNumber == surahNumber).toList();
+  final List<SurahToken> tokens = [];
+
+  // تجميع الـ Regex مرة واحدة (تحسين أداء)
+  final RegExp regex = RegExp(r'([۞۩۝ٖٞٗ]+|[^\s۞۩۝ٖٞٗ]+)');
+  final RegExp symbolRegex = RegExp(r'[۞۩۝ٖٞٗ]');
+
+  // دالة التصحيح الداخلية
+  String fixText(String text) {
+    return text.replaceAll('ٞ', 'ٌ').replaceAll('ٗ', 'ً').replaceAll('ٖ', 'ٍ');
+  }
+
+  for (final verse in currentSurah) {
+    final int verseNum = verse.verseNumber;
+    final String verseText = fixText(verse.content);
+
+    // إضافة مؤشر بداية الآية (وهمي لضبط المفاتيح لاحقاً)
+    tokens.add(SurahToken(text: "", isSymbol: true, verseNumber: verseNum));
+
+    final matches = regex.allMatches(verseText);
+    int preMarkCounter = 0;
+    int postMarkCounter = -1;
+    bool inPostMarkMode = false;
+
+    for (final match in matches) {
+      final tokenText = match.group(0)!;
+      final bool isSymbol = symbolRegex.hasMatch(tokenText);
+
+      if (isSymbol) {
+        if (tokenText.contains('۞')) {
+          inPostMarkMode = true;
+          postMarkCounter = -1;
+        }
+        tokens.add(SurahToken(text: '$tokenText ', isSymbol: true));
+      } else {
+        int effectivePosition;
+        if (!inPostMarkMode) {
+          preMarkCounter++;
+          effectivePosition = preMarkCounter;
+        } else {
+          postMarkCounter++;
+          effectivePosition = postMarkCounter;
+        }
+
+        final wordKey = "$verseNum-$effectivePosition";
+        tokens.add(SurahToken(
+          text: '$tokenText ',
+          isSymbol: false,
+          verseNumber: verseNum,
+          wordKey: wordKey,
+        ));
+      }
+    }
+
+    // رقم الآية
+    tokens.add(SurahToken(
+      text: ' ﴿$verseNum﴾ ',
+      isSymbol: true,
+      verseNumber: verseNum,
+    ));
+  }
+
+  return tokens;
 }

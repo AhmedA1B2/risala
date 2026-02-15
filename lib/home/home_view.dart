@@ -32,16 +32,19 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        CustomBg(topMargin: 0, topBorderRadius: topBorderRadius),
-        showRightView == 0
-            ? const CustomList()
-            : showRightView == 1
-                ? const QiblaView()
-                : showRightView == 2
-                    ? const CustomNotification() //const AdhanView()
-                    : showRightView == 3
-                        ? const SabhuhView()
-                        : const SizedBox(),
+        CustomBg(
+          topMargin: 0,
+          topBorderRadius: topBorderRadius,
+          child: showRightView == 0
+              ? const CustomList()
+              : showRightView == 1
+                  ? const QiblaView()
+                  : showRightView == 2
+                      ? const CustomNotification() //const AdhanView()
+                      : showRightView == 3
+                          ? const SabhuhView()
+                          : const SizedBox(),
+        ),
         Positioned(
           bottom: 8,
           width: MediaQuery.of(context).size.width,
