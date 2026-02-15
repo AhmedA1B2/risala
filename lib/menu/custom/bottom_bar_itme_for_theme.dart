@@ -1,27 +1,24 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:risala/main.dart';
 import 'package:risala/vars/colors.dart';
 
-class BottomBarItme1 extends StatefulWidget {
-  const BottomBarItme1({super.key, required this.children});
+class BottomBarItmeForTheme extends StatefulWidget {
+  const BottomBarItmeForTheme({super.key, required this.children, required this.theme});
 
   final List<Widget> children;
+  final bool theme;
 
   @override
-  State<BottomBarItme1> createState() => _BottomBarItme1State();
+  State<BottomBarItmeForTheme> createState() => _BottomBarItmeForThemeState();
 }
 
-class _BottomBarItme1State extends State<BottomBarItme1> {
-  int theme = sharedPref.getBool("checkboxValue") != null &&
-          sharedPref.getBool("checkboxValue") != false
-      ? 1
-      : 0;
+class _BottomBarItmeForThemeState extends State<BottomBarItmeForTheme> {
+  
 
   @override
   Widget build(BuildContext context) {
-    return theme == 0
+    return widget.theme == false
         ? Container(
             margin: const EdgeInsets.all(8),
             clipBehavior: Clip.antiAlias,

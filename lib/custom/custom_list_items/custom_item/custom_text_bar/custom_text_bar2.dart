@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_list_items/custom_item/custom_text/custom_text_title.dart';
 import 'package:risala/vars/colors.dart';
 
-class CustomTextBar extends StatelessWidget {
-  const CustomTextBar(
+class CustomTextBar2 extends StatelessWidget {
+  const CustomTextBar2(
       {super.key,
       required this.surah,
       required this.aya,
@@ -19,7 +19,7 @@ class CustomTextBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        width: MediaQuery.of(context).size.width,
+        width: MediaQuery.of(context).size.width * 0.4,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
             color: mainColor,

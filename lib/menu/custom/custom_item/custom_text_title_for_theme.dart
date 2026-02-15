@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:risala/main.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
 
-class CustomTextTitle extends StatefulWidget {
-  const CustomTextTitle({super.key, required this.text});
+class CustomTextTitleForTheme extends StatefulWidget {
+  const CustomTextTitleForTheme(
+      {super.key, required this.text, required this.sizeOfFont});
 
   final String text;
+  final int sizeOfFont;
 
   @override
-  State<CustomTextTitle> createState() => _CustomTextTitleState();
+  State<CustomTextTitleForTheme> createState() =>
+      _CustomTextTitleForThemeState();
 }
 
-class _CustomTextTitleState extends State<CustomTextTitle> {
-  int sizeOfTextBar = sharedPref.getInt("sizeOfTextBar") ?? 1;
-
+class _CustomTextTitleForThemeState extends State<CustomTextTitleForTheme> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -25,10 +25,10 @@ class _CustomTextTitleState extends State<CustomTextTitle> {
           widget.text,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: sizeOfTextBar == 2
-                ? mytitlefontSize / sizeOfTextBar + 10
-                : sizeOfTextBar == 3
-                    ? mytitlefontSize / sizeOfTextBar + 5
+            fontSize: widget.sizeOfFont == 2
+                ? mytitlefontSize / widget.sizeOfFont + 10
+                : widget.sizeOfFont == 3
+                    ? mytitlefontSize / widget.sizeOfFont + 8
                     : mytitlefontSize,
             color: scandColor,
             fontFamily: 'Amiri',

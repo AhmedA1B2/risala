@@ -21,6 +21,8 @@ class CustomList extends StatefulWidget {
 class _CustomListState extends State<CustomList> {
   int? openedIndex; // هنا نخزن العنصر المفتوح
 
+  int sizeOfTextBar = sharedPref.getInt("sizeOfTextBar") ?? 1;
+
   Future<List<Surah>> loadSurahs() async {
     // تحميل النص من ملف JSON
     String jsonString = await rootBundle.loadString('assets/json/surahs.json');
@@ -75,41 +77,87 @@ class _CustomListState extends State<CustomList> {
               return Text('خطأ: ${snapshot.error}');
             } else {
               final surahs = snapshot.data!;
-              return ListView.builder(
-                itemCount: surahs.length,
-                itemBuilder: (context, index) {
-                  final surah = surahs[index];
-                  return Padding(
-                    padding:
-                        EdgeInsets.only(bottom: surah.number == 114 ? 200 : 0),
-                    child: CustomItem(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
+              if (sizeOfTextBar == 1) {
+                return ListView.builder(
+                  itemCount: surahs.length,
+                  itemBuilder: (context, index) {
+                    final surah = surahs[index];
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          bottom: surah.number == 114 ? 200 : 0),
+                      child: CustomItem(
+                        sizeOfTextBar: sizeOfTextBar,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
                               builder: (context) => QuranView(
-                                    surahNumber: surah.number,
-                                    x: 0,
-                                  )),
-                        );
-                      },
-                      number: '-${surah.number}',
-                      onToggle: toggleItem,
-                      surah: sharedPref.getString("selectedValue") != "ar"
-                          ? surah.englishName
-                          : surah.name,
-                      aya:
-                          '${translation!.numberOfVerses.isNotEmpty ? translation!.numberOfVerses : "عدد الآيات"} ${surah.numberOfAyahs}',
-                      where: sharedPref.getString("selectedValue") != "ar"
-                          ? surah.revelationType
-                          : surah.revelationType == "Medinan"
-                              ? "مدنية"
-                              : "مكية",
-                      intextbar: Text(surah.englishNameTranslation),
-                    ),
-                  );
-                },
-              );
+                                surahNumber: surah.number,
+                                x: 0,
+                              ),
+                            ),
+                          );
+                        },
+                        number: '-${surah.number}',
+                        onToggle: toggleItem,
+                        surah: sharedPref.getString("selectedValue") != "ar"
+                            ? surah.englishName
+                            : surah.name,
+                        aya:
+                            '${translation?.numberOfVerses.isNotEmpty == true ? translation!.numberOfVerses : "عدد الآيات"} ${surah.numberOfAyahs}',
+                        where: sharedPref.getString("selectedValue") != "ar"
+                            ? surah.revelationType
+                            : surah.revelationType == "Medinan"
+                                ? "مدنية"
+                                : "مكية",
+                        intextbar: Text(surah.englishNameTranslation),
+                      ),
+                    );
+                  },
+                );
+              } else {
+                return Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: sizeOfTextBar),
+                    itemCount: surahs.length,
+                    itemBuilder: (context, index) {
+                      final surah = surahs[index];
+                      return Padding(
+                        padding: EdgeInsets.only(
+                            bottom: surah.number == 114 ? 200 : 0),
+                        child: CustomItem(
+                          sizeOfTextBar: sizeOfTextBar,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => QuranView(
+                                        surahNumber: surah.number,
+                                        x: 0,
+                                      )),
+                            );
+                          },
+                          number: '-${surah.number}',
+                          onToggle: toggleItem,
+                          surah: sharedPref.getString("selectedValue") != "ar"
+                              ? surah.englishName
+                              : surah.name,
+                          aya:
+                              '${translation!.numberOfVerses.isNotEmpty ? translation!.numberOfVerses : "عدد الآيات"} ${surah.numberOfAyahs}',
+                          where: sharedPref.getString("selectedValue") != "ar"
+                              ? surah.revelationType
+                              : surah.revelationType == "Medinan"
+                                  ? "مدنية"
+                                  : "مكية",
+                          intextbar: Text(surah.englishNameTranslation),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }
             }
           },
         ));

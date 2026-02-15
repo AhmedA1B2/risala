@@ -14,6 +14,7 @@ import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/quran/quran_view/quran_view.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
+import 'package:risala/vars/texts.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -42,13 +43,21 @@ class _MainViewState extends State<MainView> {
   bool isMenuOpen = false;
   List<Map<String, dynamic>>? searchResults;
   Translation? translation;
+//
+  void _reloadFontSettings() {
+    quranfontSize = sharedPref.getDouble("valueOfSize2") ?? 36;
+    mytitlefontSize = sharedPref.getDouble("valueOfSize") ?? 26;
+    quranfontFamily = sharedPref.getString("selectedValue2") ?? "Amiri";
+  }
 
+//
   @override
   void initState() {
     super.initState();
     // نبدأ بتحميل البيانات أولاً
     loadAllTranslations();
     _requestNotificationPermission();
+    _reloadFontSettings();
   }
 
   Future<void> loadAllTranslations() async {
