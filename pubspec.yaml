@@ -106,9 +106,12 @@ flutter:
     - assets/json/tafsir/it.json
     - assets/json/tafsir/ru.json
     - assets/json/tafsir/jp.json
+
     - assets/json/reciters/reciters.json
+
     - assets/json/quran/quran_for_search.json
-    - assets/json/quran/quran.json
+    - assets/json/quran/hafs/surahs/
+
     - assets/language/the_translation.json
     - assets/images/
 

@@ -25,11 +25,7 @@ class _CustomTextTitleState extends State<CustomTextTitle> {
           widget.text,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: sizeOfTextBar == 2
-                ? mytitlefontSize / sizeOfTextBar + 10
-                : sizeOfTextBar == 3
-                    ? mytitlefontSize / sizeOfTextBar + 5
-                    : mytitlefontSize,
+            fontSize: mytitlefontSize,
             color: scandColor,
             fontFamily: 'Amiri',
             fontWeight: FontWeight.bold,

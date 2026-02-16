@@ -25,15 +25,15 @@ class _ThemeViewState extends State<ThemeView> {
   final List<Color> themeMainColors = [
     const Color(0xFFFFFCBA),
     dilutionamberColor,
-    const Color(0xFFFBFFC4),
     const Color.fromARGB(255, 252, 255, 214),
+    const Color(0xFFFBFFC4),
   ];
 
   final List<Color> themeScandColors = [
     const Color(0xFF463700),
     const Color(0xFF1E1E1E),
+    const Color(0xFF005417),
     const Color(0xFF050041),
-    const Color(0xFF286305),
   ];
 
   @override
@@ -72,7 +72,8 @@ class _ThemeViewState extends State<ThemeView> {
             const SizedBox(height: 15),
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
               ChooseIcon(
-                color: currentScandColor,
+                color:
+                    sizeOfTextBar == 2 ? currentScandColor : currentMainColor,
                 icon: Icons.grid_view_rounded,
                 onTap: () {
                   setState(() {
@@ -81,7 +82,8 @@ class _ThemeViewState extends State<ThemeView> {
                 },
               ),
               ChooseIcon(
-                color: currentScandColor,
+                color:
+                    sizeOfTextBar == 1 ? currentScandColor : currentMainColor,
                 icon: Icons.rectangle,
                 onTap: () {
                   setState(() {
@@ -90,7 +92,8 @@ class _ThemeViewState extends State<ThemeView> {
                 },
               ),
               ChooseIcon(
-                color: currentScandColor,
+                color:
+                    sizeOfTextBar == 3 ? currentScandColor : currentMainColor,
                 icon: Icons.grid_on,
                 onTap: () {
                   setState(() {

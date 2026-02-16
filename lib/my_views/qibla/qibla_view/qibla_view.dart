@@ -39,24 +39,64 @@ class _QiblaViewState extends State<QiblaView>
   late double _displayedRotation; // radians applied to decorative arrow
 
   @override
-  void initState() {
-    super.initState();
-    _displayedRotation = 0.0;
-    loadAllTranslations();
-    _initPrefsThenStart();
-  }
-
-  @override
   void dispose() {
     _posSub?.cancel();
     _compassSub?.cancel();
     super.dispose();
   }
 
-  Future<void> _initPrefsThenStart() async {
+  @override
+  void initState() {
+    super.initState();
+    _displayedRotation = 0.0;
+    _initFast();
+  }
+
+  Future<void> _initFast() async {
     _prefs = await SharedPreferences.getInstance();
     _readCached();
-    await _initLocationAndCompass();
+
+    // 1️⃣ استخدم آخر موقع معروف فورًا (سريع جدًا)
+    final last = await Geolocator.getLastKnownPosition();
+    if (last != null) {
+      _position = last;
+      _cachedQibla = _calculateQiblaBearing(last.latitude, last.longitude);
+      setState(() {});
+    }
+
+    _initCompass(); // شغل البوصلة فورًا
+    _initLocationLive(); // حدث الموقع لاحقًا بدون تعطيل الواجهة
+  }
+
+  void _initCompass() {
+    _compassSub = FlutterCompass.events?.listen((event) {
+      if (event.heading != null && mounted) {
+        _heading = event.heading;
+        setState(() {});
+      }
+    });
+  }
+
+  void _initLocationLive() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) return;
+
+    _posSub = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.medium, // أسرع
+        distanceFilter: 20, // لا يحدث إلا عند تغير ملحوظ
+      ),
+    ).listen((pos) async {
+      if (!mounted) return;
+
+      _position = pos;
+      _cachedQibla = _calculateQiblaBearing(pos.latitude, pos.longitude);
+
+      await _saveCache(pos.latitude, pos.longitude, _cachedQibla!);
+
+      setState(() {});
+    });
   }
 
   void _readCached() {
@@ -83,43 +123,6 @@ class _QiblaViewState extends State<QiblaView>
     await _prefs?.setDouble('lastLat', lat);
     await _prefs?.setDouble('lastLon', lon);
     await _prefs?.setDouble('lastQibla', qibla);
-  }
-
-  Future<void> _initLocationAndCompass() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      return;
-    }
-
-    try {
-      final pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      if (!mounted) return;
-      setState(() => _position = pos);
-      final q = _calculateQiblaBearing(pos.latitude, pos.longitude);
-      await _saveCache(pos.latitude, pos.longitude, q);
-    } catch (_) {}
-
-    _posSub = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high, distanceFilter: 5),
-    ).listen((pos) async {
-      if (!mounted) return;
-      setState(() => _position = pos);
-      final q = _calculateQiblaBearing(pos.latitude, pos.longitude);
-      await _saveCache(pos.latitude, pos.longitude, q);
-    });
-
-    _compassSub = FlutterCompass.events?.listen((event) {
-      if (event.heading != null) {
-        if (!mounted) return;
-        setState(() => _heading = event.heading);
-      }
-    });
   }
 
   double _degToRad(double deg) => deg * pi / 180.0;
@@ -159,10 +162,8 @@ class _QiblaViewState extends State<QiblaView>
     final pos = _position;
     final heading = _heading;
 
-    double? qibla;
-    if (pos != null) {
-      qibla = _calculateQiblaBearing(pos.latitude, pos.longitude);
-    } else if (_cachedQibla != null) {
+    double? qibla = _cachedQibla;
+    if (_cachedQibla != null) {
       qibla = _cachedQibla;
     }
 
@@ -229,7 +230,7 @@ class _QiblaViewState extends State<QiblaView>
                     TweenAnimationBuilder<double>(
                       tween: Tween<double>(
                           begin: _displayedRotation, end: targetRotation),
-                      duration: const Duration(milliseconds: 400),
+                      duration: const Duration(milliseconds: 150),
                       curve: Curves.easeOut,
                       builder: (context, angle, child) {
                         _displayedRotation = angle;

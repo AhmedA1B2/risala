@@ -8,6 +8,7 @@ import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loadin
 import 'package:risala/custom/custom_snack_bar/custom_snack_bar.dart';
 import 'package:risala/custom/custom_snack_bar/custom_snack_bar_icon.dart';
 import 'package:risala/main.dart';
+import 'package:risala/main_view/main_view.dart';
 import 'package:risala/models/reciters.dart';
 import 'package:risala/models/tafsir.dart';
 import 'package:risala/models/translation.dart';
@@ -658,15 +659,21 @@ class _QuranViewState extends State<QuranView> {
                 child: IconButton(
                   color: mainColor,
                   onPressed: () async {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuranView(
-                          surahNumber: surahNumber + 1,
-                          x: 0,
-                        ),
-                      ),
-                    );
+                    surahNumber != 114
+                        ? Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QuranView(
+                                surahNumber: surahNumber + 1,
+                                x: 0,
+                              ),
+                            ),
+                          )
+                        : Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MainView()),
+                          );
                   },
                   icon: const Icon(
                     Icons.arrow_back,

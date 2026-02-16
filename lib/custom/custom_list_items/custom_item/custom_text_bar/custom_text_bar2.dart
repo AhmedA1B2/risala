@@ -51,7 +51,6 @@ class CustomTextBar2 extends StatelessWidget {
                   CustomTextTitle(text: aya),
                 ],
               ),
-              CustomTextTitle(text: where),
             ],
           ),
         ),

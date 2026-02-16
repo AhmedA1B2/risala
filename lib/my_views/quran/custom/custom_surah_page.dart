@@ -7,6 +7,9 @@ import 'package:risala/models/quran.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
 
+// كاش عام للسور بعد المعالجة
+final Map<int, List<SurahToken>> _surahCache = {};
+
 //=====================
 // كلاس مساعد لتخزين بيانات الكلمة بعد المعالجة (تحسين الأداء)
 //=====================
@@ -27,9 +30,9 @@ class SurahToken {
 //=====================
 // تحميل JSON
 //=====================
-Future<List<Quran>> loadQuranFromJson() async {
-  final String jsonString =
-      await rootBundle.loadString('assets/json/quran/quran.json');
+Future<List<Quran>> loadQuranFromJson(int surahNumber) async {
+  final String jsonString = await rootBundle
+      .loadString('assets/json/quran/hafs/surahs/$surahNumber.json');
   final List<dynamic> data = json.decode(jsonString);
   return data.map((e) => Quran.fromMap(e)).toList();
 }
@@ -74,19 +77,29 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
     _loadDataIsolated();
   }
 
-  // دالة التحميل الجديدة باستخدام compute
   Future<void> _loadDataIsolated() async {
     try {
-      final String jsonString =
-          await rootBundle.loadString('assets/json/quran/quran.json');
+      // 🔥 إذا السورة موجودة في الكاش → لا نعيد تحميلها
+      if (_surahCache.containsKey(widget.surahNumber)) {
+        _processedTokens = _surahCache[widget.surahNumber];
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final String jsonString = await rootBundle.loadString(
+          'assets/json/quran/hafs/surahs/${widget.surahNumber}.json');
+
       final List<dynamic> jsonData = json.decode(jsonString);
 
-      // تمرير البيانات للخيط الخلفي (Background Isolate)
-      // هذا هو السطر السحري الذي يمنع تعليق التطبيق
       final resultTokens = await compute(processSurahInBackground, {
         'data': jsonData,
         'surahNumber': widget.surahNumber,
       });
+
+      // 🔥 نحفظها في الكاش
+      _surahCache[widget.surahNumber] = resultTokens;
 
       if (mounted) {
         setState(() {
@@ -99,18 +112,10 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
     }
   }
 
-  // بناء الـ Spans فقط عند الحاجة أو تغير التحديد
   void _buildSpansIfNeeded() {
-    // نقوم بإعادة البناء فقط إذا تغير التحديد (الآية أو الكلمة)
-    // أو إذا كانت الـ Spans غير موجودة
-    // هذا يخفف الحمل عن المعالج أثناء التمرير العادي
-
-    _cachedSpans = []; // إعادة تعيين القائمة
+    _cachedSpans = [];
 
     for (final token in _processedTokens!) {
-      // منطق بناء الـ Spans (نفس السابق لكن يتم تجميعه هنا)
-
-      // 1. مفاتيح التمرير (Invisible widgets)
       if (token.text.isEmpty && token.verseNumber != null) {
         final key =
             _verseKeys.putIfAbsent(token.verseNumber!, () => GlobalKey());
@@ -156,6 +161,7 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
                 ? Colors.amber
                 : (isWordSelected ? Colors.blue : Colors.black),
             backgroundColor: isWordSelected
+                // ignore: deprecated_member_use
                 ? Colors.blue.withOpacity(0.15)
                 : Colors.transparent,
             height: 2,
@@ -188,13 +194,15 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
         if (widget.selectedVerse != null &&
             _verseKeys.containsKey(widget.selectedVerse)) {
           final ctx = _verseKeys[widget.selectedVerse]!.currentContext;
-          if (ctx != null)
+          if (ctx != null) {
             widget.onVerseContext?.call(widget.selectedVerse!, ctx);
+          }
         }
         // أو يمكنك ترك اللوب كما هو إذا كنت تحتاج كل المواقع
         _verseKeys.forEach((k, v) {
-          if (v.currentContext != null)
+          if (v.currentContext != null) {
             widget.onVerseContext?.call(k, v.currentContext!);
+          }
         });
       }
     });

@@ -47,10 +47,8 @@ class CustomTextBar3 extends StatelessWidget {
               children: [
                 CustomTextTitle(text: number),
                 CustomTextTitle(text: surah),
-                CustomTextTitle(text: aya),
               ],
             ),
-            CustomTextTitle(text: where),
           ],
         ),
       ),

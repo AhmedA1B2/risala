@@ -64,8 +64,9 @@ class _CustomSplashScreen1State extends State<CustomSplashScreen1> {
     mytitlefontSize = sharedPref.getDouble("valueOfSize") ?? 26;
     quranfontFamily = sharedPref.getString("selectedValue2") ?? "Amiri";
   }
-  // ========================
 
+  // ========================
+  int themeIndex = sharedPref.getInt("myTheme") ?? 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +78,7 @@ class _CustomSplashScreen1State extends State<CustomSplashScreen1> {
             padding: const EdgeInsets.all(22.0),
             child: Hero(
                 tag: "mosq",
-                child: Image.asset("assets/images/mosq_splash.gif")),
+                child: Image.asset("assets/images/mosq_splash$themeIndex.gif")),
           ),
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
