@@ -50,13 +50,58 @@ class _QiblaViewState extends State<QiblaView>
     super.initState();
     _displayedRotation = 0.0;
     _initFast();
+    loadAllTranslations();
   }
 
   Future<void> _initFast() async {
     _prefs = await SharedPreferences.getInstance();
     _readCached();
 
-    // 1️⃣ استخدم آخر موقع معروف فورًا (سريع جدًا)
+    _initCompass(); // شغل البوصلة
+
+    await _checkPermissionAndStart();
+  }
+
+  Future<void> _checkPermissionAndStart() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(translation != null
+                ? translation!.locationAccessRequired.isNotEmpty
+                    ? translation!.locationAccessRequired
+                    : "يجب السماح بالوصول للموقع لاستخدام البوصلة"
+                : "يجب السماح بالوصول للموقع لاستخدام البوصلة"),
+          ),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(
+          content: Text(translation != null
+                ? translation!.permissionDeniedSettings.isNotEmpty
+                    ? translation!.permissionDeniedSettings
+                    : "تم رفض الصلاحية نهائيًا. يرجى تفعيلها من الإعدادات"
+                :"تم رفض الصلاحية نهائيًا. يرجى تفعيلها من الإعدادات"),
+        ),
+      );
+      await Geolocator.openAppSettings();
+      return;
+    }
+
+    // ✅ الآن فقط نستدعي الموقع
     final last = await Geolocator.getLastKnownPosition();
     if (last != null) {
       _position = last;
@@ -64,12 +109,24 @@ class _QiblaViewState extends State<QiblaView>
       setState(() {});
     }
 
-    _initCompass(); // شغل البوصلة فورًا
-    _initLocationLive(); // حدث الموقع لاحقًا بدون تعطيل الواجهة
+    _initLocationLive();
   }
 
   void _initCompass() {
-    _compassSub = FlutterCompass.events?.listen((event) {
+    if (FlutterCompass.events == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(
+          content: Text(translation != null
+                ? translation!.compassNotSupported.isNotEmpty
+                    ? translation!.compassNotSupported
+                    : "هذا الجهاز لا يدعم مستشعر البوصلة"
+                :"هذا الجهاز لا يدعم مستشعر البوصلة"),
+        ),
+      );
+      return;
+    }
+
+    _compassSub = FlutterCompass.events!.listen((event) {
       if (event.heading != null && mounted) {
         _heading = event.heading;
         setState(() {});
@@ -78,14 +135,49 @@ class _QiblaViewState extends State<QiblaView>
   }
 
   void _initLocationLive() async {
-    LocationPermission permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) return;
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      return;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(
+            content: Text(translation != null
+                ? translation!.locationAccessRequired.isNotEmpty
+                    ? translation!.locationAccessRequired
+                    : "يجب السماح بالوصول للموقع لاستخدام البوصلة"
+                :"يجب السماح بالوصول للموقع لاستخدام البوصلة"),
+          ),
+        );
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+         SnackBar(
+          content:
+              Text(translation != null
+                ? translation!.permissionDeniedAppSettings.isNotEmpty
+                    ? translation!.permissionDeniedAppSettings
+                    :"تم رفض الصلاحية نهائيًا. يرجى تفعيلها من إعدادات التطبيق"
+                :"تم رفض الصلاحية نهائيًا. يرجى تفعيلها من إعدادات التطبيق"),
+        ),
+      );
+      await Geolocator.openAppSettings();
+      return;
+    }
 
     _posSub = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.medium, // أسرع
-        distanceFilter: 20, // لا يحدث إلا عند تغير ملحوظ
+        accuracy: LocationAccuracy.medium,
+        distanceFilter: 20,
       ),
     ).listen((pos) async {
       if (!mounted) return;
@@ -314,18 +406,77 @@ class _QiblaViewState extends State<QiblaView>
                             child: ElevatedButton.icon(
                               onPressed: () async {
                                 try {
+                                  bool serviceEnabled = await Geolocator
+                                      .isLocationServiceEnabled();
+                                  if (!serviceEnabled) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                       SnackBar(
+                                        content: Text(
+                                            translation != null
+                ? translation!.enableLocationService.isNotEmpty
+                    ? translation!.enableLocationService
+                    : "الرجاء تفعيل خدمة الموقع من إعدادات الجهاز"
+                :"الرجاء تفعيل خدمة الموقع من إعدادات الجهاز"),
+                                      ),
+                                    );
+                                    await Geolocator.openLocationSettings();
+                                    return;
+                                  }
+
+                                  LocationPermission permission =
+                                      await Geolocator.checkPermission();
+
+                                  if (permission == LocationPermission.denied) {
+                                    permission =
+                                        await Geolocator.requestPermission();
+                                    if (permission ==
+                                        LocationPermission.denied) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                         SnackBar(
+                                          content: Text(
+                                             translation != null
+                ? translation!.locationAccessRequired.isNotEmpty
+                    ? translation!.locationAccessRequired
+                    : "يجب السماح بالوصول للموقع لاستخدام البوصلة"
+                : "يجب السماح بالوصول للموقع لاستخدام البوصلة"),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                  }
+
+                                  if (permission ==
+                                      LocationPermission.deniedForever) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                       SnackBar(
+                                        content: Text(
+                                            translation != null
+                ? translation!.permissionDeniedAppSettings.isNotEmpty
+                    ? translation!.permissionDeniedAppSettings
+                    : "تم رفض الصلاحية نهائيًا. يرجى تفعيلها من إعدادات التطبيق"
+                :"تم رفض الصلاحية نهائيًا. يرجى تفعيلها من إعدادات التطبيق"),
+                                      ),
+                                    );
+                                    await Geolocator.openAppSettings();
+                                    return;
+                                  }
+
                                   final pos =
                                       await Geolocator.getCurrentPosition(
                                           desiredAccuracy:
                                               LocationAccuracy.high);
+
                                   if (!mounted) return;
+
                                   setState(() => _position = pos);
+
                                   final q = _calculateQiblaBearing(
                                       pos.latitude, pos.longitude);
                                   await _saveCache(
                                       pos.latitude, pos.longitude, q);
                                 } catch (e) {
-                                  print(">>>>??$e??<<<<");
+                                  debugPrint("Location error: $e");
                                 }
                               },
                               icon: Icon(

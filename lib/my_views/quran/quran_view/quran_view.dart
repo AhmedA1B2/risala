@@ -669,10 +669,12 @@ class _QuranViewState extends State<QuranView> {
                               ),
                             ),
                           )
-                        : Navigator.pushReplacement(
+                        : Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const MainView()),
+                              builder: (context) => const MainView(),
+                            ),
+                            (route) => false,
                           );
                   },
                   icon: const Icon(

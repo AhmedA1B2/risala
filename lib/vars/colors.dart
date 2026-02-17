@@ -20,9 +20,9 @@ final List<Map<String, Color>> themes = [
     "dilution": const Color(0xFF505050),
   },
   {
-    "scand": const Color(0xFF005417),
+    "scand": const Color(0xFF2D5400),
     "main": const Color(0xFFFBFFC4),
-    "dilution": const Color.fromARGB(255, 0, 168, 45),
+    "dilution": const Color.fromARGB(255, 73, 138, 0),
   },
   {
     "scand": const Color(0xFF050041),

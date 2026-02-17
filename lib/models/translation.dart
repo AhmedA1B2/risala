@@ -70,11 +70,35 @@ class Translation {
   final String all;
   final String addNotificationTitle;
   final String addNotificationBody;
-  
+
   // حقول الوقت والتواريخ
   final String chooseTime;
   final String time;
   final String days;
+
+  // البوصلة والمظهر
+  final String appearance;
+  final String changeAppearance;
+  final String previewAppearance; // تم التعديل
+  final String glassEffect;      // تم التعديل
+  final String chooseColor;      // تم التعديل
+  final String morning;          // تم التعديل
+  final String evening;          // تم التعديل
+  final String prayerTime;       // تم التعديل
+  final String sleep;            // تم التعديل
+  final String tasbihAndDhikr;   // تم التعديل
+  final String wakingUp;         // تم التعديل
+  final String adhan;            // تم التعديل
+  final String mosque;           // تم التعديل
+  final String ablution;         // تم التعديل
+  final String homePlace;        // تم التعديل
+  final String restroom;         // تم التعديل
+  final String food;             // تم التعديل
+  final String locationAccessRequired;    // تم التعديل
+  final String permissionDeniedSettings;  // تم التعديل
+  final String permissionDeniedAppSettings; // تم التعديل
+  final String compassNotSupported;       // تم التعديل
+  final String enableLocationService;     // تم التعديل
 
   Translation({
     required this.key,
@@ -141,6 +165,28 @@ class Translation {
     required this.chooseTime,
     required this.time,
     required this.days,
+    required this.appearance,
+    required this.changeAppearance,
+    required this.previewAppearance,
+    required this.glassEffect,
+    required this.chooseColor,
+    required this.morning,
+    required this.evening,
+    required this.prayerTime,
+    required this.sleep,
+    required this.tasbihAndDhikr,
+    required this.wakingUp,
+    required this.adhan,
+    required this.mosque,
+    required this.ablution,
+    required this.homePlace,
+    required this.restroom,
+    required this.food,
+    required this.locationAccessRequired,
+    required this.permissionDeniedSettings,
+    required this.permissionDeniedAppSettings,
+    required this.compassNotSupported,
+    required this.enableLocationService,
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
@@ -173,13 +219,15 @@ class Translation {
       locationPermissionDenied: data["locationPermissionDenied"] ?? "",
       enterCityName: data["enterCityName"] ?? "",
       cityNotFound: data["cityNotFound"] ?? "",
-      anErrorOccurredWhileSearchingForTheCity: data["anErrorOccurredWhileSearchingForTheCity"] ?? "",
+      anErrorOccurredWhileSearchingForTheCity:
+          data["anErrorOccurredWhileSearchingForTheCity"] ?? "",
       gettingLocation: data["gettingLocation"] ?? "",
       savedLocation: data["SavedLocation"] ?? "",
       updateSite: data["UpdateSite"] ?? "",
       gradeDifference: data["gradeDifference"] ?? "",
       qiblaDirection: data["qiblaDirection"] ?? "",
-      deviceOrientationNotAvailable: data["deviceOrientationNotAvailable"] ?? "",
+      deviceOrientationNotAvailable:
+          data["deviceOrientationNotAvailable"] ?? "",
       compassCalibration: data["compassCalibration"] ?? "",
       explanationOfCalibration: data["explanationOfCalibration"] ?? "",
       alfajr: data["alfajr"] ?? "",
@@ -211,6 +259,36 @@ class Translation {
       chooseTime: data["chooseTime"] ?? "",
       time: data["time"] ?? "",
       days: data["days"] ?? "",
+      // 
+      ablution: data["Ablution"] ?? "",
+      adhan: data["Adhan"] ?? "",
+      appearance: data["Appearance"] ?? "",
+      changeAppearance: data["Change Appearance"] ?? "",
+      chooseColor: data["Choose Color"] ?? "",
+      compassNotSupported:
+          data["This device does not support a compass sensor"] ?? "",
+      enableLocationService:
+          data["Please enable location service from device settings"] ?? "",
+      evening: data["Evening"] ?? "",
+      food: data["Food"] ?? "",
+      glassEffect: data["Glass Effect"] ?? "",
+      homePlace: data["Home"] ?? "",
+      locationAccessRequired:
+          data["Location access must be allowed to use the compass"] ?? "",
+      morning: data["Morning"] ?? "",
+      mosque: data["Mosque"] ?? "",
+      permissionDeniedAppSettings: data[
+              "Permission permanently denied. Please enable it from app settings"] ??
+          "",
+      permissionDeniedSettings: data[
+              "Permission permanently denied. Please enable it from settings"] ??
+          "",
+      prayerTime: data["Prayer"] ?? "",
+      previewAppearance: data["Preview Appearance"] ?? "",
+      restroom: data["Restroom"] ?? "",
+      sleep: data["Sleep"] ?? "",
+      tasbihAndDhikr: data["Tasbih and Dhikr"] ?? "",
+      wakingUp: data["Waking Up"] ?? "",
     );
   }
 }

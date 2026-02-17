@@ -225,7 +225,7 @@ class _SabhuhViewState extends State<SabhuhView> {
 
         // عرض الأذكار
         if (showAdhkarView)
-          Expanded(
+          Positioned.fill(
             child: Center(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -309,7 +309,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                               crossAxisCount: 2,
                               children: [
                                 CustomSabhuhItem(
-                                  text: "الصباح",
+                                  text: translation != null
+                                      ? translation!.morning.isNotEmpty
+                                          ? translation!.morning
+                                          : "الصباح"
+                                      : "الصباح",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "sbah");
                                     isTap = true;
@@ -318,7 +322,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "المساء",
+                                  text: translation != null
+                                      ? translation!.evening.isNotEmpty
+                                          ? translation!.evening
+                                          : "المساء"
+                                      : "المساء",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "msaa");
                                     isTap = true;
@@ -327,7 +335,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "الصلاة",
+                                  text: translation != null
+                                      ? translation!.prayerTime.isNotEmpty
+                                          ? translation!.prayerTime
+                                          : "االصلاة"
+                                      : "الصلاة",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "slah");
                                     isTap = true;
@@ -336,7 +348,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "النوم",
+                                  text: translation != null
+                                      ? translation!.sleep.isNotEmpty
+                                          ? translation!.sleep
+                                          : "النوم"
+                                      : "النوم",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "noom");
                                     isTap = true;
@@ -345,7 +361,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "تسبيح وذكر",
+                                  text: translation != null
+                                      ? translation!.tasbihAndDhikr.isNotEmpty
+                                          ? translation!.tasbihAndDhikr
+                                          : "تسبيح وذكر"
+                                      : "تسبيح وذكر",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "tsbyh");
                                     isTap = true;
@@ -354,7 +374,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "الاستيقاظ",
+                                  text: translation != null
+                                      ? translation!.wakingUp.isNotEmpty
+                                          ? translation!.wakingUp
+                                          : "الاستيقاظ"
+                                      : "الاستيقاظ",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "estyqad");
                                     isTap = true;
@@ -363,7 +387,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "الأذان",
+                                  text: translation != null
+                                      ? translation!.adhan.isNotEmpty
+                                          ? translation!.adhan
+                                          : "الأذان"
+                                      : "الأذان",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "adan");
                                     isTap = true;
@@ -372,7 +400,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "المسجد",
+                                  text: translation != null
+                                      ? translation!.mosque.isNotEmpty
+                                          ? translation!.mosque
+                                          : "المسجد"
+                                      : "المسجد",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "msjed");
                                     isTap = true;
@@ -381,7 +413,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "الوضوء",
+                                  text: translation != null
+                                      ? translation!.ablution.isNotEmpty
+                                          ? translation!.ablution
+                                          : "الوضوء"
+                                      : "الوضوء",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "wdoa");
                                     isTap = true;
@@ -390,7 +426,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "المنزل",
+                                  text: translation != null
+                                      ? translation!.homePlace.isNotEmpty
+                                          ? translation!.homePlace
+                                          : "المنزل"
+                                      : "المنزل",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "mnzl");
                                     isTap = true;
@@ -399,7 +439,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "الخلاء",
+                                  text: translation != null
+                                      ? translation!.restroom.isNotEmpty
+                                          ? translation!.restroom
+                                          : "الخلاء"
+                                      : "الخلاء",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "khla");
                                     isTap = true;
@@ -408,7 +452,11 @@ class _SabhuhViewState extends State<SabhuhView> {
                                   },
                                 ),
                                 CustomSabhuhItem(
-                                  text: "الطعام",
+                                  text: translation != null
+                                      ? translation!.food.isNotEmpty
+                                          ? translation!.food
+                                          : "الطعام"
+                                      : "الطعام",
                                   onTap: () {
                                     sharedPref.setString("myDhkar", "taam");
                                     isTap = true;
