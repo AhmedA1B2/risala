@@ -3,21 +3,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:risala/main.dart';
 import 'package:risala/models/quran.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
 
-// كاش عام للسور بعد المعالجة
 final Map<int, List<SurahToken>> _surahCache = {};
 
-//=====================
-// كلاس مساعد لتخزين بيانات الكلمة بعد المعالجة (تحسين الأداء)
-//=====================
+void clearSurahCache() {
+  _surahCache.clear();
+}
+
 class SurahToken {
   final String text;
   final bool isSymbol;
   final int? verseNumber;
-  final String? wordKey; // مفتاح الكلمة للتمييز
+  final String? wordKey;
 
   SurahToken({
     required this.text,
@@ -27,19 +28,6 @@ class SurahToken {
   });
 }
 
-//=====================
-// تحميل JSON
-//=====================
-Future<List<Quran>> loadQuranFromJson(int surahNumber) async {
-  final String jsonString = await rootBundle
-      .loadString('assets/json/quran/hafs/surahs/$surahNumber.json');
-  final List<dynamic> data = json.decode(jsonString);
-  return data.map((e) => Quran.fromMap(e)).toList();
-}
-
-//=====================
-// الصفحة (تم تحسين الأداء هنا)
-//=====================
 class CustomSurahPage extends StatefulWidget {
   const CustomSurahPage({
     super.key,
@@ -71,15 +59,16 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
 
   final Map<int, GlobalKey> _verseKeys = {};
 
+  String riwoya = sharedPref.getString("riwoya") ?? "hafs";
+
   @override
   void initState() {
     super.initState();
-    _loadDataIsolated();
+    _loadDataIsolated(riwoya);
   }
 
-  Future<void> _loadDataIsolated() async {
+  Future<void> _loadDataIsolated(String riwoya) async {
     try {
-      // 🔥 إذا السورة موجودة في الكاش → لا نعيد تحميلها
       if (_surahCache.containsKey(widget.surahNumber)) {
         _processedTokens = _surahCache[widget.surahNumber];
         setState(() {
@@ -89,7 +78,7 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
       }
 
       final String jsonString = await rootBundle.loadString(
-          'assets/json/quran/hafs/surahs/${widget.surahNumber}.json');
+          'assets/json/quran/$riwoya/surahs/${widget.surahNumber}.json');
 
       final List<dynamic> jsonData = json.decode(jsonString);
 

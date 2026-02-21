@@ -20,8 +20,8 @@ class QiblaView extends StatefulWidget {
 
 class _QiblaViewState extends State<QiblaView>
     with SingleTickerProviderStateMixin {
-  double? _heading; // device heading (degrees) 0 = North
-  Position? _position; // live GPS position
+  double? _heading; // device heading
+  Position? _position; // current GPS position
   StreamSubscription<Position>? _posSub;
   StreamSubscription<CompassEvent>? _compassSub;
   SharedPreferences? _prefs;
@@ -30,13 +30,22 @@ class _QiblaViewState extends State<QiblaView>
   static const double _kaabaLat = 21.422487;
   static const double _kaabaLon = 39.826206;
 
-  // cached values (read from SharedPreferences)
+  // cached values
   double? _cachedLat;
   double? _cachedLon;
   double? _cachedQibla;
 
-  // animation smoothing
-  late double _displayedRotation; // radians applied to decorative arrow
+  // arrow rotation
+  double _displayedRotation = 0.0;
+
+  Translation? translation;
+
+  @override
+  void initState() {
+    super.initState();
+    _initFast();
+    loadAllTranslations();
+  }
 
   @override
   void dispose() {
@@ -45,20 +54,10 @@ class _QiblaViewState extends State<QiblaView>
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _displayedRotation = 0.0;
-    _initFast();
-    loadAllTranslations();
-  }
-
   Future<void> _initFast() async {
     _prefs = await SharedPreferences.getInstance();
     _readCached();
-
-    _initCompass(); // شغل البوصلة
-
+    _initCompass();
     await _checkPermissionAndStart();
   }
 
@@ -70,38 +69,22 @@ class _QiblaViewState extends State<QiblaView>
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
-
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(translation != null
-                ? translation!.locationAccessRequired.isNotEmpty
-                    ? translation!.locationAccessRequired
-                    : "يجب السماح بالوصول للموقع لاستخدام البوصلة"
-                : "يجب السماح بالوصول للموقع لاستخدام البوصلة"),
-          ),
-        );
+        _showSnack(translation?.locationAccessRequired ??
+            "يجب السماح بالوصول للموقع لاستخدام البوصلة");
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-          content: Text(translation != null
-                ? translation!.permissionDeniedSettings.isNotEmpty
-                    ? translation!.permissionDeniedSettings
-                    : "تم رفض الصلاحية نهائيًا. يرجى تفعيلها من الإعدادات"
-                :"تم رفض الصلاحية نهائيًا. يرجى تفعيلها من الإعدادات"),
-        ),
-      );
+      _showSnack(translation?.permissionDeniedSettings ??
+          "تم رفض الصلاحية نهائيًا. يرجى تفعيلها من الإعدادات");
       await Geolocator.openAppSettings();
       return;
     }
 
-    // ✅ الآن فقط نستدعي الموقع
     final last = await Geolocator.getLastKnownPosition();
     if (last != null) {
       _position = last;
@@ -114,79 +97,51 @@ class _QiblaViewState extends State<QiblaView>
 
   void _initCompass() {
     if (FlutterCompass.events == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-          content: Text(translation != null
-                ? translation!.compassNotSupported.isNotEmpty
-                    ? translation!.compassNotSupported
-                    : "هذا الجهاز لا يدعم مستشعر البوصلة"
-                :"هذا الجهاز لا يدعم مستشعر البوصلة"),
-        ),
-      );
+      _showSnack(translation?.compassNotSupported ??
+          "هذا الجهاز لا يدعم مستشعر البوصلة");
       return;
     }
 
     _compassSub = FlutterCompass.events!.listen((event) {
-      if (event.heading != null && mounted) {
-        _heading = event.heading;
-        setState(() {});
+      if (!mounted) return;
+
+      double newHeading =
+          event.heading ?? 0.0; 
+
+      if (_heading == null) {
+        _heading = newHeading;
+      } else {
+        double diff = (newHeading - _heading! + 360) % 360;
+        if (diff > 180) diff -= 360;
+        _heading = (_heading! + diff * 0.1) % 360; // smoothing factor
       }
+
+      setState(() {
+        if (_cachedQibla != null) {
+          _displayedRotation =
+              _computeRotationRadians(_cachedQibla!, _heading!);
+        }
+      });
     });
   }
 
   void _initLocationLive() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-            content: Text(translation != null
-                ? translation!.locationAccessRequired.isNotEmpty
-                    ? translation!.locationAccessRequired
-                    : "يجب السماح بالوصول للموقع لاستخدام البوصلة"
-                :"يجب السماح بالوصول للموقع لاستخدام البوصلة"),
-          ),
-        );
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(
-          content:
-              Text(translation != null
-                ? translation!.permissionDeniedAppSettings.isNotEmpty
-                    ? translation!.permissionDeniedAppSettings
-                    :"تم رفض الصلاحية نهائيًا. يرجى تفعيلها من إعدادات التطبيق"
-                :"تم رفض الصلاحية نهائيًا. يرجى تفعيلها من إعدادات التطبيق"),
-        ),
-      );
-      await Geolocator.openAppSettings();
-      return;
-    }
-
     _posSub = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.medium,
-        distanceFilter: 20,
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 50,
       ),
     ).listen((pos) async {
       if (!mounted) return;
 
       _position = pos;
       _cachedQibla = _calculateQiblaBearing(pos.latitude, pos.longitude);
-
       await _saveCache(pos.latitude, pos.longitude, _cachedQibla!);
 
+      // تحديث السهم فقط
+      if (_heading != null) {
+        _displayedRotation = _computeRotationRadians(_cachedQibla!, _heading!);
+      }
       setState(() {});
     });
   }
@@ -195,6 +150,7 @@ class _QiblaViewState extends State<QiblaView>
     _cachedLat = _prefs?.getDouble('lastLat');
     _cachedLon = _prefs?.getDouble('lastLon');
     _cachedQibla = _prefs?.getDouble('lastQibla');
+
     if (_cachedLat != null && _cachedLon != null) {
       _position = Position(
         longitude: _cachedLon!,
@@ -230,16 +186,13 @@ class _QiblaViewState extends State<QiblaView>
         cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(deltaLambda);
 
     final double theta = atan2(y, x);
-    final double bearing = (_radToDeg(theta) + 360) % 360;
-    return bearing;
+    return (_radToDeg(theta) + 360) % 360;
   }
 
   double _computeRotationRadians(double qiblaBearing, double deviceHeading) {
     final double diff = (qiblaBearing - deviceHeading + 360) % 360;
     return _degToRad(diff);
   }
-
-  Translation? translation;
 
   Future<void> loadAllTranslations() async {
     final list = await loadTranslation(sharedPref.getString("selectedValue"));
@@ -249,20 +202,14 @@ class _QiblaViewState extends State<QiblaView>
     });
   }
 
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final pos = _position;
-    final heading = _heading;
-
-    double? qibla = _cachedQibla;
-    if (_cachedQibla != null) {
-      qibla = _cachedQibla;
-    }
-
-    double targetRotation = 0.0;
-    if (qibla != null && heading != null) {
-      targetRotation = _computeRotationRadians(qibla, heading);
-    }
+    final qibla = _cachedQibla;
 
     return SafeArea(
       child: Center(
@@ -291,22 +238,10 @@ class _QiblaViewState extends State<QiblaView>
                         ],
                       ),
                     ),
-                    const CustomTextFoDirections(
-                      text: 'N',
-                      top: 12,
-                    ),
-                    const CustomTextFoDirections(
-                      right: 12,
-                      text: 'E',
-                    ),
-                    const CustomTextFoDirections(
-                      text: 'S',
-                      bottom: 12,
-                    ),
-                    const CustomTextFoDirections(
-                      text: 'W',
-                      left: 12,
-                    ),
+                    const CustomTextFoDirections(text: 'N', top: 12),
+                    const CustomTextFoDirections(text: 'E', right: 12),
+                    const CustomTextFoDirections(text: 'S', bottom: 12),
+                    const CustomTextFoDirections(text: 'W', left: 12),
                     ClipOval(
                       child: Container(
                         width: 110,
@@ -319,18 +254,8 @@ class _QiblaViewState extends State<QiblaView>
                         ),
                       ),
                     ),
-                    TweenAnimationBuilder<double>(
-                      tween: Tween<double>(
-                          begin: _displayedRotation, end: targetRotation),
-                      duration: const Duration(milliseconds: 150),
-                      curve: Curves.easeOut,
-                      builder: (context, angle, child) {
-                        _displayedRotation = angle;
-                        return Transform.rotate(
-                          angle: angle,
-                          child: child,
-                        );
-                      },
+                    Transform.rotate(
+                      angle: _displayedRotation,
                       child: SizedBox(
                         width: 240,
                         height: 240,
@@ -359,184 +284,45 @@ class _QiblaViewState extends State<QiblaView>
                     children: [
                       if (pos != null) ...[
                         Text(
-                            '${translation != null ? translation!.yourCurrentLocation.isNotEmpty ? translation!.yourCurrentLocation : "موقعي :" : "موقعي :"} ${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)}',
-                            style: const TextStyle(color: whiteColor)),
+                          '${translation?.yourCurrentLocation ?? "موقعي :"} ${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)}',
+                          style: const TextStyle(color: whiteColor),
+                        ),
                       ] else if (_cachedLat != null) ...[
                         Text(
-                            '${translation != null ? translation!.savedLocation.isNotEmpty ? translation!.savedLocation : "موقع مخزن:" : "موقع مخزن:"} ${_cachedLat!.toStringAsFixed(5)}, ${_cachedLon!.toStringAsFixed(5)}',
-                            style: const TextStyle(color: Colors.white70)),
+                          '${translation?.savedLocation ?? "موقع مخزن:"} ${_cachedLat!.toStringAsFixed(5)}, ${_cachedLon!.toStringAsFixed(5)}',
+                          style: const TextStyle(color: Colors.white70),
+                        ),
                       ] else ...[
                         Text(
-                            translation != null
-                                ? translation!.gettingLocation.isNotEmpty
-                                    ? translation!.gettingLocation
-                                    : "جاري الحصول على الموقع..."
-                                : 'جاري الحصول على الموقع...',
-                            style: TextStyle(color: Colors.white70)),
+                          translation?.gettingLocation ??
+                              'جاري الحصول على الموقع...',
+                          style: const TextStyle(color: Colors.white70),
+                        ),
                       ],
                       const SizedBox(height: 6),
                       if (qibla != null) ...[
                         Text(
-                            '${translation != null ? translation!.qiblaDirection.isNotEmpty ? translation!.qiblaDirection : "اتجاه القبلة :" : "اتجاه القبلة :"} ${qibla.toStringAsFixed(1)}°',
-                            style: const TextStyle(color: whiteColor)),
+                          '${translation?.qiblaDirection ?? "اتجاه القبلة :"} ${qibla.toStringAsFixed(1)}°',
+                          style: const TextStyle(color: whiteColor),
+                        ),
                       ],
                       const SizedBox(height: 6),
-                      if (heading != null && qibla != null) ...[
-                        Builder(builder: (context) {
-                          final diff = ((qibla! - heading + 360) % 360);
-                          final display = diff > 180 ? diff - 360 : diff;
-                          return Text(
-                              '${translation != null ? translation!.gradeDifference.isNotEmpty ? translation!.gradeDifference : "فرق الدرجات :" : "فرق الدرجات :"} ${display.toStringAsFixed(1)}°',
-                              style: const TextStyle(color: whiteColor));
-                        })
-                      ] else ...[
+                      if (_heading != null && qibla != null) ...[
                         Text(
-                            translation != null
-                                ? translation!.deviceOrientationNotAvailable
-                                        .isNotEmpty
-                                    ? translation!.deviceOrientationNotAvailable
-                                    : 'اتجاه الجهاز: غير متوفر'
-                                : 'اتجاه الجهاز: غير متوفر',
-                            style: TextStyle(color: Colors.white70)),
+                          '${translation?.gradeDifference ?? "فرق الدرجات :"} ${((_cachedQibla! - _heading! + 360) % 360).toStringAsFixed(1)}°',
+                          style: const TextStyle(color: whiteColor),
+                        ),
                       ],
                       const SizedBox(height: 10),
                       Wrap(
                         children: [
                           Center(
                             child: ElevatedButton.icon(
-                              onPressed: () async {
-                                try {
-                                  bool serviceEnabled = await Geolocator
-                                      .isLocationServiceEnabled();
-                                  if (!serviceEnabled) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                       SnackBar(
-                                        content: Text(
-                                            translation != null
-                ? translation!.enableLocationService.isNotEmpty
-                    ? translation!.enableLocationService
-                    : "الرجاء تفعيل خدمة الموقع من إعدادات الجهاز"
-                :"الرجاء تفعيل خدمة الموقع من إعدادات الجهاز"),
-                                      ),
-                                    );
-                                    await Geolocator.openLocationSettings();
-                                    return;
-                                  }
-
-                                  LocationPermission permission =
-                                      await Geolocator.checkPermission();
-
-                                  if (permission == LocationPermission.denied) {
-                                    permission =
-                                        await Geolocator.requestPermission();
-                                    if (permission ==
-                                        LocationPermission.denied) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                         SnackBar(
-                                          content: Text(
-                                             translation != null
-                ? translation!.locationAccessRequired.isNotEmpty
-                    ? translation!.locationAccessRequired
-                    : "يجب السماح بالوصول للموقع لاستخدام البوصلة"
-                : "يجب السماح بالوصول للموقع لاستخدام البوصلة"),
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                  }
-
-                                  if (permission ==
-                                      LocationPermission.deniedForever) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                       SnackBar(
-                                        content: Text(
-                                            translation != null
-                ? translation!.permissionDeniedAppSettings.isNotEmpty
-                    ? translation!.permissionDeniedAppSettings
-                    : "تم رفض الصلاحية نهائيًا. يرجى تفعيلها من إعدادات التطبيق"
-                :"تم رفض الصلاحية نهائيًا. يرجى تفعيلها من إعدادات التطبيق"),
-                                      ),
-                                    );
-                                    await Geolocator.openAppSettings();
-                                    return;
-                                  }
-
-                                  final pos =
-                                      await Geolocator.getCurrentPosition(
-                                          desiredAccuracy:
-                                              LocationAccuracy.high);
-
-                                  if (!mounted) return;
-
-                                  setState(() => _position = pos);
-
-                                  final q = _calculateQiblaBearing(
-                                      pos.latitude, pos.longitude);
-                                  await _saveCache(
-                                      pos.latitude, pos.longitude, q);
-                                } catch (e) {
-                                  debugPrint("Location error: $e");
-                                }
-                              },
-                              icon: Icon(
-                                Icons.my_location,
-                                color: dilutionScandColor,
-                              ),
+                              onPressed: _checkPermissionAndStart,
+                              icon: Icon(Icons.my_location,
+                                  color: dilutionScandColor),
                               label: Text(
-                                translation != null
-                                    ? translation!.updateSite.isNotEmpty
-                                        ? translation!.updateSite
-                                        : 'تحديث الموقع'
-                                    : 'تحديث الموقع',
-                                style: TextStyle(color: dilutionScandColor),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Center(
-                            child: ElevatedButton.icon(
-                              onPressed: () async {
-                                await showDialog<void>(
-                                    context: context,
-                                    builder: (_) => AlertDialog(
-                                          title: Text(translation != null
-                                              ? translation!.compassCalibration
-                                                      .isNotEmpty
-                                                  ? translation!
-                                                      .compassCalibration
-                                                  : 'معايرة البوصلة'
-                                              : 'معايرة البوصلة'),
-                                          content: Text(translation != null
-                                              ? translation!
-                                                      .explanationOfCalibration
-                                                      .isNotEmpty
-                                                  ? translation!
-                                                      .explanationOfCalibration
-                                                  : 'قم بتحريك الهاتف في شكل رقم 8 واضبطه بعيدًا عن مصادر التشويش المغناطيسي.'
-                                              : 'قم بتحريك الهاتف في شكل رقم 8 واضبطه بعيدًا عن مصادر التشويش المغناطيسي.'),
-                                          actions: [
-                                            TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                child: Text(translation != null
-                                                    ? translation!.ok.isNotEmpty
-                                                        ? translation!.ok
-                                                        : 'حسنًا'
-                                                    : 'حسنًا'))
-                                          ],
-                                        ));
-                              },
-                              icon: Icon(
-                                Icons.explore,
-                                color: dilutionScandColor,
-                              ),
-                              label: Text(
-                                translation != null
-                                    ? translation!.compassCalibration.isNotEmpty
-                                        ? translation!.compassCalibration
-                                        : 'معايرة البوصلة'
-                                    : 'معايرة البوصلة',
+                                translation?.updateSite ?? 'تحديث الموقع',
                                 style: TextStyle(color: dilutionScandColor),
                               ),
                             ),
@@ -547,9 +333,7 @@ class _QiblaViewState extends State<QiblaView>
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 50,
-              )
+              const SizedBox(height: 50),
             ],
           ),
         ),
@@ -558,7 +342,7 @@ class _QiblaViewState extends State<QiblaView>
   }
 }
 
-// Decorative arrow painter (Islamic-ish ornamental arrow)
+// Decorative arrow painter
 class _DecorativeArrowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {

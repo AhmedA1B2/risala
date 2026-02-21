@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risala/main_view/main_view.dart';
 import 'package:risala/models/translation.dart';
+import 'package:risala/my_views/quran/custom/custom_surah_page.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/main.dart';
 import 'package:risala/translation/translation.dart';
@@ -21,6 +22,8 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
   double titleSize = sharedPref.getDouble("valueOfSize") ?? 26;
 
   double ayaSize = sharedPref.getDouble("valueOfSize2") ?? 36;
+
+  String riwoya = sharedPref.getString("riwoya") ?? "hafs";
 
   late Future<List<Translation>> _translationsFuture;
   int _futureKey = 0;
@@ -116,6 +119,46 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
 
                     const SizedBox(height: 30),
 
+                    Row(
+                      children: [
+                        Radio<String>(
+                          value: "hafs",
+                          activeColor: scandColor,
+                          groupValue: riwoya,
+                          onChanged: (value) {
+                            setState(() {
+                              riwoya = value!;
+                              if (selectedFont == "Kufi") {
+                                selectedFont = "uthmanic";
+                              }
+                            });
+                          },
+                        ),
+                        _buildSectionTitle("رواية حفص"),
+
+                        const SizedBox(width: 20), // مسافة بين الخيارين
+
+                        // خيار رواية قالون
+                        Radio<String>(
+                          value: "qaloun",
+                          activeColor: scandColor,
+                          groupValue: riwoya,
+                          onChanged: (value) {
+                            setState(() {
+                              riwoya = value!;
+                              if (selectedFont == "uthmanic") {
+                                selectedFont = "Kufi";
+                              }
+                            });
+                          },
+                        ),
+
+                        _buildSectionTitle('رواية قالون'),
+                      ],
+                    ),
+
+                    const SizedBox(height: 30),
+
                     /// =======================
                     /// TITLE SIZE
                     /// =======================
@@ -195,7 +238,12 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                           contentPadding: EdgeInsets.symmetric(horizontal: 16),
                         ),
                         dropdownColor: scandColor,
-                        items: ["Amiri", "Lateef", "ScheherazadeNew"]
+                        items: [
+                          "Amiri",
+                          "Lateef",
+                          "ScheherazadeNew",
+                          riwoya == "qaloun" ? "Kufi" : "uthmanic"
+                        ]
                             .map((font) => DropdownMenuItem(
                                   value: font,
                                   child: Text(
@@ -240,6 +288,8 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                       sharedPref.setDouble("valueOfSize", titleSize);
                       sharedPref.setString("selectedValue2", selectedFont);
                       sharedPref.setDouble("valueOfSize2", ayaSize);
+                      sharedPref.setString("riwoya", riwoya);
+                      clearSurahCache();
 
                       Navigator.pushAndRemoveUntil(
                         context,
