@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // ضرورية لالتقاط PlatformException
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen2.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 import 'package:risala/main.dart';
 import 'package:risala/models/translation.dart';
-import 'package:risala/my_views/qibla/custom_text/custom_text_fo_directions.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class QiblaView extends StatefulWidget {
   const QiblaView({super.key});
@@ -18,161 +19,111 @@ class QiblaView extends StatefulWidget {
   State<QiblaView> createState() => _QiblaViewState();
 }
 
-class _QiblaViewState extends State<QiblaView>
-    with SingleTickerProviderStateMixin {
-  double? _heading; // device heading
-  Position? _position; // current GPS position
-  StreamSubscription<Position>? _posSub;
-  StreamSubscription<CompassEvent>? _compassSub;
-  SharedPreferences? _prefs;
-
-  // Kaaba coordinates
+class _QiblaViewState extends State<QiblaView> {
   static const double _kaabaLat = 21.422487;
   static const double _kaabaLon = 39.826206;
 
-  // cached values
-  double? _cachedLat;
-  double? _cachedLon;
   double? _cachedQibla;
-
-  // arrow rotation
-  double _displayedRotation = 0.0;
-
+  bool _isLoading = true;
+  bool _isSupported = true;
+  bool _isGpsDisabledError = false; // متغير جديد لحالة الـ GPS
+  String _errorMessage = "";
   Translation? translation;
 
   @override
   void initState() {
     super.initState();
-    _initFast();
     loadAllTranslations();
+    _checkHardwareAndPermissions();
   }
 
-  @override
-  void dispose() {
-    _posSub?.cancel();
-    _compassSub?.cancel();
-    super.dispose();
-  }
+  /// الدالة الأساسية لفحص الموقع، الصلاحيات، والعتاد
+  Future<void> _checkHardwareAndPermissions() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _isSupported = true;
+      _isGpsDisabledError = false;
+      _errorMessage = "";
+    });
 
-  Future<void> _initFast() async {
-    _prefs = await SharedPreferences.getInstance();
-    _readCached();
-    _initCompass();
-    await _checkPermissionAndStart();
-  }
-
-  Future<void> _checkPermissionAndStart() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return;
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        _showSnack(translation?.locationAccessRequired ??
-            "يجب السماح بالوصول للموقع لاستخدام البوصلة");
+    try {
+      // 1️⃣ أولاً: هل خدمة الموقع (GPS) مفعلة في إعدادات الهاتف؟
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _setFailure(
+          "خدمة الموقع (GPS) مغلقة. يرجى تفعيلها ليتمكن التطبيق من تحديد اتجاهك.",
+          isGpsIssue: true,
+        );
         return;
       }
-    }
 
-    if (permission == LocationPermission.deniedForever) {
-      _showSnack(translation?.permissionDeniedSettings ??
-          "تم رفض الصلاحية نهائيًا. يرجى تفعيلها من الإعدادات");
-      await Geolocator.openAppSettings();
-      return;
-    }
-
-    final last = await Geolocator.getLastKnownPosition();
-    if (last != null) {
-      _position = last;
-      _cachedQibla = _calculateQiblaBearing(last.latitude, last.longitude);
-      setState(() {});
-    }
-
-    _initLocationLive();
-  }
-
-  void _initCompass() {
-    if (FlutterCompass.events == null) {
-      _showSnack(translation?.compassNotSupported ??
-          "هذا الجهاز لا يدعم مستشعر البوصلة");
-      return;
-    }
-
-    _compassSub = FlutterCompass.events!.listen((event) {
-      if (!mounted) return;
-
-      double newHeading =
-          event.heading ?? 0.0; 
-
-      if (_heading == null) {
-        _heading = newHeading;
-      } else {
-        double diff = (newHeading - _heading! + 360) % 360;
-        if (diff > 180) diff -= 360;
-        _heading = (_heading! + diff * 0.1) % 360; // smoothing factor
-      }
-
-      setState(() {
-        if (_cachedQibla != null) {
-          _displayedRotation =
-              _computeRotationRadians(_cachedQibla!, _heading!);
+      // 2️⃣ ثانياً: هل يمتلك التطبيق صلاحية الوصول للموقع؟
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          _setFailure("تم رفض صلاحية الوصول للموقع.");
+          return;
         }
-      });
-    });
-  }
-
-  void _initLocationLive() async {
-    _posSub = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        distanceFilter: 50,
-      ),
-    ).listen((pos) async {
-      if (!mounted) return;
-
-      _position = pos;
-      _cachedQibla = _calculateQiblaBearing(pos.latitude, pos.longitude);
-      await _saveCache(pos.latitude, pos.longitude, _cachedQibla!);
-
-      // تحديث السهم فقط
-      if (_heading != null) {
-        _displayedRotation = _computeRotationRadians(_cachedQibla!, _heading!);
       }
-      setState(() {});
-    });
-  }
 
-  void _readCached() {
-    _cachedLat = _prefs?.getDouble('lastLat');
-    _cachedLon = _prefs?.getDouble('lastLon');
-    _cachedQibla = _prefs?.getDouble('lastQibla');
+      if (permission == LocationPermission.deniedForever) {
+        _setFailure(
+            "صلاحية الموقع مرفوضة دائماً، يرجى تفعيلها من إعدادات الهاتف.");
+        return;
+      }
 
-    if (_cachedLat != null && _cachedLon != null) {
-      _position = Position(
-        longitude: _cachedLon!,
-        latitude: _cachedLat!,
-        timestamp: DateTime.now(),
-        accuracy: 0,
-        altitude: 0,
-        heading: 0,
-        speed: 0,
-        speedAccuracy: 0,
-        altitudeAccuracy: 0,
-        headingAccuracy: 0,
-      );
+      // 3️⃣ ثالثاً: الفحص العميق للعتاد (المستشعر المغناطيسي)
+      bool hasMagnetometer = false;
+      try {
+        // نحاول قراءة نبضة واحدة من المستشعر
+        await magnetometerEventStream()
+            .first
+            .timeout(const Duration(milliseconds: 500));
+        hasMagnetometer = true;
+      } on PlatformException catch (e) {
+        // مسك الخطأ NO_SENSOR في أجهزة مثل Samsung F12
+        debugPrint("Hardware Error: ${e.message}");
+        hasMagnetometer = false;
+      } on TimeoutException {
+        hasMagnetometer = false;
+      } catch (e) {
+        hasMagnetometer = false;
+      }
+
+      if (!hasMagnetometer) {
+        _setFailure(
+            "عذراً، جهازه لا يدعم مستشعر البوصلة (Magnetometer) اللازم لتحريك السهم.");
+        return;
+      }
+
+      // 4️⃣ أخيراً: جلب الموقع وحساب زاوية القبلة
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.low);
+      _cachedQibla =
+          _calculateQiblaBearing(position.latitude, position.longitude);
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      _setFailure("حدث خطأ غير متوقع أثناء إعداد البوصلة.");
     }
   }
 
-  Future<void> _saveCache(double lat, double lon, double qibla) async {
-    await _prefs?.setDouble('lastLat', lat);
-    await _prefs?.setDouble('lastLon', lon);
-    await _prefs?.setDouble('lastQibla', qibla);
+  void _setFailure(String message, {bool isGpsIssue = false}) {
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+        _isSupported = false;
+        _errorMessage = message;
+        _isGpsDisabledError = isGpsIssue;
+      });
+    }
   }
 
+  // حسابات الزوايا
   double _degToRad(double deg) => deg * pi / 180.0;
   double _radToDeg(double rad) => rad * 180.0 / pi;
 
@@ -180,11 +131,9 @@ class _QiblaViewState extends State<QiblaView>
     final double phi1 = _degToRad(lat);
     final double phi2 = _degToRad(_kaabaLat);
     final double deltaLambda = _degToRad(_kaabaLon - lon);
-
     final double y = sin(deltaLambda) * cos(phi2);
     final double x =
         cos(phi1) * sin(phi2) - sin(phi1) * cos(phi2) * cos(deltaLambda);
-
     final double theta = atan2(y, x);
     return (_radToDeg(theta) + 360) % 360;
   }
@@ -196,201 +145,163 @@ class _QiblaViewState extends State<QiblaView>
 
   Future<void> loadAllTranslations() async {
     final list = await loadTranslation(sharedPref.getString("selectedValue"));
-    if (!mounted) return;
-    setState(() {
-      translation = list.first;
-    });
-  }
-
-  void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    if (mounted) {
+      setState(() => translation = list.first);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final pos = _position;
-    final qibla = _cachedQibla;
-
     return SafeArea(
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              SizedBox(
-                width: 300,
-                height: 300,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 300,
-                      height: 300,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: scandColor,
-                        border: Border.all(color: dilutionScandColor, width: 2),
-                        boxShadow: const [
-                          BoxShadow(
-                              blurRadius: 6,
-                              color: Colors.black45,
-                              offset: Offset(0, 4))
-                        ],
+        child: _isLoading
+            ? const CustomLoadingScreen2()
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (!_isSupported) ...[
+                    // أيقونة تتغير حسب نوع الخطأ
+                    Icon(
+                      _isGpsDisabledError
+                          ? Icons.location_off
+                          : Icons.error_outline,
+                      color: Colors.red,
+                      size: 80,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _isGpsDisabledError
+                          ? "الموقع مغلق"
+                          : "البوصلة غير مدعومة",
+                      style: TextStyle(
+                          color: scandColor,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40, vertical: 10),
+                      child: Text(
+                        _errorMessage,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: scandColor, fontSize: 16),
                       ),
                     ),
-                    const CustomTextFoDirections(text: 'N', top: 12),
-                    const CustomTextFoDirections(text: 'E', right: 12),
-                    const CustomTextFoDirections(text: 'S', bottom: 12),
-                    const CustomTextFoDirections(text: 'W', left: 12),
-                    ClipOval(
-                      child: Container(
-                        width: 110,
-                        height: 110,
-                        color: whiteColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Image.asset('assets/images/kaaba.png',
-                              fit: BoxFit.contain),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: scandColor,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 12),
+                      ),
+                      onPressed: () async {
+                        if (_isGpsDisabledError) {
+                          // فتح إعدادات الموقع في الهاتف مباشرة
+                          await Geolocator.openLocationSettings();
+                        } else {
+                          // إعادة محاولة الفحص
+                          _checkHardwareAndPermissions();
+                        }
+                      },
+                      child: Text(
+                        _isGpsDisabledError
+                            ? "فتح إعدادات الموقع"
+                            : "إعادة المحاولة",
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    )
+                  ] else ...[
+                    // واجهة البوصلة عند نجاح كل الفحوصات
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          height: MediaQuery.of(context).size.width * 0.8,
+                          decoration: BoxDecoration(
+                            color: scandColor,
+                            shape: BoxShape.circle,
+                            border:
+                                Border.all(color: dilutionScandColor, width: 4),
+                          ),
+                          child: const Stack(
+                            alignment: AlignmentGeometry.center,
+                            children: [
+                              Positioned(
+                                  top: 15,
+                                  child: Text("N",
+                                      style: TextStyle(
+                                          color: whiteColor,
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold))),
+                              Positioned(
+                                  right: 15,
+                                  child: Text("E",
+                                      style: TextStyle(
+                                          color: whiteColor, fontSize: 24))),
+                              Positioned(
+                                  bottom: 15,
+                                  child: Text("S",
+                                      style: TextStyle(
+                                          color: whiteColor, fontSize: 24))),
+                              Positioned(
+                                  left: 15,
+                                  child: Text("W",
+                                      style: TextStyle(
+                                          color: whiteColor, fontSize: 24))),
+                            ],
+                          ),
                         ),
-                      ),
+                        StreamBuilder<CompassEvent>(
+                          stream: FlutterCompass.events,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasError ||
+                                snapshot.data?.heading == null) {
+                              return const Icon(Icons.navigation,
+                                  size: 150, color: Colors.grey);
+                            }
+                            double heading = snapshot.data!.heading!;
+                            double rotation =
+                                _computeRotationRadians(_cachedQibla!, heading);
+                            return Transform.rotate(
+                              angle: rotation,
+                              child: Icon(Icons.navigation,
+                                  size: 160, color: mainColor),
+                            );
+                          },
+                        ),
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                              color: scandColor,
+                              border: Border.all(
+                                  color: dilutionScandColor, width: 5),
+                              shape: BoxShape.circle),
+                        )
+                      ],
                     ),
-                    Transform.rotate(
-                      angle: _displayedRotation,
-                      child: SizedBox(
-                        width: 240,
-                        height: 240,
-                        child: Center(
-                          child: CustomPaint(
-                            size: const Size(240, 240),
-                            painter: _DecorativeArrowPainter(),
+                    if (_cachedQibla != null && translation != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 30),
+                        child: Container(
+                          padding: const EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            color: scandColor,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Text(
+                            "${translation!.qiblaDirection} ${_cachedQibla!.toStringAsFixed(1)}°",
+                            style: const TextStyle(
+                                color: whiteColor, fontSize: 18),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                        width: 14,
-                        height: 14,
-                        decoration: const BoxDecoration(
-                            color: whiteColor, shape: BoxShape.circle)),
-                  ],
-                ),
+                  ]
+                ],
               ),
-              const SizedBox(height: 18),
-              Card(
-                color: scandColor,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    children: [
-                      if (pos != null) ...[
-                        Text(
-                          '${translation?.yourCurrentLocation ?? "موقعي :"} ${pos.latitude.toStringAsFixed(5)}, ${pos.longitude.toStringAsFixed(5)}',
-                          style: const TextStyle(color: whiteColor),
-                        ),
-                      ] else if (_cachedLat != null) ...[
-                        Text(
-                          '${translation?.savedLocation ?? "موقع مخزن:"} ${_cachedLat!.toStringAsFixed(5)}, ${_cachedLon!.toStringAsFixed(5)}',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                      ] else ...[
-                        Text(
-                          translation?.gettingLocation ??
-                              'جاري الحصول على الموقع...',
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                      ],
-                      const SizedBox(height: 6),
-                      if (qibla != null) ...[
-                        Text(
-                          '${translation?.qiblaDirection ?? "اتجاه القبلة :"} ${qibla.toStringAsFixed(1)}°',
-                          style: const TextStyle(color: whiteColor),
-                        ),
-                      ],
-                      const SizedBox(height: 6),
-                      if (_heading != null && qibla != null) ...[
-                        Text(
-                          '${translation?.gradeDifference ?? "فرق الدرجات :"} ${((_cachedQibla! - _heading! + 360) % 360).toStringAsFixed(1)}°',
-                          style: const TextStyle(color: whiteColor),
-                        ),
-                      ],
-                      const SizedBox(height: 10),
-                      Wrap(
-                        children: [
-                          Center(
-                            child: ElevatedButton.icon(
-                              onPressed: _checkPermissionAndStart,
-                              icon: Icon(Icons.my_location,
-                                  color: dilutionScandColor),
-                              label: Text(
-                                translation?.updateSite ?? 'تحديث الموقع',
-                                style: TextStyle(color: dilutionScandColor),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 50),
-            ],
-          ),
-        ),
       ),
     );
   }
-}
-
-// Decorative arrow painter
-class _DecorativeArrowPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 6
-      ..strokeCap = StrokeCap.round
-      ..color = mainColor;
-
-    final borderPaint = Paint()
-      ..color = dilutionScandColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = min(size.width, size.height) / 2 - 18;
-
-    final spineTop = Offset(center.dx, center.dy - radius + 12);
-    final spineBottom = Offset(center.dx, center.dy + 12);
-
-    final spinePath = Path()
-      ..moveTo(spineBottom.dx, spineBottom.dy)
-      ..lineTo(spineTop.dx, spineTop.dy);
-    canvas.drawPath(spinePath, paint);
-    canvas.drawPath(spinePath, borderPaint);
-
-    final ornamentPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4
-      ..color = mainColor;
-
-    final ornamentRect = Rect.fromCircle(
-        center: Offset(center.dx - 8, spineTop.dy + 10), radius: 18);
-    canvas.drawArc(ornamentRect, -pi / 3, pi * 2 / 3, false, ornamentPaint);
-    canvas.drawArc(ornamentRect, -pi / 3, pi * 2 / 3, false, borderPaint);
-
-    final tipPath = Path()
-      ..moveTo(center.dx, spineTop.dy - 16)
-      ..lineTo(center.dx - 8, spineTop.dy - 4)
-      ..lineTo(center.dx, spineTop.dy + 8)
-      ..lineTo(center.dx + 8, spineTop.dy - 4)
-      ..close();
-
-    final fill = Paint()..color = mainColor;
-    canvas.drawPath(tipPath, fill);
-    canvas.drawPath(tipPath, borderPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

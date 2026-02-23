@@ -62,7 +62,10 @@ class QuranHafsAudioService {
 //////////////////////////////////////////////////////////////////////
 
   Future<List<AyahTiming>> fetchAyahTimings(int surah, int reciter) async {
-    if (sharedPref.getInt("numOfReciter")! > 18) reciter = 4;
+    if (sharedPref.getInt("numOfReciter") == null ||
+        sharedPref.getInt("numOfReciter")! > 18) {
+      reciter = 4;
+    }
 
     final url =
         "https://www.mp3quran.net/api/v3/ayat_timing?surah=$surah&read=$reciter";

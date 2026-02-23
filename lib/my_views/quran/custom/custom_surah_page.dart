@@ -116,13 +116,20 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
       final bool isVerseSelected = widget.selectedVerse == token.verseNumber;
       final bool isWordSelected = widget.selectedWordKey == token.wordKey;
 
+      String fontFamily = quranfontFamily;
+
+      if (fontFamily != "UthmanicQaloun" && fontFamily != "UthmanicHafs") {
+        fontFamily = "UthmanicHafs";
+        sharedPref.setString("selectedValue2", fontFamily);
+      }
+
       // 2. النصوص
       if (token.isSymbol) {
         final bool isVerseNum = token.text.contains('﴿');
         _cachedSpans!.add(TextSpan(
           text: token.text,
           style: TextStyle(
-            fontFamily: quranfontFamily,
+            fontFamily: fontFamily,
             fontSize: quranfontSize,
             color: isVerseNum
                 ? (isVerseSelected ? Colors.amber : Colors.grey[700])

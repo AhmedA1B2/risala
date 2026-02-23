@@ -578,6 +578,11 @@ class _QuranViewState extends State<QuranView> {
           child: IconButton(
             icon: Icon(Icons.music_note, size: 36, color: mainColor),
             onPressed: () async {
+              print("[][][][][][][][][][][][][][][][][][][][][][][][][]");
+              print("[][][][][]$surahNumber:$highlightedWordVerse[][][][][]");
+              print("[][][][()()()()()()()()()()[][][]");
+              print("[][][][][]$highlightedWord[][][][][]");
+              print("[][][][][][][][][][][][][][][][][][][][][][][][][]");
               setState(() => isloading = true);
               await _audioService.playWord(
                   "$surahNumber:$highlightedWordVerse", highlightedWord!, 7);

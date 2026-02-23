@@ -17,7 +17,8 @@ class LanguageTextSettingsView extends StatefulWidget {
 class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
   late String selectedValue = sharedPref.getString("selectedValue") ?? "ar";
 
-  late String selectedFont = sharedPref.getString("selectedValue2") ?? "Amiri";
+  late String selectedFont =
+      sharedPref.getString("selectedValue2") ?? "UthmanicHafs";
 
   double titleSize = sharedPref.getDouble("valueOfSize") ?? 26;
 
@@ -32,6 +33,10 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
   void initState() {
     super.initState();
     _translationsFuture = loadTranslation(selectedValue);
+    if (selectedFont != "UthmanicQaloun" && selectedFont != "UthmanicHafs") {
+      selectedFont = "UthmanicHafs";
+      sharedPref.setString("selectedValue2", selectedFont);
+    }
   }
 
   void _updateLanguage(String newLang) {
@@ -51,10 +56,6 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
         iconTheme: IconThemeData(color: mainColor),
         elevation: 0,
         centerTitle: true,
-        title: Text(
-          "Language & Text Settings",
-          style: TextStyle(color: mainColor),
-        ),
       ),
       body: FutureBuilder<List<Translation>>(
         key: ValueKey(_futureKey),
@@ -128,8 +129,8 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                           onChanged: (value) {
                             setState(() {
                               riwoya = value!;
-                              if (selectedFont == "Kufi") {
-                                selectedFont = "uthmanic";
+                              if (selectedFont != "UthmanicHafs") {
+                                selectedFont = "UthmanicHafs";
                               }
                             });
                           },
@@ -146,8 +147,8 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                           onChanged: (value) {
                             setState(() {
                               riwoya = value!;
-                              if (selectedFont == "uthmanic") {
-                                selectedFont = "Kufi";
+                              if (selectedFont != "UthmanicQaloun") {
+                                selectedFont = "UthmanicQaloun";
                               }
                             });
                           },
@@ -239,10 +240,9 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                         ),
                         dropdownColor: scandColor,
                         items: [
-                          "Amiri",
-                          "Lateef",
-                          "ScheherazadeNew",
-                          riwoya == "qaloun" ? "Kufi" : "uthmanic"
+                          riwoya == "qaloun"
+                              ? "UthmanicQaloun"
+                              : "UthmanicHafs",
                         ]
                             .map((font) => DropdownMenuItem(
                                   value: font,

@@ -10,4 +10,5 @@ double quranfontSize =
 //   FONT FAMILY
 
 String quranfontFamily = sharedPref.getString("selectedValue2") ??
-    "Amiri"; //Lateef // Amiri // ScheherazadeNew
+    "UthmanicHafs"; 
+  

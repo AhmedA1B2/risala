@@ -15,22 +15,8 @@
       "jp": { "reciter_name": "ドゥカーリー・ムハンマド・アル＝アーリム" }
     },
     {
-      "id": "trabulsi",
-      "number": 2,
-      "base_url": "https://server10.mp3quran.net/trabulsi/",
-      "ar": { "reciter_name": "أحمد الطرابلسي" },
-      "en": { "reciter_name": "Ahmed Al-Trabulsi" },
-      "sp": { "reciter_name": "Ahmed Al-Trabulsi" },
-      "it": { "reciter_name": "Ahmed Al-Trabulsi" },
-      "in": { "reciter_name": "Ahmed Al-Trabulsi" },
-      "cn": { "reciter_name": "艾哈迈德·特拉布尔西" },
-      "bn": { "reciter_name": "আহমেদ আল-ত্রাবুলসি" },
-      "ru": { "reciter_name": "Ахмед аль-Трабулси" },
-      "jp": { "reciter_name": "アフマド・アッ＝タラーブルスィー" }
-    },
-    {
       "id": "br-hym-kshyd-n",
-      "number": 3,
+      "number": 2,
       "base_url": "https://server16.mp3quran.net/i_kshidan/Rewayat-Qalon-A-n-Nafi/",
       "ar": { "reciter_name": "إبراهيم كشيدان" },
       "en": { "reciter_name": "Ibrahim Kashidan" },
@@ -44,7 +30,7 @@
     },
     {
       "id": "tareq",
-      "number": 4,
+      "number": 3,
       "base_url": "https://server10.mp3quran.net/tareq/",
       "ar": { "reciter_name": "طارق عبدالغني دعوب" },
       "en": { "reciter_name": "Tariq Abdulghani Daoub" },
@@ -58,7 +44,7 @@
     },
     {
       "id": "aaly-lhthyfy",
-      "number": 5,
+      "number": 4,
       "base_url": "https://server9.mp3quran.net/huthifi_qalon/",
       "ar": { "reciter_name": "علي الحذيفي" },
       "en": { "reciter_name": "Ali Al-Hudhaifi" },
@@ -72,7 +58,7 @@
     },
     {
       "id": "sneineh",
-      "number": 6,
+      "number": 5,
       "base_url": "https://server16.mp3quran.net/sneineh/Rewayat-Qalon-A-n-Nafi/",
       "ar": { "reciter_name": "محمد أبو سنينة" },
       "en": { "reciter_name": "Muhammad Abu Sneineh" },
@@ -86,7 +72,7 @@
     },
     {
       "id": "qeniwa",
-      "number": 7,
+      "number": 6,
       "base_url": "https://server16.mp3quran.net/qeniwa/Rewayat-Qalon-A-n-Nafi/",
       "ar": { "reciter_name": "محمد الأمين قنيوة" },
       "en": { "reciter_name": "Muhammad Al-Amin Qeniwa" },
@@ -100,7 +86,7 @@
     },
     {
       "id": "mr-on-laakry",
-      "number": 8,
+      "number": 7,
       "base_url": "https://server16.mp3quran.net/m_akri/Rewayat-Qalon-A-n-Nafi/",
       "ar": { "reciter_name": "مروان العكري" },
       "en": { "reciter_name": "Marwan Al-Akari" },

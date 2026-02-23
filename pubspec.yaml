@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+7
+version: 1.0.0+9
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -57,6 +57,7 @@ dependencies:
   geolocator: ^14.0.2
   intl: ^0.20.2
   geocoding: ^3.0.0
+  sensors_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:
@@ -117,6 +118,7 @@ flutter:
     - assets/json/quran/qaloun/surahs/
 
     - assets/language/the_translation.json
+    - assets/audio/
     - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -149,9 +151,13 @@ flutter:
       fonts:
         - asset: assets/fonts/Kufi/Kufi.ttf
     
-    - family: uthmanic
+    - family: UthmanicHafs
       fonts:
-        - asset: assets/fonts/uthmanic/uthmanic.ttf
+        - asset: assets/fonts/UthmanicHafs/UthmanicHafs.ttf
+    
+    - family: UthmanicQaloun
+      fonts:
+        - asset: assets/fonts/UthmanicQaloun/UthmanicQaloun.ttf
     
   #
   # For details regarding fonts from package dependencies,

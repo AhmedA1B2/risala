@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:risala/main.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/sabhuh/custom/custom_sabhuh_item.dart';
+import 'package:risala/my_views/sabhuh/service/click_sound_service.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 
@@ -209,6 +210,8 @@ class _SabhuhViewState extends State<SabhuhView> {
                   onPressed: () {
                     setState(() {
                       conter += 1;
+
+                      ClickSoundService().play();
                       sharedPref.setInt("sabhuhConter", conter);
                     });
                   },

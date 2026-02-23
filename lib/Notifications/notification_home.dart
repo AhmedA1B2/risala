@@ -1,129 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:risala/Notifications/notification_service.dart';
-import 'package:timezone/data/latest.dart';
-import 'package:timezone/standalone.dart';
-import 'package:timezone/timezone.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class NotificationHome extends StatefulWidget {
-  const NotificationHome({super.key});
-
   @override
-  State<NotificationHome> createState() => _NotificationHomeState();
+  _NotificationHomeState createState() => _NotificationHomeState();
 }
 
 class _NotificationHomeState extends State<NotificationHome> {
-  final FlutterLocalNotificationsPlugin notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+
   @override
   void initState() {
-    init();
     super.initState();
+    _initializeNotifications();
   }
 
-  Future<void> init() async {
-    initializeTimeZones();
-    setLocalLocation(
-      getLocation('Africa/Cairo'),
-    );
-    const androidSettings =
+  // تهيئة الإشعارات للأندرويد
+  void _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    const DarwinInitializationSettings iosSettinhs =
-        DarwinInitializationSettings();
+
     const InitializationSettings initializationSettings =
-        InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettinhs,
-    );
-    await notificationsPlugin.initialize(initializationSettings);
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    await _notificationsPlugin.initialize(initializationSettings);
   }
 
-  Future<void> showInstantNotification({
-    required int id,
-    required String title,
-    required String body,
-  }) async {
-    await notificationsPlugin.show(
-      id,
-      title,
-      body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'instant_notification_channel_id',
-          'Instant Notifications',
-          channelDescription: 'Instant notification channel',
-          importance: Importance.max,
-          priority: Priority.high,
-        ), // AndroidNotificationDetails
-        iOS: DarwinNotificationDetails(),
-      ), // NotificationDetails
-    );
+  // طلب صلاحية أندرويد 13
+  Future<void> _requestPermission() async {
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
   }
 
-  Future<void> scheduleReminder({
-    required int id,
-    required String title,
-    String? body,
-  }) async {
-    TZDateTime now = TZDateTime.now(local);
-    TZDateTime scheduledDate = now.add(
-      const Duration(seconds: 1),
+  // دالة إرسال الإشعار
+  Future<void> _showNotification() async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'channel_id',
+      'اسم القناة',
+      channelDescription: 'وصف القناة للإشعارات',
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
     );
-    await notificationsPlugin.zonedSchedule(
-      id,
-      title,
-      body,
-      scheduledDate,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'daily_reminder_channel_id', // A unique ID to group notifications together.
-          'Daily Reminders', // A human-readable name shown to users in their notification settings.
-          channelDescription: 'Reminder to complete daily habits',
-          importance: Importance.max,
-          priority: Priority.high,
-        ), // AndroidNotificationDetails
-        iOS: DarwinNotificationDetails(),
-      ), // NotificationDetails
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents:
-          DateTimeComponents.dayOfWeekAndTime, // or dateAndTime
+
+    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
+
+    await _notificationsPlugin.show(
+      0,
+      'مرحباً بك!',
+      'هذا إشعار تجريبي مخصص لأندرويد 13 🚀',
+      platformDetails,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          TextButton(
-              onPressed: () {
-                showInstantNotification(
-                    id: 0,
-                    title: "showInstantNotification",
-                    body: "dwkb f ufyw fuyvre fuyerf eruyferf");
-              },
-              child: const Center(
-                child: Text(
-                  "showInstantNotification",
-                ),
-              )),
-          TextButton(
-              onPressed: () {
-                NotificationService.instance.scheduledNotification(
-                  title: "title",
-                  body: "body",
-                  hour: 14,
-                  minute: 38,
-                  daysOfWeek: [1, 4, 5],
-                );
-              },
-              child: const Center(
-                child: Text(
-                  "scheduleReminder",
-                ),
-              ))
-        ],
+      appBar: AppBar(title: const Text('إشعارات أندرويد 13')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.notifications_active, size: 80, color: Colors.blue),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _requestPermission,
+              child: const Text('طلب صلاحية الإشعارات'),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _showNotification,
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: const Text('إرسال إشعار الآن', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -141,7 +141,8 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
             CustomDialogue(
               iconOk: Icons.check_circle,
               iconNo: Icons.cancel,
-              text: translation!.confirmLanguageChange.isNotEmpty
+              text: translation != null &&
+                      translation!.confirmLanguageChange.isNotEmpty
                   ? translation!.confirmLanguageChange
                   : 'هل أنت متأكد من أنك تريد استخدام هذه اللغة ؟',
               onPressediconNo: () {
