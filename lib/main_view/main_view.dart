@@ -167,7 +167,6 @@ class _MainViewState extends State<MainView> {
       title: translation!.theQuran.isNotEmpty
           ? translation!.theQuran
           : "ٱلْقُرْآنُ",
-      onPressedBookMark: _openQuranViewSaved,
       onMenuChanged: (value) {
         setState(() {
           isMenuOpen = value;
@@ -181,6 +180,7 @@ class _MainViewState extends State<MainView> {
         children: [
           searchResults == null
               ? HomeView(
+                  onPressedCustomIconButtonBookmark: _openQuranViewSaved,
                   keyBottomBarForTuorial1: keyBottomBarForTuorial1,
                   keyBottomBarForTuorial2: keyBottomBarForTuorial2,
                   keyBottomBarForTuorial3: keyBottomBarForTuorial3,

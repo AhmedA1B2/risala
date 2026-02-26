@@ -97,6 +97,19 @@
       "bn": { "reciter_name": "মারওয়ান আল-আকারি" },
       "ru": { "reciter_name": "Марван аль-Акари" },
       "jp": { "reciter_name": "マルワン・アル＝アカリ" }
-    }
+    },{
+  "id": "91",
+  "number": 8,
+  "base_url": "https://server9.mp3quran.net/waleed/",
+  "ar": { "reciter_name": "وليد النائحي" },
+  "en": { "reciter_name": "Waleed Al-Na'ehi" },
+  "sp": { "reciter_name": "Waleed Al-Na'ehi" },
+  "it": { "reciter_name": "Waleed Al-Na'ehi" },
+  "in": { "reciter_name": "Waleed Al-Na'ehi" },
+  "cn": { "reciter_name": "瓦利德·纳伊希" },
+  "bn": { "reciter_name": "ওয়ালিদ আল-নাইহি" },
+  "ru": { "reciter_name": "Валид Ан-Наихи" },
+  "jp": { "reciter_name": "ワリード・アル＝ナーイヒー" }
+}
   ]
 }

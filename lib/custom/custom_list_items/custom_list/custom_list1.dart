@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:risala/custom/custom_icon_button/custom_icon_button_bookmark.dart';
 import 'package:risala/custom/custom_list_items/custom_item/custom_item1.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen2.dart';
 import 'package:risala/main.dart';
@@ -8,9 +9,12 @@ import 'package:risala/models/sura.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/quran/quran_view/quran_view.dart';
 import 'package:risala/translation/translation.dart';
+import 'package:risala/vars/colors.dart';
 
 class CustomList extends StatefulWidget {
-  const CustomList({super.key});
+  const CustomList({super.key, this.onPressedCustomIconButtonBookmark});
+
+  final void Function()? onPressedCustomIconButtonBookmark;
 
   @override
   State<CustomList> createState() => _CustomListState();
@@ -55,23 +59,37 @@ class _CustomListState extends State<CustomList> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.8,
-      child: FutureBuilder<List<Surah>>(
-        future: surahsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CustomLoadingScreen2();
-          }
+      child: Stack(
+        children: [
+          FutureBuilder<List<Surah>>(
+            future: surahsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CustomLoadingScreen2();
+              }
 
-          if (snapshot.hasError) {
-            return Center(child: Text('خطأ: ${snapshot.error}'));
-          }
+              if (snapshot.hasError) {
+                return Center(child: Text('خطأ: ${snapshot.error}'));
+              }
 
-          final surahs = snapshot.data!;
+              final surahs = snapshot.data!;
 
-          return sizeOfTextBar == 1
-              ? buildListView(surahs)
-              : buildGridView(surahs);
-        },
+              return sizeOfTextBar == 1
+                  ? buildListView(surahs)
+                  : buildGridView(surahs);
+            },
+          ),
+          Positioned(
+              bottom: MediaQuery.of(context).size.height * 0.15,
+              right: 20,
+              child: Card(
+                elevation: 1,
+                color: scandColor,
+                child: CustomIconButtonBookmark(
+                  onPressed: widget.onPressedCustomIconButtonBookmark,
+                ),
+              ))
+        ],
       ),
     );
   }

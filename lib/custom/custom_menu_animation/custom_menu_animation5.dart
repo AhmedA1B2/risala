@@ -1,9 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:risala/custom/custom_icon_button/custom_icon_button_bookmark.dart';
 import 'package:risala/custom/custom_menu_button/custom_menu_button1.dart';
 import 'package:risala/main.dart';
+import 'package:risala/streak/streak.dart';
 import 'package:risala/vars/colors.dart';
 
 class CustomMenuAnimation5 extends StatefulWidget {
@@ -11,7 +11,6 @@ class CustomMenuAnimation5 extends StatefulWidget {
     super.key,
     required this.mainView,
     required this.menu,
-    this.onPressedBookMark,
     required this.searchWidget,
     required this.title,
     required this.onMenuChanged,
@@ -20,7 +19,6 @@ class CustomMenuAnimation5 extends StatefulWidget {
 
   final Widget mainView;
   final Widget menu;
-  final void Function()? onPressedBookMark;
   final Widget searchWidget;
   final String title;
   final GlobalKey<CustomMenuButton1State> buttonMenuKey;
@@ -78,11 +76,14 @@ class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
       backgroundColor: whiteColor,
       appBar: AppBar(
         backgroundColor: scandColor,
-        toolbarHeight: MediaQuery.of(context).size.height * 0.20,
+        toolbarHeight: MediaQuery.of(context).size.height * 0.2,
         actions: [
           Expanded(
             child: Column(
               children: [
+                const SizedBox(
+                  height: 10,
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
@@ -101,9 +102,11 @@ class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
                         fontFamily: 'Amiri',
                       ),
                     ),
-                    CustomIconButtonBookmark(
-                      onPressed: widget.onPressedBookMark,
-                    ),
+
+                    const Streak(),
+                    // CustomIconButtonBookmark(
+                    //   onPressed: widget.onPressedBookMark,
+                    // ),
                   ],
                 ),
                 widget.searchWidget,

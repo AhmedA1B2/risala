@@ -206,6 +206,8 @@ class _QuranViewState extends State<QuranView> {
         Scrollable.ensureVisible(context,
             duration: const Duration(milliseconds: 400), alignment: 0.15);
         setState(() => highlightedVerse = ayasaved);
+      } else {
+        goToSavedVerse();
       }
     });
   }
@@ -217,6 +219,8 @@ class _QuranViewState extends State<QuranView> {
         Scrollable.ensureVisible(context,
             duration: const Duration(milliseconds: 400), alignment: 0.3);
         setState(() => highlightedVerse = widget.searchedVerse);
+      }else {
+        goToSearchedVerse();
       }
     });
   }

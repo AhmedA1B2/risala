@@ -120,6 +120,8 @@ flutter:
     - assets/language/the_translation.json
     - assets/audio/
     - assets/images/
+    - assets/images/streak/0/
+    - assets/images/streak/1/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

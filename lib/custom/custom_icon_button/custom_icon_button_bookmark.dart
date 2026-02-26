@@ -7,21 +7,18 @@ class CustomIconButtonBookmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: 'customIconButtonBookmark',
-      child: IconButton(
-        onPressed: onPressed,
-        icon:  Icon(
-          Icons.bookmark,
-          color: mainColor,
-          size: 32,
-          shadows: const [
-            Shadow(
-              color: blackColor,
-              blurRadius: 5,
-            )
-          ],
-        ),
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(
+        Icons.bookmark,
+        color: mainColor,
+        size: 36,
+        shadows: const [
+          Shadow(
+            color: blackColor,
+            blurRadius: 5,
+          )
+        ],
       ),
     );
   }

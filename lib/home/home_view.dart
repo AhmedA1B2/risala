@@ -13,13 +13,15 @@ class HomeView extends StatefulWidget {
       required this.keyBottomBarForTuorial2,
       required this.keyBottomBarForTuorial3,
       required this.keyBottomBarForTuorial4,
-      required this.onTutorialNext});
+      required this.onTutorialNext,
+      this.onPressedCustomIconButtonBookmark});
 
   final GlobalKey keyBottomBarForTuorial1;
   final GlobalKey keyBottomBarForTuorial2;
   final GlobalKey keyBottomBarForTuorial3;
   final GlobalKey keyBottomBarForTuorial4;
   final VoidCallback onTutorialNext;
+  final void Function()? onPressedCustomIconButtonBookmark;
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -36,7 +38,10 @@ class _HomeViewState extends State<HomeView> {
           topMargin: 0,
           topBorderRadius: topBorderRadius,
           child: showRightView == 0
-              ? const CustomList()
+              ? CustomList(
+                  onPressedCustomIconButtonBookmark:
+                      widget.onPressedCustomIconButtonBookmark,
+                )
               : showRightView == 1
                   ? const QiblaView()
                   : showRightView == 2
