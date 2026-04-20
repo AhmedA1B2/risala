@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math; // أضفنا هذه المكتبة لعمليات الحساب البسيطة
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -54,12 +55,15 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
   List<SurahToken>? _processedTokens;
   bool _isLoading = true;
 
-  // تخزين الـ Spans لعدم إعادة بنائها عند كل SetState (مهم جداً للأداء)
+  // تخزين الـ Spans لعدم إعادة بنائها
   List<InlineSpan>? _cachedSpans;
 
   final Map<int, GlobalKey> _verseKeys = {};
 
   String riwoya = sharedPref.getString("riwoya") ?? "hafs";
+
+  // المتغيرات الجديدة الخاصة بالرسم التدريجي
+  int _currentRenderLimit = 30; // عدد الآيات التي سيتم رسمها مبدئياً
 
   @override
   void initState() {
@@ -71,9 +75,7 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
     try {
       if (_surahCache.containsKey(widget.surahNumber)) {
         _processedTokens = _surahCache[widget.surahNumber];
-        setState(() {
-          _isLoading = false;
-        });
+        _startProgressiveRendering();
         return;
       }
 
@@ -87,24 +89,65 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
         'surahNumber': widget.surahNumber,
       });
 
-      // 🔥 نحفظها في الكاش
       _surahCache[widget.surahNumber] = resultTokens;
 
       if (mounted) {
-        setState(() {
-          _processedTokens = resultTokens;
-          _isLoading = false;
-        });
+        _processedTokens = resultTokens;
+        _startProgressiveRendering();
       }
     } catch (e) {
       debugPrint("Error loading surah: $e");
     }
   }
 
+  // هذه الدالة تبدأ عملية الرسم التدريجي لكي تفتح الشاشة فوراً
+  void _startProgressiveRendering() {
+    // إذا كان المستخدم قادماً لآية محددة، نضمن أن يتم رسم السورة حتى تلك الآية
+    if (widget.selectedVerse != null) {
+      _currentRenderLimit = math.max(30, widget.selectedVerse! + 5);
+    } else {
+      _currentRenderLimit = 30;
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    // نبدأ بتحميل باقي السورة في الخلفية إذا كانت أطول من الحد الحالي
+    _renderRestProgressively();
+  }
+
+  // هذه الدالة تضيف الآيات المتبقية على دفعات (كل 30 آية) لمنع تجميد الشاشة
+  Future<void> _renderRestProgressively() async {
+    if (_processedTokens == null) return;
+    
+    // الحصول على رقم آخر آية في السورة
+    int maxVerses = _processedTokens!.isNotEmpty 
+        ? (_processedTokens!.last.verseNumber ?? 300) 
+        : 300;
+
+    while (_currentRenderLimit < maxVerses) {
+      // ننتظر قليلاً (جزء من الثانية) لنعطي الشاشة فرصة للتنفس والاستجابة للمس
+      await Future.delayed(const Duration(milliseconds: 50));
+      
+      if (!mounted) return; // إذا خرج المستخدم من الصفحة نوقف العملية
+      
+      setState(() {
+        _currentRenderLimit += 30; // إضافة 30 آية جديدة
+      });
+    }
+    
+  }
+
   void _buildSpansIfNeeded() {
     _cachedSpans = [];
 
     for (final token in _processedTokens!) {
+      // التعديل السحري: نتوقف عن بناء العناصر إذا تجاوزنا الحد المسموح برسمه حالياً
+      if (token.verseNumber != null && token.verseNumber! > _currentRenderLimit) {
+        break; 
+      }
+
       if (token.text.isEmpty && token.verseNumber != null) {
         final key =
             _verseKeys.putIfAbsent(token.verseNumber!, () => GlobalKey());
@@ -123,7 +166,6 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
         sharedPref.setString("selectedValue2", fontFamily);
       }
 
-      // 2. النصوص
       if (token.isSymbol) {
         final bool isVerseNum = token.text.contains('﴿');
         _cachedSpans!.add(TextSpan(
@@ -179,14 +221,10 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
       return Center(child: CircularProgressIndicator(color: scandColor));
     }
 
-    // بناء الـ Spans عند كل build لضمان تحديث الألوان
-    // (سريعة جداً الآن لأن البيانات جاهزة)
     _buildSpansIfNeeded();
 
-    // إرسال الـ Contexts مرة واحدة بعد البناء
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_verseKeys.isNotEmpty) {
-        // نتحقق فقط من الآيات المطلوبة للتمرير لتقليل الضغط
         if (widget.selectedVerse != null &&
             _verseKeys.containsKey(widget.selectedVerse)) {
           final ctx = _verseKeys[widget.selectedVerse]!.currentContext;
@@ -194,7 +232,6 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
             widget.onVerseContext?.call(widget.selectedVerse!, ctx);
           }
         }
-        // أو يمكنك ترك اللوب كما هو إذا كنت تحتاج كل المواقع
         _verseKeys.forEach((k, v) {
           if (v.currentContext != null) {
             widget.onVerseContext?.call(k, v.currentContext!);
@@ -205,8 +242,6 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
-      // RepaintBoundary: هذا الودجت يمنع إعادة رسم النص بالكامل عند التمرير
-      // أو عند تحديث مشغل الصوت خارج هذا الودجت
       child: RepaintBoundary(
         child: Directionality(
           textDirection: TextDirection.rtl,
@@ -225,8 +260,6 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
                     ),
                   ),
                 ),
-              // استخدام const هنا غير ممكن بسبب البيانات المتغيرة، لكن SelectableText قد يكون أثقل
-              // RichText هو الأخف وزناً
               Text.rich(
                 TextSpan(children: _cachedSpans),
                 textAlign: TextAlign.justify,
@@ -245,18 +278,15 @@ List<SurahToken> processSurahInBackground(Map<String, dynamic> params) {
   final List<dynamic> rawData = params['data'];
   final int surahNumber = params['surahNumber'];
 
-  // تحويل البيانات الخام
   final List<Quran> allQuran = rawData.map((e) => Quran.fromMap(e)).toList();
 
   final currentSurah =
       allQuran.where((v) => v.surahNumber == surahNumber).toList();
   final List<SurahToken> tokens = [];
 
-  // تجميع الـ Regex مرة واحدة (تحسين أداء)
   final RegExp regex = RegExp(r'([۞۩۝ٖٞٗ]+|[^\s۞۩۝ٖٞٗ]+)');
   final RegExp symbolRegex = RegExp(r'[۞۩۝ٖٞٗ]');
 
-  // دالة التصحيح الداخلية
   String fixText(String text) {
     return text.replaceAll('ٞ', 'ٌ').replaceAll('ٗ', 'ً').replaceAll('ٖ', 'ٍ');
   }
@@ -265,7 +295,6 @@ List<SurahToken> processSurahInBackground(Map<String, dynamic> params) {
     final int verseNum = verse.verseNumber;
     final String verseText = fixText(verse.content);
 
-    // إضافة مؤشر بداية الآية (وهمي لضبط المفاتيح لاحقاً)
     tokens.add(SurahToken(text: "", isSymbol: true, verseNumber: verseNum));
 
     final matches = regex.allMatches(verseText);
@@ -282,7 +311,8 @@ List<SurahToken> processSurahInBackground(Map<String, dynamic> params) {
           inPostMarkMode = true;
           postMarkCounter = -1;
         }
-        tokens.add(SurahToken(text: '$tokenText ', isSymbol: true));
+        // التعديل هنا: إضافة رقم الآية حتى للرموز لكي لا تختل خوارزمية الرسم التدريجي
+        tokens.add(SurahToken(text: '$tokenText ', isSymbol: true, verseNumber: verseNum));
       } else {
         int effectivePosition;
         if (!inPostMarkMode) {
@@ -303,7 +333,6 @@ List<SurahToken> processSurahInBackground(Map<String, dynamic> params) {
       }
     }
 
-    // رقم الآية
     tokens.add(SurahToken(
       text: ' ﴿$verseNum﴾ ',
       isSymbol: true,

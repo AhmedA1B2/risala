@@ -105,34 +105,52 @@ class QuranHafsAudioService {
 ///////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
   // تشغيل كلمة محددة
-  Future<void> playWord(String verseKey, int position, int recitationId) async {
-    if (_accessToken == null) await fetchAccessToken();
+// دالة لجلب وتشغيل صوت كلمة محددة في القرآن الكريم
+// تشغيل كلمة محددة بناءً على أرقام (السورة، الآية، الموقع)
+  Future<void> playWord(int surah, int verse, String verseKey, int position,
+      int recitationId) async {
+    debugPrint("=== بدء محاولة تشغيل الكلمة (بناء يدوي للرابط) ===");
+    debugPrint("السورة: $surah | الآية: $verse | الكلمة: $position");
 
-    final response = await http.get(
-      Uri.parse(
-          "https://apis.quran.foundation/content/api/v4/verses/by_key/$verseKey?words=true&audio=$recitationId"),
-      headers: {
-        "Accept": "application/json",
-        "x-auth-token": _accessToken!,
-        "x-client-id": clientId,
-      },
-    );
+    try {
+      // 1. التأكد من التوكن
+      if (_accessToken == null) {
+        await fetchAccessToken();
+      }
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final words = data["verse"]["words"] as List<dynamic>;
-      final word = words.firstWhere((w) => w["position"] == position,
-          orElse: () => null);
+      // 2. طلب البيانات من API (للحفاظ على تدفق الكود الخاص بك)
+      final String apiUrl =
+          "https://apis.quran.foundation/content/api/v4/verses/by_key/$verseKey?words=true&audio=$recitationId";
 
-      if (word != null && word["audio_url"] != null) {
-        String audioUrl = word["audio_url"];
-        if (!audioUrl.startsWith("http"))
-          audioUrl = "https://verses.quran.com/$audioUrl";
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          "Accept": "application/json",
+          "x-auth-token": _accessToken!,
+          "x-client-id": clientId,
+        },
+      );
 
+      if (response.statusCode == 200) {
+        // 3. تحويل الأرقام إلى تنسيق 000 (ثلاث خانات)
+        String s = surah.toString().padLeft(3, '0');
+        String v = verse.toString().padLeft(3, '0');
+        String p = position.toString().padLeft(3, '0');
+
+        // 4. بناء الرابط يدوياً كما أردت
+        String audioUrl = "https://audio.qurancdn.com/wbw/${s}_${v}_${p}.mp3";
+
+        debugPrint("جاري تشغيل الرابط المخصص: $audioUrl");
+
+        // 5. التنفيذ
         await player.stop();
         await player.setUrl(audioUrl);
-        player.play();
+        await player.play();
+      } else {
+        debugPrint("خطأ في الاتصال بالخادم: ${response.statusCode}");
       }
+    } catch (error) {
+      debugPrint("حدث خطأ غير متوقع: $error");
     }
   }
 

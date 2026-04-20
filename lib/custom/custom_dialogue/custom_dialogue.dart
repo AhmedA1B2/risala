@@ -28,7 +28,6 @@ class _CustomDialogueState extends State<CustomDialogue> {
   void initState() {
     super.initState();
 
-    // تشغيل الأنميشن فور ظهور الودجت
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         dialogueAnimatedScale = 1;
@@ -45,16 +44,17 @@ class _CustomDialogueState extends State<CustomDialogue> {
         curve: Curves.bounceOut,
         scale: dialogueAnimatedScale,
         child: Center(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.7,
-            height: MediaQuery.of(context).size.height * 0.25,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.7,
+            ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         widget.text,
@@ -64,6 +64,7 @@ class _CustomDialogueState extends State<CustomDialogue> {
                           fontSize: 22,
                         ),
                       ),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [

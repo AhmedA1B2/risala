@@ -589,7 +589,7 @@ class _QuranViewState extends State<QuranView> {
               print("[][][][][][][][][][][][][][][][][][][][][][][][][]");
               setState(() => isloading = true);
               await _audioService.playWord(
-                  "$surahNumber:$highlightedWordVerse", highlightedWord!, 7);
+                  surahNumber,highlightedWordVerse!,"$surahNumber:$highlightedWordVerse", highlightedWord!, 7);
               setState(() => isloading = false);
             },
           ),
