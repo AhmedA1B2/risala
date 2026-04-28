@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:math' as math; // أضفنا هذه المكتبة لعمليات الحساب البسيطة
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -55,15 +55,13 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
   List<SurahToken>? _processedTokens;
   bool _isLoading = true;
 
-  // تخزين الـ Spans لعدم إعادة بنائها
   List<InlineSpan>? _cachedSpans;
 
   final Map<int, GlobalKey> _verseKeys = {};
 
   String riwoya = sharedPref.getString("riwoya") ?? "hafs";
 
-  // المتغيرات الجديدة الخاصة بالرسم التدريجي
-  int _currentRenderLimit = 30; // عدد الآيات التي سيتم رسمها مبدئياً
+  int _currentRenderLimit = 30;
 
   @override
   void initState() {
@@ -100,9 +98,7 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
     }
   }
 
-  // هذه الدالة تبدأ عملية الرسم التدريجي لكي تفتح الشاشة فوراً
   void _startProgressiveRendering() {
-    // إذا كان المستخدم قادماً لآية محددة، نضمن أن يتم رسم السورة حتى تلك الآية
     if (widget.selectedVerse != null) {
       _currentRenderLimit = math.max(30, widget.selectedVerse! + 5);
     } else {
@@ -113,39 +109,34 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
       _isLoading = false;
     });
 
-    // نبدأ بتحميل باقي السورة في الخلفية إذا كانت أطول من الحد الحالي
     _renderRestProgressively();
   }
 
-  // هذه الدالة تضيف الآيات المتبقية على دفعات (كل 30 آية) لمنع تجميد الشاشة
   Future<void> _renderRestProgressively() async {
     if (_processedTokens == null) return;
-    
-    // الحصول على رقم آخر آية في السورة
-    int maxVerses = _processedTokens!.isNotEmpty 
-        ? (_processedTokens!.last.verseNumber ?? 300) 
+
+    int maxVerses = _processedTokens!.isNotEmpty
+        ? (_processedTokens!.last.verseNumber ?? 300)
         : 300;
 
     while (_currentRenderLimit < maxVerses) {
-      // ننتظر قليلاً (جزء من الثانية) لنعطي الشاشة فرصة للتنفس والاستجابة للمس
       await Future.delayed(const Duration(milliseconds: 50));
-      
-      if (!mounted) return; // إذا خرج المستخدم من الصفحة نوقف العملية
-      
+
+      if (!mounted) return;
+
       setState(() {
-        _currentRenderLimit += 30; // إضافة 30 آية جديدة
+        _currentRenderLimit += 30;
       });
     }
-    
   }
 
   void _buildSpansIfNeeded() {
     _cachedSpans = [];
 
     for (final token in _processedTokens!) {
-      // التعديل السحري: نتوقف عن بناء العناصر إذا تجاوزنا الحد المسموح برسمه حالياً
-      if (token.verseNumber != null && token.verseNumber! > _currentRenderLimit) {
-        break; 
+      if (token.verseNumber != null &&
+          token.verseNumber! > _currentRenderLimit) {
+        break;
       }
 
       if (token.text.isEmpty && token.verseNumber != null) {
@@ -161,7 +152,8 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
 
       String fontFamily = quranfontFamily;
 
-      if (fontFamily != "UthmanicQaloun" && fontFamily != "UthmanicHafs") {
+      if (fontFamily != "UthmanicQaloun" &&
+          fontFamily != "UthmanicHafs") {
         fontFamily = "UthmanicHafs";
         sharedPref.setString("selectedValue2", fontFamily);
       }
@@ -199,7 +191,6 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
                 ? Colors.amber
                 : (isWordSelected ? Colors.blue : Colors.black),
             backgroundColor: isWordSelected
-                // ignore: deprecated_member_use
                 ? Colors.blue.withOpacity(0.15)
                 : Colors.transparent,
             height: 2,
@@ -278,52 +269,52 @@ List<SurahToken> processSurahInBackground(Map<String, dynamic> params) {
   final List<dynamic> rawData = params['data'];
   final int surahNumber = params['surahNumber'];
 
-  final List<Quran> allQuran = rawData.map((e) => Quran.fromMap(e)).toList();
+  final List<Quran> allQuran =
+      rawData.map((e) => Quran.fromMap(e)).toList();
 
   final currentSurah =
       allQuran.where((v) => v.surahNumber == surahNumber).toList();
+
   final List<SurahToken> tokens = [];
 
-  final RegExp regex = RegExp(r'([۞۩۝ٖٞٗ]+|[^\s۞۩۝ٖٞٗ]+)');
-  final RegExp symbolRegex = RegExp(r'[۞۩۝ٖٞٗ]');
+  final RegExp regex =
+      RegExp(r'([۞۩۝ٖٞٗ]+|[^\s۞۩۝ٖٞٗ]+)');
+  final RegExp symbolRegex =
+      RegExp(r'[۞۩۝ٖٞٗ]');
 
   String fixText(String text) {
-    return text.replaceAll('ٞ', 'ٌ').replaceAll('ٗ', 'ً').replaceAll('ٖ', 'ٍ');
+    return text
+        .replaceAll('ٞ', 'ٌ')
+        .replaceAll('ٗ', 'ً')
+        .replaceAll('ٖ', 'ٍ');
   }
 
   for (final verse in currentSurah) {
     final int verseNum = verse.verseNumber;
     final String verseText = fixText(verse.content);
 
-    tokens.add(SurahToken(text: "", isSymbol: true, verseNumber: verseNum));
+    tokens.add(SurahToken(
+        text: "", isSymbol: true, verseNumber: verseNum));
 
     final matches = regex.allMatches(verseText);
-    int preMarkCounter = 0;
-    int postMarkCounter = -1;
-    bool inPostMarkMode = false;
+
+    int wordCounter = 0;
 
     for (final match in matches) {
       final tokenText = match.group(0)!;
       final bool isSymbol = symbolRegex.hasMatch(tokenText);
 
       if (isSymbol) {
-        if (tokenText.contains('۞')) {
-          inPostMarkMode = true;
-          postMarkCounter = -1;
-        }
-        // التعديل هنا: إضافة رقم الآية حتى للرموز لكي لا تختل خوارزمية الرسم التدريجي
-        tokens.add(SurahToken(text: '$tokenText ', isSymbol: true, verseNumber: verseNum));
+        tokens.add(SurahToken(
+          text: '$tokenText ',
+          isSymbol: true,
+          verseNumber: verseNum,
+        ));
       } else {
-        int effectivePosition;
-        if (!inPostMarkMode) {
-          preMarkCounter++;
-          effectivePosition = preMarkCounter;
-        } else {
-          postMarkCounter++;
-          effectivePosition = postMarkCounter;
-        }
+        wordCounter++;
 
-        final wordKey = "$verseNum-$effectivePosition";
+        final wordKey = "$verseNum-$wordCounter";
+
         tokens.add(SurahToken(
           text: '$tokenText ',
           isSymbol: false,
