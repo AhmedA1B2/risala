@@ -58,6 +58,8 @@ dependencies:
   intl: ^0.20.2
   geocoding: ^3.0.0
   sensors_plus: ^7.0.0
+  video_player: ^2.10.1
+  vibration: ^3.1.8
 
 dev_dependencies:
   flutter_test:
@@ -122,6 +124,7 @@ flutter:
     - assets/images/
     - assets/images/streak/0/
     - assets/images/streak/1/
+    - assets/images/streak/animation/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

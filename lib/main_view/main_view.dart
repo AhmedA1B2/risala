@@ -12,6 +12,7 @@ import 'package:risala/main.dart';
 import 'package:risala/menu/menu.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/quran/quran_view/quran_view.dart';
+import 'package:risala/streak/video/my_video_player.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
@@ -23,13 +24,10 @@ class MainView extends StatefulWidget {
   State<MainView> createState() => _MainViewState();
 }
 
-class _MainViewState extends State<MainView> {
-  final GlobalKey<CustomMenuAnimation5State> menuKey =
-      GlobalKey<CustomMenuAnimation5State>();
-  final GlobalKey<CustomMenuButton1State> buttonMenuKey =
-      GlobalKey<CustomMenuButton1State>();
+class _MainViewState extends State<MainView> with RouteAware {
+  final GlobalKey<CustomMenuAnimation5State> menuKey = GlobalKey();
+  final GlobalKey<CustomMenuButton1State> buttonMenuKey = GlobalKey();
 
-  // Tutorial Keys
   final GlobalKey keyBottomBarForTuorial1 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial2 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial3 = GlobalKey();
@@ -37,27 +35,50 @@ class _MainViewState extends State<MainView> {
 
   late TutorialOverlay tutorial;
 
-  int? surahsaved = sharedPref.getInt('surahsaved');
-  String? namesaved = sharedPref.getString('namesaved');
-
   bool isMenuOpen = false;
+  bool isVisible = false;
+
   List<Map<String, dynamic>>? searchResults;
   Translation? translation;
-//
+
+  int streakCount = sharedPref.getInt("streakCount") ?? 0;
+
+  @override
+  void initState() {
+    super.initState();
+    loadAllTranslations();
+    _requestNotificationPermission();
+    _reloadFontSettings();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPush() => isVisible = true;
+
+  @override
+  void didPopNext() => isVisible = true;
+
+  @override
+  void didPushNext() => isVisible = false;
+
+  @override
+  void didPop() => isVisible = false;
+
   void _reloadFontSettings() {
     quranfontSize = sharedPref.getDouble("valueOfSize2") ?? 36;
     mytitlefontSize = sharedPref.getDouble("valueOfSize") ?? 26;
     quranfontFamily = sharedPref.getString("selectedValue2") ?? "Amiri";
-  }
-
-//
-  @override
-  void initState() {
-    super.initState();
-    // نبدأ بتحميل البيانات أولاً
-    loadAllTranslations();
-    _requestNotificationPermission();
-    _reloadFontSettings();
   }
 
   Future<void> loadAllTranslations() async {
@@ -67,7 +88,6 @@ class _MainViewState extends State<MainView> {
         translation = list.first;
       });
 
-      // بعد التأكد من أن الترجمة جاهزة، نقوم بتهيئة التوجيه
       if (sharedPref.getBool("oldUser") != true) {
         _initTutorial();
       }
@@ -75,39 +95,22 @@ class _MainViewState extends State<MainView> {
   }
 
   void _initTutorial() {
-    // هذه الدالة لا تُستدعى إلا و translation مؤكد وجوده
     tutorial = TutorialOverlay(
       context: context,
       steps: [
         TutorialStep(
-            key: keyBottomBarForTuorial4,
-            text: translation!.tutorialTasbih.isNotEmpty
-                ? translation!.tutorialTasbih
-                : "هنا السبحة توجد فيها بعض الأذكار وستكون هناك المزيد من الأذكار مستقبلا"),
+            key: keyBottomBarForTuorial4, text: translation!.tutorialTasbih),
         TutorialStep(
             key: keyBottomBarForTuorial3,
-            text: translation!.tutorialNotifications.isNotEmpty
-                ? translation!.tutorialNotifications
-                : "هنا تعرض إشعاراتك المخصصة، ومن هنا يمكنك إضافة إشعارات جديدة."),
+            text: translation!.tutorialNotifications),
         TutorialStep(
-            key: keyBottomBarForTuorial2,
-            text: translation!.tutorialCompass.isNotEmpty
-                ? translation!.tutorialCompass
-                : "هنا توجد البوصلة التي تشير إلى القبلة. قد لا تكون الاتجاهات دقيقة في بعض الشبكات وفي بعض الأجهزة."),
+            key: keyBottomBarForTuorial2, text: translation!.tutorialCompass),
         TutorialStep(
-            key: keyBottomBarForTuorial1,
-            text: translation!.tutorialHome.isNotEmpty
-                ? translation!.tutorialHome
-                : "هنا الصفحة الرئيسية حيث يوجد القرآن الكريم وتعرض السور هنا "),
-        TutorialStep(
-            key: buttonMenuKey,
-            text: translation!.tutorialMenu.isNotEmpty
-                ? translation!.tutorialMenu
-                : "هذه القائمة يمكنك تحكم منها ببعض الإعدادات وتغيير اللغة متى شئت."),
+            key: keyBottomBarForTuorial1, text: translation!.tutorialHome),
+        TutorialStep(key: buttonMenuKey, text: translation!.tutorialMenu),
       ],
     );
 
-    // تشغيل التوجيه بعد بناء الواجهة مباشرة
     WidgetsBinding.instance.addPostFrameCallback((_) => tutorial.start());
   }
 
@@ -118,89 +121,80 @@ class _MainViewState extends State<MainView> {
     }
   }
 
+  String getStreakVideoPath() {
+    if (streakCount <= 9) return "assets/images/streak/animation/1.mp4";
+    if (streakCount <= 29) return "assets/images/streak/animation/2.mp4";
+    if (streakCount <= 49) return "assets/images/streak/animation/3.mp4";
+    if (streakCount <= 99) return "assets/images/streak/animation/4.mp4";
+    return "assets/images/streak/animation/5.mp4";
+  }
+
+  void _handleVideoFinished() {
+    sharedPref.setBool("isVideoWatched", true);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      isGoalCompletedNotifier.value = false;
+    });
+  }
+
   Future<void> _openQuranViewSaved() async {
-    surahsaved = sharedPref.getInt('surahsaved');
-    namesaved = sharedPref.getString('namesaved');
-    if (surahsaved != null && namesaved != null) {
+    final surah = sharedPref.getInt('surahsaved');
+    final name = sharedPref.getString('namesaved');
+
+    if (surah != null && name != null) {
       await Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => QuranView(
-            surahNumber: surahsaved!,
+          builder: (_) => QuranView(
+            surahNumber: surah,
             x: 1,
           ),
         ),
       );
-
-      setState(() {
-        surahsaved = sharedPref.getInt('surahsaved');
-        namesaved = sharedPref.getString('namesaved');
-      });
     } else {
-      if (translation != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: CustomSnackBar(
-              text: translation!.dontSaved.isNotEmpty
-                  ? translation!.dontSaved
-                  : "لم يتم حفظ أي اية",
-            ),
-            backgroundColor: const Color.fromARGB(0, 255, 193, 7),
-            elevation: 0,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: CustomSnackBar(text: translation!.dontSaved),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      );
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (translation == null) {
-      return const Scaffold(
-        body: Center(child: CustomLoadingScreen1()),
-      );
-    }
-
+  Widget _buildMainContent() {
     return CustomMenuAnimation5(
       key: menuKey,
-      title: translation!.theQuran.isNotEmpty
-          ? translation!.theQuran
-          : "ٱلْقُرْآنُ",
+      title: translation!.theQuran,
       onMenuChanged: (value) {
-        setState(() {
-          isMenuOpen = value;
-        });
-        if (sharedPref.getBool("oldUser") != true) {
-          tutorial.next();
-        }
+        setState(() => isMenuOpen = value);
       },
       buttonMenuKey: buttonMenuKey,
       mainView: Stack(
         children: [
           searchResults == null
               ? HomeView(
-                  onPressedCustomIconButtonBookmark: _openQuranViewSaved,
-                  keyBottomBarForTuorial1: keyBottomBarForTuorial1,
-                  keyBottomBarForTuorial2: keyBottomBarForTuorial2,
-                  keyBottomBarForTuorial3: keyBottomBarForTuorial3,
-                  keyBottomBarForTuorial4: keyBottomBarForTuorial4,
                   onTutorialNext: () {
                     if (sharedPref.getBool("oldUser") != true) {
                       tutorial.next();
                     }
                   },
+                  onPressedCustomIconButtonBookmark: _openQuranViewSaved,
+                  keyBottomBarForTuorial1: keyBottomBarForTuorial1,
+                  keyBottomBarForTuorial2: keyBottomBarForTuorial2,
+                  keyBottomBarForTuorial3: keyBottomBarForTuorial3,
+                  keyBottomBarForTuorial4: keyBottomBarForTuorial4,
                 )
               : ListView.builder(
                   itemCount: searchResults!.length,
-                  itemBuilder: (context, index) {
+                  itemBuilder: (_, index) {
                     final verse = searchResults![index];
                     return ListTile(
                       onTap: () async {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => QuranView(
+                            builder: (_) => QuranView(
                               surahNumber: verse['surah_number'],
                               searchedVerse: verse['verse_number'],
                               x: 2,
@@ -210,10 +204,6 @@ class _MainViewState extends State<MainView> {
                       },
                       title: Text(
                         verse['content'],
-                        textAlign: TextAlign.right,
-                      ),
-                      subtitle: Text(
-                        "${translation!.surah} ${verse['surah_number']} - ${translation!.verse} ${verse['verse_number']}",
                         textAlign: TextAlign.right,
                       ),
                     );
@@ -240,23 +230,40 @@ class _MainViewState extends State<MainView> {
         saveText: translation!.save,
       ),
       searchWidget: CustomSearchBar(
-        onSearchBarTap: () {
-          menuKey.currentState?.closeMenu();
-          buttonMenuKey.currentState?.closeButtonMenu();
-        },
-        onSearchBarChanged: (value) {
-          menuKey.currentState?.closeMenu();
-          buttonMenuKey.currentState?.closeButtonMenu();
-        },
         onResults: (results) {
-          setState(() {
-            searchResults = results;
-          });
+          setState(() => searchResults = results);
         },
         aya: translation!.verse,
         surah: translation!.surah,
         hintText: translation!.searchHintText,
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (translation == null) {
+      return const Scaffold(
+        body: Center(child: CustomLoadingScreen1()),
+      );
+    }
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: isGoalCompletedNotifier,
+      builder: (context, isGoalCompleted, _) {
+        final isVideoWatched = sharedPref.getBool("isVideoWatched") ?? false;
+
+        final shouldPlayVideo = isVisible && isGoalCompleted && !isVideoWatched;
+
+        if (shouldPlayVideo) {
+          return MyVideoPlayer(
+            video: getStreakVideoPath(),
+            onFinished: _handleVideoFinished,
+          );
+        }
+
+        return _buildMainContent();
+      },
     );
   }
 }

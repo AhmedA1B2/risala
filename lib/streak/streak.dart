@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:risala/main.dart';
 import 'package:risala/vars/colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'usage_tracker.dart';
 
 class Streak extends StatefulWidget {
@@ -18,30 +18,64 @@ class _StreakState extends State<Streak> {
   @override
   void initState() {
     super.initState();
+
     _loadInitialData();
 
     usageTracker = UsageTracker(
-      onStreakUpdated: (count, completed) {
-        setState(() {
-          streakCount = count;
-          isGoalCompleted = completed;
-        });
-      },
+      onStreakUpdated: _onStreakUpdated,
     );
+
     usageTracker.init();
   }
 
-  Future<void> _loadInitialData() async {
-    final prefs = await SharedPreferences.getInstance();
+  void _onStreakUpdated(int count, bool completed) {
+    if (!mounted) return;
+
     setState(() {
-      streakCount = prefs.getInt("streakCount") ?? 0;
-      int seconds = prefs.getInt("todayUsageSeconds") ?? 0;
-      isGoalCompleted = seconds >= 180;
+      streakCount = count;
+      isGoalCompleted = completed;
     });
+
+    sharedPref.setBool("isGoalCompleted", completed);
+
+    _updateNotifierSafely(completed);
+  }
+
+  void _updateNotifierSafely(bool value) {
+    if (isGoalCompletedNotifier.value == value) return;
+
+    // 🔥 أهم سطر: يمنع crash أثناء build
+    Future.microtask(() {
+      if (mounted) {
+        isGoalCompletedNotifier.value = value;
+      }
+    });
+  }
+
+  Future<void> _loadInitialData() async {
+    final count = sharedPref.getInt("streakCount") ?? 0;
+    final seconds = sharedPref.getInt("todayUsageSeconds") ?? 0;
+    final completed = seconds >= 180;
+
+    if (!mounted) return;
+
+    setState(() {
+      streakCount = count;
+      isGoalCompleted = completed;
+    });
+
+    sharedPref.setBool("isGoalCompleted", completed);
+
+    _updateNotifierSafely(completed);
   }
 
   String getStreakImagePath() {
     String folder = isGoalCompleted ? "1" : "0";
+
+    if (isGoalCompleted && sharedPref.getBool("isVideoWatched") != true) {
+      sharedPref.setBool("showVideo", true);
+    }
+
     String fileName;
     if (streakCount <= 9) {
       fileName = "1.png";
@@ -54,16 +88,16 @@ class _StreakState extends State<Streak> {
     } else {
       fileName = "5.png";
     }
+
     return "assets/images/streak/$folder/$fileName";
   }
 
-  // 💡 الدالة المسؤولة عن إظهار النافذة المنبثقة
   void _showStreakInfoDialog() {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: scandColor, // لون خلفية مناسب
+          backgroundColor: scandColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Row(
@@ -82,7 +116,6 @@ class _StreakState extends State<Streak> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              // استدعاء دالة بناء صفوف المستويات
               _buildTierRow("1.png", "0 - 9 أيام", 0),
               _buildTierRow("2.png", "10 - 29 يوم", 10),
               _buildTierRow("3.png", "30 - 49 يوم", 30),
@@ -102,13 +135,9 @@ class _StreakState extends State<Streak> {
     );
   }
 
-  // 💡 دالة لبناء كل مستوى في النافذة المنبثقة للتحقق هل هو مفتوح أم مغلق
   Widget _buildTierRow(String fileName, String title, int requiredDays) {
-    // المستوى يكون "مفتوحاً" إذا كان الستريك الحالي أكبر من أو يساوي المطلوب للمستوى
     bool isUnlocked = streakCount >= requiredDays;
-    // إذا مفتوح نأخذ من مجلد 1، إذا مغلق من مجلد 0
     String folder = isUnlocked ? "1" : "0";
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -118,18 +147,17 @@ class _StreakState extends State<Streak> {
           Text(
             title,
             style: TextStyle(
-              color: isUnlocked
-                  ? Colors.white
-                  : Colors.white38, // لون باهت إذا كان مغلقاً
+              color: isUnlocked ? Colors.white : Colors.white38,
               fontWeight: isUnlocked ? FontWeight.bold : FontWeight.normal,
               fontSize: 16,
             ),
           ),
           const Spacer(),
-          if (isUnlocked)
-            const Icon(Icons.check_circle, color: Colors.green, size: 20),
-          if (!isUnlocked)
-            const Icon(Icons.lock, color: Colors.white38, size: 20),
+          Icon(
+            isUnlocked ? Icons.check_circle : Icons.lock,
+            color: isUnlocked ? Colors.green : Colors.white38,
+            size: 20,
+          ),
         ],
       ),
     );
@@ -137,29 +165,26 @@ class _StreakState extends State<Streak> {
 
   @override
   Widget build(BuildContext context) {
-    // 💡 استخدام GestureDetector لجعل العنصر قابلاً للنقر
     return GestureDetector(
-      onTap: _showStreakInfoDialog, // فتح النافذة عند الضغط
-      child: Container(
-        padding: const EdgeInsets.all(4.0),
-        color: Colors.transparent, // لجعل المساحة كلها قابلة للنقر
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "$streakCount",
-              style: const TextStyle(
-                  color: whiteColor, fontWeight: FontWeight.bold, fontSize: 20),
+      onTap: _showStreakInfoDialog,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "$streakCount",
+            style: const TextStyle(
+              color: whiteColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
             ),
-            const SizedBox(width: 8),
-            Image.asset(
-              getStreakImagePath(),
-              width: 32,
-              key: ValueKey(getStreakImagePath()),
-            )
-          ],
-        ),
+          ),
+          const SizedBox(width: 8),
+          Image.asset(
+            getStreakImagePath(),
+            width: 32,
+            key: ValueKey(getStreakImagePath()),
+          )
+        ],
       ),
     );
   }

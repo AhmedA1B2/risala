@@ -7,6 +7,10 @@ import 'package:risala/custom/custom_splash_screen/custom_splash_screen1.dart';
 import 'package:flutter/services.dart';
 
 late SharedPreferences sharedPref;
+late ValueNotifier<bool> isGoalCompletedNotifier;
+
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +18,13 @@ void main() async {
   await Hive.initFlutter();
   await Hive.openBox("saved_notifications");
   await NotificationService.instance.init();
+
   sharedPref = await SharedPreferences.getInstance();
+
+  // 🔥 أهم سطر (كان ناقص)
+  isGoalCompletedNotifier =
+      ValueNotifier(sharedPref.getBool("isGoalCompleted") ?? false);
+
   await NotificationService.instance.loadAllTranslations();
 
   await SystemChrome.setPreferredOrientations([
@@ -27,17 +37,21 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     final bool oldUser = sharedPref.getBool("oldUser") ?? false;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      //debugShowCheckedModeBanner: false,
+      navigatorObservers: [routeObserver],
       home:
           oldUser ? const CustomSplashScreen1() : const CustomChooseLangView(),
     );
   }
 }
-//flutter run --release
-//flutter build apk --split-per-abi\
-//flutter build appbundle
+
+//MediaQuery.of(context).size.width 
+//flutter run --release 
+//flutter build apk --split-per-abi\ 
+//flutter build 

@@ -61,12 +61,12 @@ class UsageTracker with WidgetsBindingObserver {
     if (_currentDateStr != realToday) {
       _currentDateStr = realToday;
       await _checkNewDay(); // تحديث البيانات لليوم الجديد
-      
+
       // إخبار الواجهة أن الهدف لم يكتمل اليوم ليعود للمجلد 0
       if (onStreakUpdated != null) {
         final prefs = await SharedPreferences.getInstance();
         int currentStreak = prefs.getInt("streakCount") ?? 0;
-        onStreakUpdated!(currentStreak, false); 
+        onStreakUpdated!(currentStreak, false);
       }
     }
   }
