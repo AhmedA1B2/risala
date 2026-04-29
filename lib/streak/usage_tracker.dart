@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import 'package:risala/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UsageTracker with WidgetsBindingObserver {
@@ -77,6 +78,7 @@ class UsageTracker with WidgetsBindingObserver {
     final lastOpenDate = prefs.getString("lastOpenDate");
 
     if (lastOpenDate != today) {
+      sharedPref.setBool("isVideoWatched", false);
       await prefs.setInt("todayUsageSeconds", 0);
       _todaySeconds = 0;
       isGoalCompleted = false;
