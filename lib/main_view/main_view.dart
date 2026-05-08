@@ -16,6 +16,7 @@ import 'package:risala/streak/video/my_video_player.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
+import 'package:vibration/vibration.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -258,7 +259,10 @@ class _MainViewState extends State<MainView> with RouteAware {
         if (shouldPlayVideo) {
           return MyVideoPlayer(
             video: getStreakVideoPath(),
-            onFinished: _handleVideoFinished,
+            onFinished: () {
+              Vibration.vibrate(duration: 200);
+              _handleVideoFinished();
+            },
           );
         }
 

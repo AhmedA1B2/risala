@@ -69,19 +69,21 @@ class _CustomDialogueState extends State<CustomDialogue> {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           IconButton(
+                            padding: const EdgeInsets.all(0),
                             onPressed: widget.onPressediconOk,
                             icon: Icon(
                               widget.iconOk,
                               color: Colors.green,
-                              size: 32,
+                              size: 48,
                             ),
                           ),
                           IconButton(
+                            padding: const EdgeInsets.all(0),
                             onPressed: widget.onPressediconNo,
                             icon: Icon(
                               widget.iconNo,
                               color: Colors.red,
-                              size: 32,
+                              size: 48,
                             ),
                           ),
                         ],

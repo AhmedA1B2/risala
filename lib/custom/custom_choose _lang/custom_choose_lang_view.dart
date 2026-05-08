@@ -16,8 +16,11 @@ class CustomChooseLangView extends StatefulWidget {
 
 class _CustomChooseLangViewState extends State<CustomChooseLangView> {
   late String selectedValue = sharedPref.getString("selectedValue") ?? "ar";
-  late String selectedValue2 =
-      sharedPref.getString("selectedValue2") ?? "Amiri";
+  late String selectedFont =
+      sharedPref.getString("selectedValue2") ?? "UthmanicHafs";
+
+  String riwoya = sharedPref.getString("riwoya") ?? "hafs";
+
   int chooselang = 0;
   bool showDialogue = false;
 
@@ -31,6 +34,17 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
     setState(() {
       translation = list.first;
     });
+  }
+
+//
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    );
   }
 
 //
@@ -117,6 +131,44 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
                             ),
                           ),
                         ),
+                        Row(
+                          children: [
+                            Radio<String>(
+                              value: "hafs",
+                              activeColor: scandColor,
+                              groupValue: riwoya,
+                              onChanged: (value) {
+                                setState(() {
+                                  riwoya = value!;
+                                  if (selectedFont != "UthmanicHafs") {
+                                    selectedFont = "UthmanicHafs";
+                                  }
+                                });
+                              },
+                            ),
+                            _buildSectionTitle("رواية حفص"),
+
+                            const SizedBox(width: 20), // مسافة بين الخيارين
+
+                            // خيار رواية قالون
+                            Radio<String>(
+                              value: "qaloun",
+                              activeColor: scandColor,
+                              // ignore: deprecated_member_use
+                              groupValue: riwoya,
+                              onChanged: (value) {
+                                setState(() {
+                                  riwoya = value!;
+                                  if (selectedFont != "UthmanicQaloun") {
+                                    selectedFont = "UthmanicQaloun";
+                                  }
+                                });
+                              },
+                            ),
+
+                            _buildSectionTitle('رواية قالون'),
+                          ],
+                        ),
                         IconButton(
                           onPressed: () {
                             setState(() {
@@ -151,6 +203,8 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
                 });
               },
               onPressediconOk: () {
+                sharedPref.setString("selectedValue2", selectedFont);
+                sharedPref.setString("riwoya", riwoya);
                 sharedPref.setString("selectedValue", selectedValue);
                 Navigator.pushReplacement(
                   context,

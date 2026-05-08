@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// تأكد من مسارات الاستيراد الصحيحة
 import 'package:risala/main.dart';
 import 'package:risala/vars/colors.dart';
 import 'usage_tracker.dart';
@@ -38,13 +39,21 @@ class _StreakState extends State<Streak> {
 
     sharedPref.setBool("isGoalCompleted", completed);
 
+    // 🔥 التعديل الأهم: قمنا بنقل منطق تشغيل الفيديو إلى هنا
+    // هكذا نتأكد أننا لا نغير الحالة أثناء رسم الواجهة
+    if (completed && sharedPref.getBool("isVideoWatched") != true) {
+      sharedPref.setBool("showVideo", true);
+      // ملاحظة: إذا كان لديك مكان آخر يعرض الفيديو بناءً على هذا المتغير،
+      // قد تحتاج إلى استخدام ValueNotifier لتنبيه ذلك المكان بالتغيير.
+    }
+
     _updateNotifierSafely(completed);
   }
 
   void _updateNotifierSafely(bool value) {
     if (isGoalCompletedNotifier.value == value) return;
 
-    // 🔥 أهم سطر: يمنع crash أثناء build
+    // يمنع crash أثناء build
     Future.microtask(() {
       if (mounted) {
         isGoalCompletedNotifier.value = value;
@@ -65,18 +74,14 @@ class _StreakState extends State<Streak> {
     });
 
     sharedPref.setBool("isGoalCompleted", completed);
-
     _updateNotifierSafely(completed);
   }
 
   String getStreakImagePath() {
+    // 🔥 الآن هذه الدالة مسؤولة فقط عن إرجاع المسار كنص، وهو التصرف البرمجي السليم
     String folder = isGoalCompleted ? "1" : "0";
-
-    if (isGoalCompleted && sharedPref.getBool("isVideoWatched") != true) {
-      sharedPref.setBool("showVideo", true);
-    }
-
     String fileName;
+
     if (streakCount <= 9) {
       fileName = "1.png";
     } else if (streakCount <= 29) {
@@ -97,7 +102,7 @@ class _StreakState extends State<Streak> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: scandColor,
+          backgroundColor: scandColor, // تأكد من وجود scandColor في ملف colors.dart
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Row(
@@ -173,7 +178,7 @@ class _StreakState extends State<Streak> {
           Text(
             "$streakCount",
             style: const TextStyle(
-              color: whiteColor,
+              color: whiteColor, // تأكد من وجود whiteColor
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
@@ -182,7 +187,7 @@ class _StreakState extends State<Streak> {
           Image.asset(
             getStreakImagePath(),
             width: 32,
-            key: ValueKey(getStreakImagePath()),
+            key: ValueKey(getStreakImagePath()), // فكرة ممتازة لاستخدام Key هنا لتحديث الصورة فوراً
           )
         ],
       ),

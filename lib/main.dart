@@ -21,7 +21,7 @@ void main() async {
 
   sharedPref = await SharedPreferences.getInstance();
 
-  // 🔥 أهم سطر (كان ناقص)
+
   isGoalCompletedNotifier =
       ValueNotifier(sharedPref.getBool("isGoalCompleted") ?? false);
 
@@ -54,4 +54,4 @@ class MyApp extends StatelessWidget {
 //MediaQuery.of(context).size.width 
 //flutter run --release 
 //flutter build apk --split-per-abi\ 
-//flutter build 
+//flutter build appbundle

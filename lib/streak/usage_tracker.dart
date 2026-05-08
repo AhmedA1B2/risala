@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
-import 'package:risala/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UsageTracker with WidgetsBindingObserver {
@@ -11,7 +10,7 @@ class UsageTracker with WidgetsBindingObserver {
   bool isGoalCompleted = false;
   String _currentDateStr = "";
 
-  // الدالة تستقبل قيمتين: عدد الستريك، وهل اكتمل هدف اليوم أم لا
+  // الدالة التي تربط بين المتتبع والواجهة
   final Function(int streak, bool completed)? onStreakUpdated;
 
   UsageTracker({this.onStreakUpdated});
@@ -28,7 +27,6 @@ class UsageTracker with WidgetsBindingObserver {
     _timer?.cancel();
   }
 
-  // هذه الدالة تعمل عندما يخرج المستخدم من التطبيق ويعود إليه (تحديث تلقائي)
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -38,37 +36,28 @@ class UsageTracker with WidgetsBindingObserver {
 
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      // التحقق كل ثانية إذا دخلنا في يوم جديد (تجاوزنا منتصف الليل)
       _checkIfDayChanged();
 
       _todaySeconds++;
 
-      // 1. تحقق من الوصول للهدف لأول مرة في هذه الجلسة
       if (_todaySeconds == requiredSeconds) {
         isGoalCompleted = true;
         await _tryIncreaseStreak();
       }
 
-      // 2. حفظ التقدم كل 10 ثوانٍ للأداء
       if (_todaySeconds % 10 == 0) {
         await _saveTodayUsage();
       }
     });
   }
 
-  // دالة مخصصة لاكتشاف إذا تغير اليوم الفعلي (التقويم) ليعود المجلد لـ 0
   Future<void> _checkIfDayChanged() async {
     String realToday = _formatDate(DateTime.now());
     if (_currentDateStr != realToday) {
       _currentDateStr = realToday;
-      await _checkNewDay(); // تحديث البيانات لليوم الجديد
-
-      // إخبار الواجهة أن الهدف لم يكتمل اليوم ليعود للمجلد 0
-      if (onStreakUpdated != null) {
-        final prefs = await SharedPreferences.getInstance();
-        int currentStreak = prefs.getInt("streakCount") ?? 0;
-        onStreakUpdated!(currentStreak, false);
-      }
+      
+      // بمجرد استدعاء هذه الدالة، ستقوم هي بتحديث الواجهة بالبيانات الجديدة
+      await _checkNewDay(); 
     }
   }
 
@@ -78,14 +67,26 @@ class UsageTracker with WidgetsBindingObserver {
     final lastOpenDate = prefs.getString("lastOpenDate");
 
     if (lastOpenDate != today) {
-      sharedPref.setBool("isVideoWatched", false);
+      // 1. تصفير البيانات لليوم الجديد
+      await prefs.setBool("isVideoWatched", false);
+      await prefs.setBool("showVideo", false);
       await prefs.setInt("todayUsageSeconds", 0);
       _todaySeconds = 0;
       isGoalCompleted = false;
 
+      // 2. التحقق مما إذا كان الستريك قد انكسر
       await _checkBrokenStreak(lastOpenDate);
       await prefs.setString("lastOpenDate", today);
+
+      // 🔥 الحل هنا: إخبار الواجهة فوراً بأن الهدف عاد لـ false
+      // هذا سيجبر الواجهة على استخدام المجلد رقم 0 وتحديث الصورة
+      if (onStreakUpdated != null) {
+        int currentStreak = prefs.getInt("streakCount") ?? 0;
+        onStreakUpdated!(currentStreak, false); 
+      }
+      
     } else {
+      // إذا كنا في نفس اليوم، نستعيد البيانات المحفوظة
       _todaySeconds = prefs.getInt("todayUsageSeconds") ?? 0;
       isGoalCompleted = _todaySeconds >= requiredSeconds;
     }
@@ -107,6 +108,7 @@ class UsageTracker with WidgetsBindingObserver {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt("streakCount", 0);
 
+      // تنبيه الواجهة بأن الستريك انكسر
       if (onStreakUpdated != null) {
         onStreakUpdated!(0, false);
       }

@@ -55,9 +55,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
     }
 
     // 🎬 انتهاء الفيديو
-    if (position >= duration &&
-        !showContinueButton &&
-        !isFinishedHandled) {
+    if (position >= duration && !showContinueButton && !isFinishedHandled) {
       isFinishedHandled = true;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -110,7 +108,7 @@ class _MyVideoPlayerState extends State<MyVideoPlayer> {
                   ),
                 );
               }
-              return const Center(child: CircularProgressIndicator());
+              return const SizedBox();
             },
           ),
 

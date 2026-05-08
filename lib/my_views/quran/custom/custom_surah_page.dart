@@ -152,8 +152,7 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
 
       String fontFamily = quranfontFamily;
 
-      if (fontFamily != "UthmanicQaloun" &&
-          fontFamily != "UthmanicHafs") {
+      if (fontFamily != "UthmanicQaloun" && fontFamily != "UthmanicHafs") {
         fontFamily = "UthmanicHafs";
         sharedPref.setString("selectedValue2", fontFamily);
       }
@@ -239,18 +238,21 @@ class _CustomSurahPageState extends State<CustomSurahPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (widget.surahNumber != 1 && widget.surahNumber != 9)
-                Padding(
-                  padding: const EdgeInsets.all(18.0),
-                  child: Text(
-                    "بِسْمِ اللَّهِ الرَّحْمٰنِ الرَّحِيمِ",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: quranfontSize,
-                    ),
-                  ),
-                ),
+              widget.surahNumber == 1 &&
+                      sharedPref.getString("riwoya") == "hafs"
+                  ? const SizedBox()
+                  : widget.surahNumber != 9
+                      ? Padding(
+                          padding: const EdgeInsets.all(18.0),
+                          child: Text(
+                            "بِسْمِ اللَّهِ الرَّحْمٰنِ الرَّحِيمِ",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Amiri',
+                              fontSize: quranfontSize,
+                            ),
+                          ))
+                      : const SizedBox(),
               Text.rich(
                 TextSpan(children: _cachedSpans),
                 textAlign: TextAlign.justify,
@@ -269,32 +271,25 @@ List<SurahToken> processSurahInBackground(Map<String, dynamic> params) {
   final List<dynamic> rawData = params['data'];
   final int surahNumber = params['surahNumber'];
 
-  final List<Quran> allQuran =
-      rawData.map((e) => Quran.fromMap(e)).toList();
+  final List<Quran> allQuran = rawData.map((e) => Quran.fromMap(e)).toList();
 
   final currentSurah =
       allQuran.where((v) => v.surahNumber == surahNumber).toList();
 
   final List<SurahToken> tokens = [];
 
-  final RegExp regex =
-      RegExp(r'([۞۩۝ٖٞٗ]+|[^\s۞۩۝ٖٞٗ]+)');
-  final RegExp symbolRegex =
-      RegExp(r'[۞۩۝ٖٞٗ]');
+  final RegExp regex = RegExp(r'([۞۩۝ٖٞٗ]+|[^\s۞۩۝ٖٞٗ]+)');
+  final RegExp symbolRegex = RegExp(r'[۞۩۝ٖٞٗ]');
 
   String fixText(String text) {
-    return text
-        .replaceAll('ٞ', 'ٌ')
-        .replaceAll('ٗ', 'ً')
-        .replaceAll('ٖ', 'ٍ');
+    return text.replaceAll('ٞ', 'ٌ').replaceAll('ٗ', 'ً').replaceAll('ٖ', 'ٍ');
   }
 
   for (final verse in currentSurah) {
     final int verseNum = verse.verseNumber;
     final String verseText = fixText(verse.content);
 
-    tokens.add(SurahToken(
-        text: "", isSymbol: true, verseNumber: verseNum));
+    tokens.add(SurahToken(text: "", isSymbol: true, verseNumber: verseNum));
 
     final matches = regex.allMatches(verseText);
 
