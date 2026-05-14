@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/quran/custom/custom_app_bar.dart';
 import 'package:risala/my_views/quran/custom/custom_surah_name.dart';
 import 'package:risala/my_views/quran/custom/custom_surah_page.dart';
+import 'package:risala/my_views/quran/custom/custom_surah_page_for_ss.dart';
 import 'package:risala/my_views/quran/quran_service/quran_audio_service/hafs/quran_hafs_audio_service.dart';
 import 'package:risala/my_views/quran/quran_service/quran_audio_service/qaloun/quran_qaloun_audio_service.dart';
 import 'package:risala/translation/translation.dart';
@@ -39,7 +41,6 @@ class QuranView extends StatefulWidget {
 }
 
 class _QuranViewState extends State<QuranView> {
-  // تعريف الخدمة الجديدة
   final QuranHafsAudioService _audioService = QuranHafsAudioService();
   final QuranQalounAudioService _audioService2 = QuranQalounAudioService();
 
@@ -66,20 +67,53 @@ class _QuranViewState extends State<QuranView> {
   String onOff = '';
   Translation? translation;
 
-  /////////////////////////////////
   List<RecitersHafs> recitersHafs = [];
   RecitersHafs? selectedReciterHafs;
   List<RecitersQaloun> recitersQaloun = [];
   RecitersQaloun? selectedReciterQaloun;
-  /////////////////////////////////
+
+  bool isDownloading = false;
+  double downloadProgress = 0;
+  bool isDownloaded = false;
 
   int idOfReciterHafs = sharedPref.getInt("idOfReciter") ?? 4;
   String urlOfReciterHafs = sharedPref.getString("urlOfReciterHafs") ??
       "https://server11.mp3quran.net/shatri/";
-  String idOfReciterQaloun = sharedPref.getString("idOfReciterQaloun") ??
+  String idOfReciterQaloun = sharedPref.getString("idOfReciterQaloun") ?? "208";
+  String urlOfReciterQaloun = sharedPref.getString("urlOfReciterQaloun") ??
       "https://server7.mp3quran.net/dokali/";
 
   String riwoya = sharedPref.getString("riwoya") ?? "hafs";
+
+  late StreamSubscription playerSub1;
+  late StreamSubscription playerSub2;
+  bool _disposed = false;
+  int _savedRetry = 0;
+  int _searchRetry = 0;
+
+  Future<void> checkDownloaded() async {
+    bool downloaded;
+
+    if (riwoya == "hafs") {
+      downloaded = await _audioService.isSurahDownloaded(
+        surahNumber,
+        idOfReciterHafs,
+        surahName ?? "",
+      );
+    } else {
+      downloaded = await _audioService2.isSurahDownloaded(
+        surahNumber,
+        idOfReciterQaloun,
+        surahName ?? "",
+      );
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      isDownloaded = downloaded;
+    });
+  }
 
   @override
   void initState() {
@@ -87,26 +121,56 @@ class _QuranViewState extends State<QuranView> {
     loadAllTranslations();
     loadSurahName();
     loadData();
+    checkDownloaded();
 
-    _audioService2.player.playerStateStream.listen((state) {
+    // 💡 التعديل الجوهري الأول: مراقبة حالة مشغل الصوت الأول (حفص)
+    playerSub1 = _audioService.player.playerStateStream.listen((state) {
+      if (!mounted) return;
+
+      // إذا كان المشغل يقوم بجلب الصوت من الإنترنت (Buffering) أو يحمل
+      if (state.processingState == ProcessingState.buffering ||
+          state.processingState == ProcessingState.loading) {
+        setState(() => isloading = true);
+      }
+
+      // إذا أصبح الصوت جاهزاً للتشغيل
+      if (state.processingState == ProcessingState.ready) {
+        setState(() => isloading = false);
+      }
+
+      // إذا انتهت السورة
       if (state.processingState == ProcessingState.completed) {
         setState(() {
           positionsOfMusic = null;
           sizeoficonOfMusic = null;
-          _audioService2.player.stop();
+          isitplay = false;
+          iconData = Icons.play_arrow; // إعادة الأيقونة لعلامة التشغيل
+          onOff = translation?.turnOn ?? "تشغيل";
         });
-        _audioService2.player.seek(Duration.zero);
       }
     });
 
-    _audioService.player.playerStateStream.listen((state) {
+    // 💡 التعديل الجوهري الثاني: مراقبة حالة مشغل الصوت الثاني (قالون)
+    playerSub2 = _audioService2.player.playerStateStream.listen((state) {
+      if (!mounted) return;
+
+      if (state.processingState == ProcessingState.buffering ||
+          state.processingState == ProcessingState.loading) {
+        setState(() => isloading = true);
+      }
+
+      if (state.processingState == ProcessingState.ready) {
+        setState(() => isloading = false);
+      }
+
       if (state.processingState == ProcessingState.completed) {
         setState(() {
           positionsOfMusic = null;
           sizeoficonOfMusic = null;
-          _audioService.player.stop();
+          isitplay = false;
+          iconData = Icons.play_arrow;
+          onOff = translation?.turnOn ?? "تشغيل";
         });
-        _audioService.player.seek(Duration.zero);
       }
     });
 
@@ -120,13 +184,14 @@ class _QuranViewState extends State<QuranView> {
 
   @override
   void dispose() {
+    _disposed = true;
+    playerSub1.cancel();
+    playerSub2.cancel();
     _audioService.dispose();
     _audioService2.dispose();
     _scrollController.dispose();
     super.dispose();
   }
-
-  // --- دوال التحميل والبيانات (UI Logic) ---
 
   Future<void> loadSurahName() async {
     String jsonString = await rootBundle.loadString('assets/json/surahs.json');
@@ -143,11 +208,10 @@ class _QuranViewState extends State<QuranView> {
     }
   }
 
-//////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
   void loadData() async {
     recitersHafs = await loadRecitersHafs();
     recitersQaloun = await loadRecitersQalouin();
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -169,28 +233,28 @@ class _QuranViewState extends State<QuranView> {
 
   Future<void> loadAllTranslations() async {
     final list = await loadTranslation(sharedPref.getString("selectedValue"));
+    if (!mounted) return;
     setState(() {
       translation = list.first;
       onOff = translation?.turnOn ?? "تشغيل";
     });
   }
 
-//////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-
-  // --- دوال التنقل (Navigation Logic) ---
-
   void saveMyAya(int verse, int surah, String surahName) async {
     await sharedPref.setInt('ayasaved', verse);
     await sharedPref.setInt('surahsaved', surah);
     await sharedPref.setString('namesaved', surahName);
+    
     if (!mounted) return;
+
+    String messageText = "تم الحفظ";
+    if (translation != null && translation!.saved.isNotEmpty) {
+      messageText = translation!.saved;
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: CustomSnackBar(
-            text: translation!.saved.isNotEmpty
-                ? translation!.saved
-                : "تم الحفظ"),
+        content: CustomSnackBar(text: messageText),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -199,33 +263,53 @@ class _QuranViewState extends State<QuranView> {
   }
 
   void goToSavedVerse() {
-    if (ayasaved == null || surahsaved != surahNumber) return;
-    Future.delayed(const Duration(milliseconds: 200), () {
-      final context = verseContexts[ayasaved!];
-      if (context != null) {
-        Scrollable.ensureVisible(context,
-            duration: const Duration(milliseconds: 400), alignment: 0.15);
-        setState(() => highlightedVerse = ayasaved);
-      } else {
-        goToSavedVerse();
-      }
-    });
+    if (_savedRetry > 10) return;
+    if (ayasaved == null || surahsaved != surahNumber) {
+      return;
+    }
+    Future.delayed(
+      const Duration(milliseconds: 200),
+      () {
+        if (!mounted) return;
+        final ctx = verseContexts[ayasaved!];
+        if (ctx != null && ctx.mounted) {
+          Scrollable.ensureVisible(
+            ctx,
+            duration: const Duration(milliseconds: 400),
+            alignment: 0.15,
+          );
+        } else {
+          setState(() {
+            highlightedVerse = ayasaved;
+          });
+          _savedRetry++;
+          goToSavedVerse();
+        }
+      },
+    );
   }
 
   void goToSearchedVerse() {
+    if (_searchRetry > 10) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final context = verseContexts[widget.searchedVerse];
-      if (context != null) {
-        Scrollable.ensureVisible(context,
-            duration: const Duration(milliseconds: 400), alignment: 0.3);
-        setState(() => highlightedVerse = widget.searchedVerse);
-      }else {
+      if (!mounted) return;
+      final ctx = verseContexts[widget.searchedVerse];
+      if (ctx != null && ctx.mounted) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 400),
+          alignment: 0.3,
+        );
+        setState(() {
+          highlightedVerse = widget.searchedVerse;
+        });
+      } else {
+        _searchRetry++;
         goToSearchedVerse();
       }
     });
   }
 
-  // --- دوال التفسير ---
   int showTafsir = 0;
   Future<String?> getTafsir(int surah, int ayah) async {
     final String response = await rootBundle.loadString(
@@ -267,35 +351,65 @@ class _QuranViewState extends State<QuranView> {
                     : _handlePauseQalounButton,
               ),
               CustomSurahName(surahName: surahName ?? ""),
-              CustomSurahPage(
-                surahNumber: surahNumber,
-                selectedVerse: highlightedVerse,
-                onVerseContext: (verseNum, ctx) =>
-                    verseContexts[verseNum] = ctx,
-                selectedWordKey:
-                    highlightedWord != null && highlightedWordVerse != null
-                        ? "$highlightedWordVerse-$highlightedWord"
-                        : null,
-                onVerseSelected: (verse) => setState(() {
-                  highlightedVerse = verse;
-                  highlightedWord = null;
-                }),
-                onWordSelected: (wordKey) {
-                  if (wordKey.isEmpty) {
-                    setState(() {
-                      highlightedWord = null;
-                      highlightedWordVerse = null;
-                    });
-                    return;
-                  }
-                  final parts = wordKey.split('-');
-                  setState(() {
-                    highlightedWordVerse = int.parse(parts[0]);
-                    highlightedWord = int.parse(parts[1]);
-                    highlightedVerse = null;
-                  });
-                },
-              ),
+              widget.x != 0
+                  ? CustomSurahPageForSs(
+                      surahNumber: surahNumber,
+                      selectedVerse: highlightedVerse,
+                      onVerseContext: (verseNum, ctx) =>
+                          verseContexts[verseNum] = ctx,
+                      selectedWordKey: highlightedWord != null &&
+                              highlightedWordVerse != null
+                          ? "$highlightedWordVerse-$highlightedWord"
+                          : null,
+                      onVerseSelected: (verse) => setState(() {
+                        highlightedVerse = verse;
+                        highlightedWord = null;
+                      }),
+                      onWordSelected: (wordKey) {
+                        if (wordKey.isEmpty) {
+                          setState(() {
+                            highlightedWord = null;
+                            highlightedWordVerse = null;
+                          });
+                          return;
+                        }
+                        final parts = wordKey.split('-');
+                        setState(() {
+                          highlightedWordVerse = int.parse(parts[0]);
+                          highlightedWord = int.parse(parts[1]);
+                          highlightedVerse = null;
+                        });
+                      },
+                    )
+                  : CustomSurahPage(
+                      surahNumber: surahNumber,
+                      selectedVerse: highlightedVerse,
+                      onVerseContext: (verseNum, ctx) =>
+                          verseContexts[verseNum] = ctx,
+                      selectedWordKey: highlightedWord != null &&
+                              highlightedWordVerse != null
+                          ? "$highlightedWordVerse-$highlightedWord"
+                          : null,
+                      onVerseSelected: (verse) => setState(() {
+                        highlightedVerse = verse;
+                        highlightedWord = null;
+                      }),
+                      onWordSelected: (wordKey) {
+                        if (wordKey.isEmpty) {
+                          setState(() {
+                            highlightedWord = null;
+                            highlightedWordVerse = null;
+                          });
+                          return;
+                        }
+                        final parts = wordKey.split('-');
+                        setState(() {
+                          highlightedWordVerse = int.parse(parts[0]);
+                          highlightedWord = int.parse(parts[1]);
+                          highlightedVerse = null;
+                        });
+                      },
+                    ),
               _buildNextSurahButton(),
               const SizedBox(height: 80)
             ],
@@ -303,14 +417,90 @@ class _QuranViewState extends State<QuranView> {
           riwoya == "hafs"
               ? _buildHafsBottomActionBars()
               : _buildQalounBottomActionBars(),
+          isitplay && highlightedVerse == null && highlightedWord == null
+              ? Positioned(
+                  bottom: 12,
+                  right: 12,
+                  child: Card(
+                    color: scandColor,
+                    margin: const EdgeInsets.all(8),
+                    child: IconButton(
+                      icon: isDownloading
+                          ? SizedBox(
+                              width: 36,
+                              height: 36,
+                              child: CircularProgressIndicator(
+                                value: downloadProgress,
+                                color: mainColor,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Icon(
+                              isDownloaded
+                                  ? Icons.check_circle
+                                  : Icons.download,
+                              color: mainColor,
+                              size: 36,
+                            ),
+                      onPressed: isDownloaded || isDownloading
+                          ? null
+                          : () async {
+                              setState(() {
+                                isDownloading = true;
+                                downloadProgress = 0;
+                              });
+
+                              final result = riwoya == "hafs"
+                                  ? await _audioService.downloadSurah(
+                                      urlOfReciterHafs,
+                                      surahNumber,
+                                      surahName ?? "",
+                                      idOfReciterHafs.toString(),
+                                      (progress) {
+                                        setState(() {
+                                          downloadProgress = progress;
+                                        });
+                                      },
+                                    )
+                                  : await _audioService2.downloadSurah(
+                                      urlOfReciterQaloun,
+                                      surahNumber,
+                                      surahName ?? "",
+                                      idOfReciterQaloun,
+                                      (progress) {
+                                        setState(() {
+                                          downloadProgress = progress;
+                                        });
+                                      },
+                                    );
+
+                              if (!mounted) return;
+
+                              setState(() {
+                                isDownloading = false;
+                                isDownloaded = result != null;
+                              });
+
+                              if (result != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    backgroundColor: scandColor,
+                                    content:
+                                        const Text("تم تحميل السورة بنجاح"),
+                                  ),
+                                );
+                              }
+                            },
+                    ),
+                  ),
+                )
+              : const SizedBox(),
           _buildTafsirOverlay(),
           if (isloading) const CustomLoadingScreen2(),
         ],
       ),
     );
   }
-
-  // --- قطع الـ UI المصغرة (Helper Widgets) ---
 
   Widget _buildReciterHafsDropdown() {
     return Container(
@@ -335,14 +525,28 @@ class _QuranViewState extends State<QuranView> {
                       style: const TextStyle(fontSize: 14)),
                 ))
             .toList(),
-        onChanged: (value) => setState(() {
+        onChanged: (value) async {
+          if (value == null) return;
           selectedReciterHafs = value;
-          sharedPref.setString("urlOfReciterHafs", value!.urlReciter);
-          sharedPref.setInt("idOfReciter", value.id);
-          sharedPref.setInt("numOfReciter", value.number);
+          sharedPref.setString(
+            "urlOfReciterHafs",
+            value.urlReciter,
+          );
+          sharedPref.setInt(
+            "idOfReciter",
+            value.id,
+          );
+          sharedPref.setInt(
+            "numOfReciter",
+            value.number,
+          );
           urlOfReciterHafs = value.urlReciter;
           idOfReciterHafs = value.id;
-        }),
+          await checkDownloaded();
+          if (!mounted) return;
+
+          setState(() {});
+        },
       ),
     );
   }
@@ -370,12 +574,28 @@ class _QuranViewState extends State<QuranView> {
                       style: const TextStyle(fontSize: 14)),
                 ))
             .toList(),
-        onChanged: (value) => setState(() {
+        onChanged: (value) async {
+          if (value == null) return;
           selectedReciterQaloun = value;
-          sharedPref.setString("idOfReciterQaloun", value!.urlReciter);
-          sharedPref.setInt("numOfReciterQaloun", value.number);
-          idOfReciterQaloun = value.urlReciter;
-        }),
+          sharedPref.setString(
+            "urlOfReciterQaloun",
+            value.urlReciter,
+          );
+          sharedPref.setString(
+            "idOfReciterQaloun",
+            value.id,
+          );
+          sharedPref.setInt(
+            "numOfReciterQaloun",
+            value.number,
+          );
+          urlOfReciterQaloun = value.urlReciter;
+          idOfReciterQaloun = value.id;
+          await checkDownloaded();
+          if (!mounted) return;
+
+          setState(() {});
+        },
       ),
     );
   }
@@ -432,29 +652,30 @@ class _QuranViewState extends State<QuranView> {
     );
   }
 
-  // --- منطق الأزرار المشغل (Audio UI Logic) ---
-
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+  // 💡 التعديل الجوهري الثالث: إصلاح أزرار التشغيل لتحديث الواجهة فوراً
   void _handleMainHafsPlayButton() async {
+    checkDownloaded();
     if (translation == null) return;
+    
     if (onOff == translation!.turnOn) {
-      setState(() => isloading = true);
+      // التأكد من الإنترنت أولاً قبل فعل أي شيء
       if (!(await _audioService.checkInternet())) {
         _showNoInternetSnackBar();
-        setState(() => isloading = false);
         return;
       }
-      await _audioService.playSurah(urlOfReciterHafs, surahNumber);
+
+      // 💡 نحدث الواجهة فوراً (نغير الأيقونة لزر التوقف، ونخفي التحميل إن وجد)
       setState(() {
         isitplay = true;
-        isloading = false;
         iconDataPause = Icons.pause;
         onOff = translation!.turnOff;
         iconData = Icons.stop;
         highlightedVerse = null;
       });
+
+      // 💡 نشغل الصوت بدون كلمة await لكي لا يتجمد الكود هنا
+      _audioService.playSurah(urlOfReciterHafs, surahNumber);
+
     } else {
       _audioService.player.stop();
       setState(() {
@@ -475,39 +696,34 @@ class _QuranViewState extends State<QuranView> {
     }
     setState(() => isPlayerPause = !isPlayerPause);
   }
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   void _handleMainQalounPlayButton() async {
+    checkDownloaded();
+    
     if (!isitplay) {
-      setState(() => isloading = true);
-
       try {
         final hasInternet = await _audioService2.checkInternet();
         if (!hasInternet) {
           _showNoInternetSnackBar();
-          setState(() => isloading = false);
           return;
         }
 
-        await _audioService2.playSurah(idOfReciterQaloun, surahNumber);
-
-        if (!mounted) return;
-
+        // 💡 تحديث الواجهة فوراً
         setState(() {
           isitplay = true;
           onOff = translation!.turnOff;
           iconData = Icons.stop;
           iconDataPause = Icons.pause;
         });
+
+        // 💡 تشغيل بدون await
+        _audioService2.playSurah(urlOfReciterQaloun, surahNumber);
+
       } catch (e) {
         debugPrint("Qaloun error: $e");
-      } finally {
-        if (mounted) {
-          setState(() => isloading = false);
-        }
       }
     } else {
-      await _audioService2.player.stop();
+      _audioService2.player.stop();
       setState(() {
         isitplay = false;
         onOff = translation!.turnOn;
@@ -526,8 +742,6 @@ class _QuranViewState extends State<QuranView> {
     }
     setState(() => isPlayerPause = !isPlayerPause);
   }
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   Widget _buildHafsBottomActionBars() {
     if (highlightedVerse != null && highlightedWord == null) {
@@ -537,7 +751,6 @@ class _QuranViewState extends State<QuranView> {
           onIconTap: (index) async {
             if (index == 0) {
               setState(() {
-                isloading = true;
                 positionsOfMusic = 0;
                 sizeoficonOfMusic = 42;
               });
@@ -547,12 +760,12 @@ class _QuranViewState extends State<QuranView> {
                 final currentAyahTiming =
                     timings.firstWhere((t) => t.ayah == highlightedVerse);
 
-                await _audioService.playAyah(
+                // أزلنا await هنا أيضاً لنفس السبب
+                _audioService.playAyah(
                     urlOfReciterHafs, surahNumber, currentAyahTiming);
               } catch (e) {
-                print("Timing not found for this ayah");
+                debugPrint("Timing not found for this ayah");
               }
-              setState(() => isloading = false);
             } else if (index == 1) {
               saveMyAya(highlightedVerse!, surahNumber, surahName ?? "");
             } else if (index == 2) {
@@ -582,15 +795,11 @@ class _QuranViewState extends State<QuranView> {
           child: IconButton(
             icon: Icon(Icons.music_note, size: 36, color: mainColor),
             onPressed: () async {
-              print("[][][][][][][][][][][][][][][][][][][][][][][][][]");
-              print("[][][][][]$surahNumber:$highlightedWordVerse[][][][][]");
-              print("[][][][()()()()()()()()()()[][][]");
-              print("[][][][][]$highlightedWord[][][][][]");
-              print("[][][][][][][][][][][][][][][][][][][][][][][][][]");
-              setState(() => isloading = true);
-              await _audioService.playWord(
-                  surahNumber,highlightedWordVerse!,"$surahNumber:$highlightedWordVerse", highlightedWord!, 7);
-              setState(() => isloading = false);
+              _audioService.playWord(
+                surahNumber,
+                highlightedWordVerse!,
+                highlightedWord!,
+              );
             },
           ),
         ),
@@ -598,8 +807,6 @@ class _QuranViewState extends State<QuranView> {
     }
     return const SizedBox();
   }
-
-  ///////////////////////////////////////////////////////////////////////////////
 
   Widget _buildQalounBottomActionBars() {
     if (highlightedVerse != null && highlightedWord == null) {
@@ -609,7 +816,6 @@ class _QuranViewState extends State<QuranView> {
           onIconTap: (index) async {
             if (index == 0) {
               setState(() {
-                isloading = true;
                 positionsOfMusic = 0;
                 sizeoficonOfMusic = 42;
               });
@@ -619,11 +825,10 @@ class _QuranViewState extends State<QuranView> {
                 final currentAyahTiming =
                     timings.firstWhere((t) => t.ayah == highlightedVerse);
 
-                await _audioService2.playAyah(surahNumber, currentAyahTiming);
+                _audioService2.playAyah(surahNumber, currentAyahTiming);
               } catch (e) {
-                print("Timing not found for this ayah");
+                debugPrint("Timing not found for this ayah");
               }
-              setState(() => isloading = false);
             } else if (index == 1) {
               saveMyAya(highlightedVerse!, surahNumber, surahName ?? "");
             } else if (index == 2) {
@@ -643,9 +848,6 @@ class _QuranViewState extends State<QuranView> {
     return const SizedBox();
   }
 
-  ///////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////
-
   Widget _buildTafsirOverlay() {
     if (showTafsir == 0 || highlightedVerse == null) return const SizedBox();
     return Center(
@@ -663,8 +865,9 @@ class _QuranViewState extends State<QuranView> {
               child: FutureBuilder<String?>(
                 future: getTafsir(surahNumber, highlightedVerse!),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting)
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CustomLoadingScreen2();
+                  }
                   return SingleChildScrollView(
                       child: Text(snapshot.data ?? "لا يوجد تفسير",
                           style: TextStyle(

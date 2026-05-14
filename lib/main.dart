@@ -21,7 +21,6 @@ void main() async {
 
   sharedPref = await SharedPreferences.getInstance();
 
-
   isGoalCompletedNotifier =
       ValueNotifier(sharedPref.getBool("isGoalCompleted") ?? false);
 

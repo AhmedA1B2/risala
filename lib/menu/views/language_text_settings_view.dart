@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risala/main_view/main_view.dart';
 import 'package:risala/models/translation.dart';
-import 'package:risala/my_views/quran/custom/custom_surah_page.dart';
+import 'package:risala/my_views/quran/custom/custom_surah_page_for_ss.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/main.dart';
 import 'package:risala/translation/translation.dart';
