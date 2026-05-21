@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_bg/custom_bg_of_home.dart';
+import 'package:risala/custom/custom_bg/islamic_animated_bg.dart';
 import 'package:risala/custom/custom_bottom_bar/bottom_bar_animation/bottom_bar_animation1.dart';
 import 'package:risala/custom/custom_list_items/custom_list/custom_list1.dart';
+import 'package:risala/main.dart';
 import 'package:risala/my_views/custom_notification/custom_notification_view/custom_notification.dart';
 import 'package:risala/my_views/qibla/qibla_view/qibla_view.dart';
 import 'package:risala/my_views/sabhuh/sabhuh_view/sabhuh_view.dart';
@@ -30,26 +32,43 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   double showRightView = 0;
   double topBorderRadius = 10;
+  bool isEidToDay = sharedPref.getBool("isToDatEid") ?? false;
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        CustomBg(
-          topMargin: 0,
-          topBorderRadius: topBorderRadius,
-          child: showRightView == 0
-              ? CustomList(
-                  onPressedCustomIconButtonBookmark:
-                      widget.onPressedCustomIconButtonBookmark,
-                )
-              : showRightView == 1
-                  ? const QiblaView()
-                  : showRightView == 2
-                      ? const CustomNotification() //const AdhanView()
-                      : showRightView == 3
-                          ? const SabhuhView()
-                          : const SizedBox(),
-        ),
+        isEidToDay
+            ? IslamicAnimatedBackground(
+                child: showRightView == 0
+                    ? CustomList(
+                        onPressedCustomIconButtonBookmark:
+                            widget.onPressedCustomIconButtonBookmark,
+                      )
+                    : showRightView == 1
+                        ? const QiblaView()
+                        : showRightView == 2
+                            ? const CustomNotification() //const AdhanView()
+                            : showRightView == 3
+                                ? const SabhuhView()
+                                : const SizedBox(),
+              )
+            : CustomBg(
+                topMargin: 0,
+                topBorderRadius: topBorderRadius,
+                child: showRightView == 0
+                    ? CustomList(
+                        onPressedCustomIconButtonBookmark:
+                            widget.onPressedCustomIconButtonBookmark,
+                      )
+                    : showRightView == 1
+                        ? const QiblaView()
+                        : showRightView == 2
+                            ? const CustomNotification() //const AdhanView()
+                            : showRightView == 3
+                                ? const SabhuhView()
+                                : const SizedBox(),
+              ),
         Positioned(
           bottom: 8,
           width: MediaQuery.of(context).size.width,

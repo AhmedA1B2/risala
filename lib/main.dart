@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:risala/Notifications/notification_service.dart';
 import 'package:risala/custom/custom_choose%20_lang/custom_choose_lang_view.dart';
+import 'package:risala/islamic_themes/istoday_eid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:risala/custom/custom_splash_screen/custom_splash_screen1.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +21,15 @@ void main() async {
   await NotificationService.instance.init();
 
   sharedPref = await SharedPreferences.getInstance();
+  //
+  final today = DateTime.now();
 
+  if (isToDatEid(today)) {
+    sharedPref.setBool("isToDatEid", true);
+  } else {
+    sharedPref.setBool("isToDatEid", false);
+  }
+  //
   isGoalCompletedNotifier =
       ValueNotifier(sharedPref.getBool("isGoalCompleted") ?? false);
 

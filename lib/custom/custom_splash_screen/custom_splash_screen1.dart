@@ -15,6 +15,7 @@ class CustomSplashScreen1 extends StatefulWidget {
 
 class _CustomSplashScreen1State extends State<CustomSplashScreen1> {
   double heightofContainer = 0;
+  bool isEidToDay = sharedPref.getBool("isToDatEid") ?? false;
 
   @override
   void initState() {
@@ -78,7 +79,9 @@ class _CustomSplashScreen1State extends State<CustomSplashScreen1> {
             padding: const EdgeInsets.all(22.0),
             child: Hero(
                 tag: "mosq",
-                child: Image.asset("assets/images/mosq_splash$themeIndex.gif")),
+                child: isEidToDay
+                    ? Image.asset("assets/images/fanuos.gif")
+                    : Image.asset("assets/images/mosq_splash$themeIndex.gif")),
           ),
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
@@ -91,7 +94,7 @@ class _CustomSplashScreen1State extends State<CustomSplashScreen1> {
               color: scandColor,
             ),
             child: Text(
-              "السلام عليكم ورحمة الله",
+              isEidToDay ? "عيد مبارك" : "السلام عليكم ورحمة الله",
               style: TextStyle(
                 fontSize: 32,
                 fontFamily: 'Amiri',

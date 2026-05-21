@@ -32,6 +32,7 @@ class CustomMenuAnimation5 extends StatefulWidget {
 class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
   int itView = 0;
   double animatedContainerWidth = 80;
+  bool isEidToDay = sharedPref.getBool("isToDatEid") ?? false;
 
   /// فتح / إغلاق المينيو بالأنيميشن
   void animation() async {
@@ -75,41 +76,56 @@ class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
     return Scaffold(
       backgroundColor: whiteColor,
       appBar: AppBar(
+        shadowColor: blackColor,
+        elevation: 8,
         backgroundColor: scandColor,
         toolbarHeight: MediaQuery.of(context).size.height * 0.2,
         actions: [
           Expanded(
-            child: Column(
+            child: Stack(
               children: [
-                const SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                isEidToDay
+                    ? SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Image.asset(
+                          "assets/images/bgofappbar.png",
+                          fit: BoxFit.fill,
+                        ),
+                      )
+                    : const SizedBox(),
+                Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: CustomMenuButton1(
-                        key: widget.buttonMenuKey,
-                        onTap: animation,
-                      ),
+                    const SizedBox(
+                      height: 10,
                     ),
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        color: whiteColor,
-                        fontSize: 32,
-                        fontFamily: 'Amiri',
-                      ),
-                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CustomMenuButton1(
+                            key: widget.buttonMenuKey,
+                            onTap: animation,
+                          ),
+                        ),
+                        Text(
+                          widget.title,
+                          style: const TextStyle(
+                            color: whiteColor,
+                            fontSize: 32,
+                            fontFamily: 'Amiri',
+                          ),
+                        ),
 
-                    const Streak(),
-                    // CustomIconButtonBookmark(
-                    //   onPressed: widget.onPressedBookMark,
-                    // ),
+                        const Streak(),
+                        // CustomIconButtonBookmark(
+                        //   onPressed: widget.onPressedBookMark,
+                        // ),
+                      ],
+                    ),
+                    widget.searchWidget,
                   ],
                 ),
-                widget.searchWidget,
               ],
             ),
           ),
