@@ -87,7 +87,6 @@ class _QuranViewState extends State<QuranView> {
 
   late StreamSubscription playerSub1;
   late StreamSubscription playerSub2;
-  bool _disposed = false;
   int _savedRetry = 0;
   int _searchRetry = 0;
 
@@ -184,7 +183,6 @@ class _QuranViewState extends State<QuranView> {
 
   @override
   void dispose() {
-    _disposed = true;
     playerSub1.cancel();
     playerSub2.cancel();
     _audioService.dispose();
@@ -244,7 +242,7 @@ class _QuranViewState extends State<QuranView> {
     await sharedPref.setInt('ayasaved', verse);
     await sharedPref.setInt('surahsaved', surah);
     await sharedPref.setString('namesaved', surahName);
-    
+
     if (!mounted) return;
 
     String messageText = "تم الحفظ";
@@ -264,24 +262,30 @@ class _QuranViewState extends State<QuranView> {
 
   void goToSavedVerse() {
     if (_savedRetry > 10) return;
+
     if (ayasaved == null || surahsaved != surahNumber) {
       return;
     }
+
     Future.delayed(
       const Duration(milliseconds: 200),
       () {
         if (!mounted) return;
+
         final ctx = verseContexts[ayasaved!];
+
         if (ctx != null && ctx.mounted) {
+          // تحديد الآية دائماً
+          setState(() {
+            highlightedVerse = ayasaved;
+          });
+
           Scrollable.ensureVisible(
             ctx,
             duration: const Duration(milliseconds: 400),
             alignment: 0.15,
           );
         } else {
-          setState(() {
-            highlightedVerse = ayasaved;
-          });
           _savedRetry++;
           goToSavedVerse();
         }
@@ -656,7 +660,7 @@ class _QuranViewState extends State<QuranView> {
   void _handleMainHafsPlayButton() async {
     checkDownloaded();
     if (translation == null) return;
-    
+
     if (onOff == translation!.turnOn) {
       // التأكد من الإنترنت أولاً قبل فعل أي شيء
       if (!(await _audioService.checkInternet())) {
@@ -675,7 +679,6 @@ class _QuranViewState extends State<QuranView> {
 
       // 💡 نشغل الصوت بدون كلمة await لكي لا يتجمد الكود هنا
       _audioService.playSurah(urlOfReciterHafs, surahNumber);
-
     } else {
       _audioService.player.stop();
       setState(() {
@@ -699,7 +702,7 @@ class _QuranViewState extends State<QuranView> {
 
   void _handleMainQalounPlayButton() async {
     checkDownloaded();
-    
+
     if (!isitplay) {
       try {
         final hasInternet = await _audioService2.checkInternet();
@@ -718,7 +721,6 @@ class _QuranViewState extends State<QuranView> {
 
         // 💡 تشغيل بدون await
         _audioService2.playSurah(urlOfReciterQaloun, surahNumber);
-
       } catch (e) {
         debugPrint("Qaloun error: $e");
       }
