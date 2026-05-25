@@ -63,3 +63,4 @@ class MyApp extends StatelessWidget {
 //flutter run --release 
 //flutter build apk --split-per-abi\ 
 //flutter build appbundle
+//flutter build appbundle --split-debug-info=debug-info

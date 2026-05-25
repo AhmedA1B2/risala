@@ -77,7 +77,7 @@ class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
       backgroundColor: whiteColor,
       appBar: AppBar(
         shadowColor: blackColor,
-        elevation: 8,
+        elevation: isEidToDay ? 8 : 0,
         backgroundColor: scandColor,
         toolbarHeight: MediaQuery.of(context).size.height * 0.2,
         actions: [

@@ -79,9 +79,7 @@ class _CustomSplashScreen1State extends State<CustomSplashScreen1> {
             padding: const EdgeInsets.all(22.0),
             child: Hero(
                 tag: "mosq",
-                child: isEidToDay
-                    ? Image.asset("assets/images/fanuos.gif")
-                    : Image.asset("assets/images/mosq_splash$themeIndex.gif")),
+                child: Image.asset("assets/images/mosq_splash$themeIndex.gif")),
           ),
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
