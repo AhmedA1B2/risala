@@ -17,6 +17,7 @@ class QuranHafsAudioService {
   ////////////////////////////////////////////////////////////
 
   final AudioPlayer player = AudioPlayer();
+  bool get isPlaying => player.playing;
 
   ////////////////////////////////////////////////////////////
   // Dio
@@ -29,9 +30,7 @@ class QuranHafsAudioService {
       sendTimeout: const Duration(seconds: 20),
       followRedirects: true,
       validateStatus: (status) {
-        return status != null &&
-            status >= 200 &&
-            status < 300;
+        return status != null && status >= 200 && status < 300;
       },
     ),
   );
@@ -40,14 +39,11 @@ class QuranHafsAudioService {
   // API
   ////////////////////////////////////////////////////////////
 
-  final String clientId =
-      "e3af92df-f3d7-4d3a-9ccc-152c532492ee";
+  final String clientId = "e3af92df-f3d7-4d3a-9ccc-152c532492ee";
 
-  final String clientSecret =
-      "1tfKz8HWd3w9iyGkBTkv_b~N8t";
+  final String clientSecret = "1tfKz8HWd3w9iyGkBTkv_b~N8t";
 
-  final String tokenEndpoint =
-      "https://oauth2.quran.foundation/oauth2/token";
+  final String tokenEndpoint = "https://oauth2.quran.foundation/oauth2/token";
 
   String? _accessToken;
 
@@ -55,8 +51,7 @@ class QuranHafsAudioService {
   // Cache
   ////////////////////////////////////////////////////////////
 
-  final Map<int, List<AyahTiming>>
-      _timingsCache = {};
+  final Map<int, List<AyahTiming>> _timingsCache = {};
 
   ////////////////////////////////////////////////////////////
   // Internet Check
@@ -64,15 +59,13 @@ class QuranHafsAudioService {
 
   Future<bool> checkInternet() async {
     try {
-      final result =
-          await InternetAddress.lookup(
+      final result = await InternetAddress.lookup(
         'google.com',
       ).timeout(
         const Duration(seconds: 5),
       );
 
-      return result.isNotEmpty &&
-          result.first.rawAddress.isNotEmpty;
+      return result.isNotEmpty && result.first.rawAddress.isNotEmpty;
     } catch (_) {
       return false;
     }
@@ -88,8 +81,7 @@ class QuranHafsAudioService {
         return _accessToken;
       }
 
-      final auth =
-          'Basic ${base64Encode(
+      final auth = 'Basic ${base64Encode(
         utf8.encode(
           '$clientId:$clientSecret',
         ),
@@ -99,23 +91,19 @@ class QuranHafsAudioService {
           .post(
             Uri.parse(tokenEndpoint),
             headers: {
-              'Content-Type':
-                  'application/x-www-form-urlencoded',
+              'Content-Type': 'application/x-www-form-urlencoded',
               'Authorization': auth,
             },
-            body:
-                'grant_type=client_credentials&scope=content',
+            body: 'grant_type=client_credentials&scope=content',
           )
           .timeout(
             const Duration(seconds: 20),
           );
 
       if (response.statusCode == 200) {
-        final data =
-            jsonDecode(response.body);
+        final data = jsonDecode(response.body);
 
-        _accessToken =
-            data['access_token'];
+        _accessToken = data['access_token'];
 
         return _accessToken;
       }
@@ -157,8 +145,7 @@ class QuranHafsAudioService {
     try {
       await _preparePlayer();
 
-      final url =
-          "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
+      final url = "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
 
       await player.setUrl(url);
 
@@ -178,8 +165,7 @@ class QuranHafsAudioService {
   // Fetch Ayah Timings
   ////////////////////////////////////////////////////////////
 
-  Future<List<AyahTiming>>
-      fetchAyahTimings(
+  Future<List<AyahTiming>> fetchAyahTimings(
     int surah,
     int reciter,
   ) async {
@@ -231,18 +217,15 @@ class QuranHafsAudioService {
       //////////////////////////////////////////////////////
 
       if (response.statusCode == 200) {
-        final List<dynamic> data =
-            json.decode(response.body);
+        final List<dynamic> data = json.decode(response.body);
 
         final timings = data
             .map(
-              (item) =>
-                  AyahTiming.fromJson(item),
+              (item) => AyahTiming.fromJson(item),
             )
             .toList();
 
-        _timingsCache[surah] =
-            timings;
+        _timingsCache[surah] = timings;
 
         return timings;
       }
@@ -277,23 +260,20 @@ class QuranHafsAudioService {
                 "numOfReciter",
               )! >
               18) {
-        urlReciter =
-            "https://server11.mp3quran.net/shatri/";
+        urlReciter = "https://server11.mp3quran.net/shatri/";
       }
 
       //////////////////////////////////////////////////////
       // URL
       //////////////////////////////////////////////////////
 
-      final url =
-          "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
+      final url = "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
 
       //////////////////////////////////////////////////////
       // Validate Timing
       //////////////////////////////////////////////////////
 
-      if (timing.endTime <=
-          timing.startTime) {
+      if (timing.endTime <= timing.startTime) {
         return false;
       }
 
@@ -307,18 +287,15 @@ class QuranHafsAudioService {
       // Audio Source
       //////////////////////////////////////////////////////
 
-      final audioSource =
-          ClippingAudioSource(
+      final audioSource = ClippingAudioSource(
         child: AudioSource.uri(
           Uri.parse(url),
         ),
         start: Duration(
-          milliseconds:
-              timing.startTime,
+          milliseconds: timing.startTime,
         ),
         end: Duration(
-          milliseconds:
-              timing.endTime,
+          milliseconds: timing.endTime,
         ),
       );
 
@@ -329,6 +306,8 @@ class QuranHafsAudioService {
       await player.setAudioSource(
         audioSource,
       );
+
+      await player.seek(Duration.zero);
 
       await player.play();
 
@@ -362,26 +341,22 @@ class QuranHafsAudioService {
       // Build URL
       //////////////////////////////////////////////////////
 
-      final s =
-          surah.toString().padLeft(
-                3,
-                '0',
-              );
+      final s = surah.toString().padLeft(
+            3,
+            '0',
+          );
 
-      final v =
-          verse.toString().padLeft(
-                3,
-                '0',
-              );
+      final v = verse.toString().padLeft(
+            3,
+            '0',
+          );
 
-      final p =
-          position.toString().padLeft(
-                3,
-                '0',
-              );
+      final p = position.toString().padLeft(
+            3,
+            '0',
+          );
 
-      final audioUrl =
-          "https://audio.qurancdn.com/wbw/${s}_${v}_${p}.mp3";
+      final audioUrl = "https://audio.qurancdn.com/wbw/${s}_${v}_${p}.mp3";
 
       //////////////////////////////////////////////////////
       // Play
@@ -417,22 +392,19 @@ class QuranHafsAudioService {
       // Android 13+
       //////////////////////////////////////////////////////
 
-      final audioStatus =
-          await Permission.audio.request();
+      final audioStatus = await Permission.audio.request();
 
       //////////////////////////////////////////////////////
       // Android <= 12
       //////////////////////////////////////////////////////
 
-      final storageStatus =
-          await Permission.storage.request();
+      final storageStatus = await Permission.storage.request();
 
       //////////////////////////////////////////////////////
       // Validate
       //////////////////////////////////////////////////////
 
-      if (audioStatus.isDenied &&
-          storageStatus.isDenied) {
+      if (audioStatus.isDenied && storageStatus.isDenied) {
         return false;
       }
 
@@ -451,16 +423,14 @@ class QuranHafsAudioService {
     int surah,
     String surahName,
     String reciterNum,
-    Function(double progress)?
-        onProgress,
+    Function(double progress)? onProgress,
   ) async {
     try {
       //////////////////////////////////////////////////////
       // Permissions
       //////////////////////////////////////////////////////
 
-      final hasPermission =
-          await _requestPermissions();
+      final hasPermission = await _requestPermissions();
 
       if (!hasPermission) {
         debugPrint(
@@ -474,15 +444,13 @@ class QuranHafsAudioService {
       // URL
       //////////////////////////////////////////////////////
 
-      final url =
-          "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
+      final url = "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
 
       //////////////////////////////////////////////////////
       // Directory
       //////////////////////////////////////////////////////
 
-      final Directory reciterDir =
-          Directory(
+      final Directory reciterDir = Directory(
         "/storage/emulated/0/Music/Risala Quran/Hafs$reciterNum",
       );
 
@@ -520,9 +488,7 @@ class QuranHafsAudioService {
       await _dio.download(
         url,
         filePath,
-
         deleteOnError: true,
-
         onReceiveProgress: (
           received,
           total,
@@ -600,6 +566,13 @@ class QuranHafsAudioService {
   void clearTimingsCache() {
     _timingsCache.clear();
   }
+
+  /////////////////////////////////////////////////////////////
+  Future<void> stop() async {
+    await player.stop();
+  }
+
+  /////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////
   // Dispose

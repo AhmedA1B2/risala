@@ -3,8 +3,8 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:risala/Notifications/notification_service.dart';
 import 'package:risala/custom/custom_choose%20_lang/custom_choose_lang_view.dart';
 import 'package:risala/islamic_themes/istoday_eid.dart';
+import 'package:risala/main_view/main_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:risala/custom/custom_splash_screen/custom_splash_screen1.dart';
 import 'package:flutter/services.dart';
 
 late SharedPreferences sharedPref;
@@ -40,6 +40,10 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+  );
+
   runApp(const MyApp());
 }
 
@@ -53,8 +57,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorObservers: [routeObserver],
-      home:
-          oldUser ? const CustomSplashScreen1() : const CustomChooseLangView(),
+      home: oldUser ? const MainView() : const CustomChooseLangView(),
     );
   }
 }

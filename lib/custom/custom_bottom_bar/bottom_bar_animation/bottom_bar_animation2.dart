@@ -8,106 +8,169 @@ class BottomBarAnimation2 extends StatefulWidget {
     super.key,
     required this.icons,
     required this.onIconTap,
-    this.oldeOnIconTap,
     this.positionsOfMusic,
-    this.sizeoficonOfMusic, // ✅ أضفنا callback
+    this.sizeoficonOfMusic,
   });
 
   final List<IconData> icons;
-  final Function(int index) onIconTap; // ✅ هذا بيرجع index الأيقونة المضغوطة
-  final Function(int index)? oldeOnIconTap;
+
+  final Future<void> Function(int index) onIconTap;
+
   final double? positionsOfMusic;
   final double? sizeoficonOfMusic;
 
   @override
-  State<BottomBarAnimation2> createState() => _BottomBarAnimation2State();
+  State<BottomBarAnimation2> createState() =>
+      _BottomBarAnimation2State();
 }
 
-class _BottomBarAnimation2State extends State<BottomBarAnimation2> {
-  @override
-  void didUpdateWidget(covariant BottomBarAnimation2 oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (widget.positionsOfMusic == null && widget.sizeoficonOfMusic == null) {
-      if (currentIndex != null) {
-        setState(() {
-          positions[currentIndex!] = 0;
-          sizeoficon[currentIndex!] = 42;
-          currentIndex = null;
-        });
-      }
-    }
-  }
+class _BottomBarAnimation2State
+    extends State<BottomBarAnimation2> {
 
   int? currentIndex;
+
   late List<double> sizeoficon;
   late List<double> positions;
 
   @override
   void initState() {
     super.initState();
-    sizeoficon = List.filled(widget.icons.length, 42);
-    positions = List.filled(widget.icons.length, 0);
+
+    sizeoficon =
+        List.filled(widget.icons.length, 42);
+
+    positions =
+        List.filled(widget.icons.length, 0);
   }
 
-  void animateTo(int index) {
-    if (currentIndex == index) {
-      // إعادة القيم إلى الطبيعية
-      setState(() {
-        positions[index] = 0;
-        sizeoficon[index] = 42;
-        widget.oldeOnIconTap?.call(currentIndex!);
-        currentIndex = null;
-      });
-      return;
-    }
+  @override
+  void didUpdateWidget(
+    covariant BottomBarAnimation2 oldWidget,
+  ) {
+    super.didUpdateWidget(oldWidget);
 
-    if (currentIndex != null) {
-      setState(() {
-        positions[currentIndex!] = 0;
-        sizeoficon[currentIndex!] = 42;
-        widget.oldeOnIconTap?.call(currentIndex!);
-      });
+    if (widget.positionsOfMusic == null &&
+        widget.sizeoficonOfMusic == null) {
+
+      if (currentIndex != null) {
+
+        setState(() {
+
+          for (int i = 0;
+              i < widget.icons.length;
+              i++) {
+
+            positions[i] = 0;
+            sizeoficon[i] = 42;
+          }
+
+          currentIndex = null;
+        });
+      }
     }
+  }
+
+  Future<void> animateTo(int index) async {
+
+    final isSelected =
+        currentIndex == index;
 
     setState(() {
-      positions[index] =
-          widget.positionsOfMusic ?? -30; // هذه ستأخذ القيمة الجديدة من parent
-      sizeoficon[index] = widget.sizeoficonOfMusic ?? 48; // هذه أيضًا
-      currentIndex = index;
+
+      for (int i = 0;
+          i < widget.icons.length;
+          i++) {
+
+        positions[i] = 0;
+        sizeoficon[i] = 42;
+      }
+
+      if (!isSelected) {
+
+        positions[index] =
+            widget.positionsOfMusic ?? -30;
+
+        sizeoficon[index] =
+            widget.sizeoficonOfMusic ?? 48;
+
+        currentIndex = index;
+
+      } else {
+
+        currentIndex = null;
+      }
     });
 
-    widget.onIconTap(index);
+    await widget.onIconTap(index);
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
+
         const BottomBarItme2(),
+
         Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding:
+              const EdgeInsets.only(top: 5.0),
+
           child: Row(
             textDirection: TextDirection.rtl,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(widget.icons.length, (i) {
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                transform: Matrix4.translationValues(0, positions[i], 0),
-                decoration: BoxDecoration(
-                  color: scandColor,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: blackColor),
-                ),
-                child: IconBarItme(
-                  size: sizeoficon[i],
-                  iconbar: widget.icons[i],
-                  onPressed: () => animateTo(i),
-                ),
-              );
-            }),
+
+            mainAxisAlignment:
+                MainAxisAlignment.spaceAround,
+
+            children: List.generate(
+              widget.icons.length,
+              (i) {
+
+                return AnimatedContainer(
+                  duration:
+                      const Duration(milliseconds: 250),
+
+                  curve: Curves.easeOut,
+
+                  transform:
+                      Matrix4.translationValues(
+                    0,
+                    positions[i],
+                    0,
+                  ),
+
+                  child: AnimatedScale(
+                    scale: sizeoficon[i] / 42,
+
+                    duration:
+                        const Duration(milliseconds: 250),
+
+                    curve: Curves.easeOut,
+
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: scandColor,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: blackColor,
+                        ),
+                      ),
+
+                      child: IconBarItme(
+                        size: 42,
+
+                        iconbar:
+                            widget.icons[i],
+
+                        onPressed: () =>
+                            animateTo(i),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-        )
+        ),
       ],
     );
   }

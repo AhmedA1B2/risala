@@ -43,6 +43,8 @@ class QuranView extends StatefulWidget {
 class _QuranViewState extends State<QuranView> {
   final QuranHafsAudioService _audioService = QuranHafsAudioService();
   final QuranQalounAudioService _audioService2 = QuranQalounAudioService();
+  bool isPlayingHafsAyah = false;
+  bool isPlayingQalounAyah = false;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -66,6 +68,7 @@ class _QuranViewState extends State<QuranView> {
   double? sizeoficonOfMusic;
   String onOff = '';
   Translation? translation;
+  bool isPlayingAyah = false;
 
   List<RecitersHafs> recitersHafs = [];
   RecitersHafs? selectedReciterHafs;
@@ -123,56 +126,75 @@ class _QuranViewState extends State<QuranView> {
     checkDownloaded();
 
     // 💡 التعديل الجوهري الأول: مراقبة حالة مشغل الصوت الأول (حفص)
-    playerSub1 = _audioService.player.playerStateStream.listen((state) {
-      if (!mounted) return;
+    playerSub1 = _audioService.player.playerStateStream.listen(
+      (state) {
+        if (!mounted) return;
 
-      // إذا كان المشغل يقوم بجلب الصوت من الإنترنت (Buffering) أو يحمل
-      if (state.processingState == ProcessingState.buffering ||
-          state.processingState == ProcessingState.loading) {
-        setState(() => isloading = true);
-      }
+        if (state.processingState == ProcessingState.buffering ||
+            state.processingState == ProcessingState.loading) {
+          setState(() {
+            isloading = true;
+          });
+        }
 
-      // إذا أصبح الصوت جاهزاً للتشغيل
-      if (state.processingState == ProcessingState.ready) {
-        setState(() => isloading = false);
-      }
+        if (state.processingState == ProcessingState.ready) {
+          setState(() {
+            isloading = false;
+          });
+        }
 
-      // إذا انتهت السورة
-      if (state.processingState == ProcessingState.completed) {
-        setState(() {
-          positionsOfMusic = null;
-          sizeoficonOfMusic = null;
-          isitplay = false;
-          iconData = Icons.play_arrow; // إعادة الأيقونة لعلامة التشغيل
-          onOff = translation?.turnOn ?? "تشغيل";
-        });
-      }
-    });
+        if (state.processingState == ProcessingState.completed ||
+            !state.playing) {
+          setState(() {
+            isPlayingHafsAyah = false;
 
+            positionsOfMusic = null;
+            sizeoficonOfMusic = null;
+
+            isitplay = false;
+
+            iconData = Icons.play_arrow;
+
+            onOff = translation?.turnOn ?? "تشغيل";
+          });
+        }
+      },
+    );
     // 💡 التعديل الجوهري الثاني: مراقبة حالة مشغل الصوت الثاني (قالون)
-    playerSub2 = _audioService2.player.playerStateStream.listen((state) {
-      if (!mounted) return;
+    playerSub2 = _audioService2.player.playerStateStream.listen(
+      (state) {
+        if (!mounted) return;
 
-      if (state.processingState == ProcessingState.buffering ||
-          state.processingState == ProcessingState.loading) {
-        setState(() => isloading = true);
-      }
+        if (state.processingState == ProcessingState.buffering ||
+            state.processingState == ProcessingState.loading) {
+          setState(() {
+            isloading = true;
+          });
+        }
 
-      if (state.processingState == ProcessingState.ready) {
-        setState(() => isloading = false);
-      }
+        if (state.processingState == ProcessingState.ready) {
+          setState(() {
+            isloading = false;
+          });
+        }
 
-      if (state.processingState == ProcessingState.completed) {
-        setState(() {
-          positionsOfMusic = null;
-          sizeoficonOfMusic = null;
-          isitplay = false;
-          iconData = Icons.play_arrow;
-          onOff = translation?.turnOn ?? "تشغيل";
-        });
-      }
-    });
+        if (state.processingState == ProcessingState.completed ||
+            !state.playing) {
+          setState(() {
+            isPlayingQalounAyah = false;
 
+            positionsOfMusic = null;
+            sizeoficonOfMusic = null;
+
+            isitplay = false;
+
+            iconData = Icons.play_arrow;
+
+            onOff = translation?.turnOn ?? "تشغيل";
+          });
+        }
+      },
+    );
     if (widget.x == 1) {
       WidgetsBinding.instance.addPostFrameCallback((_) => goToSavedVerse());
     }
@@ -748,42 +770,112 @@ class _QuranViewState extends State<QuranView> {
   Widget _buildHafsBottomActionBars() {
     if (highlightedVerse != null && highlightedWord == null) {
       return Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).size.height - 75),
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).size.height - 75,
+        ),
         child: BottomBarAnimation2(
           onIconTap: (index) async {
-            if (index == 0) {
-              setState(() {
-                positionsOfMusic = 0;
-                sizeoficonOfMusic = 42;
-              });
-              List<AyahTiming> timings = await _audioService.fetchAyahTimings(
-                  surahNumber, idOfReciterHafs);
-              try {
-                final currentAyahTiming =
-                    timings.firstWhere((t) => t.ayah == highlightedVerse);
+            //////////////////////////////////////////////////
+            // تشغيل الآية
+            //////////////////////////////////////////////////
 
-                // أزلنا await هنا أيضاً لنفس السبب
-                _audioService.playAyah(
-                    urlOfReciterHafs, surahNumber, currentAyahTiming);
-              } catch (e) {
-                debugPrint("Timing not found for this ayah");
+            if (index == 0) {
+              // إيقاف
+              if (isPlayingHafsAyah) {
+                await _audioService.stop();
+
+                setState(() {
+                  isPlayingHafsAyah = false;
+
+                  positionsOfMusic = null;
+                  sizeoficonOfMusic = null;
+                });
+
+                return;
               }
-            } else if (index == 1) {
-              saveMyAya(highlightedVerse!, surahNumber, surahName ?? "");
-            } else if (index == 2) {
-              setState(() => showTafsir = 1);
+
+              //////////////////////////////////////////////////
+              // التوقيتات
+              //////////////////////////////////////////////////
+
+              List<AyahTiming> timings = await _audioService.fetchAyahTimings(
+                surahNumber,
+                idOfReciterHafs,
+              );
+
+              try {
+                final currentAyahTiming = timings.firstWhere(
+                  (t) => t.ayah == highlightedVerse,
+                );
+
+                //////////////////////////////////////////////////
+                // تشغيل
+                //////////////////////////////////////////////////
+
+                setState(() {
+                  isPlayingHafsAyah = true;
+
+                  positionsOfMusic = -30;
+                  sizeoficonOfMusic = 48;
+                });
+
+                _audioService.playAyah(
+                  urlOfReciterHafs,
+                  surahNumber,
+                  currentAyahTiming,
+                );
+              } catch (e) {
+                debugPrint(
+                  "Timing not found for this ayah",
+                );
+
+                setState(() {
+                  isPlayingHafsAyah = false;
+
+                  positionsOfMusic = null;
+                  sizeoficonOfMusic = null;
+                });
+              }
+            }
+
+            //////////////////////////////////////////////////
+            // حفظ
+            //////////////////////////////////////////////////
+
+            else if (index == 1) {
+              saveMyAya(
+                highlightedVerse!,
+                surahNumber,
+                surahName ?? "",
+              );
+            }
+
+            //////////////////////////////////////////////////
+            // تفسير
+            //////////////////////////////////////////////////
+
+            else if (index == 2) {
+              setState(() {
+                showTafsir = 1;
+              });
             }
           },
           icons: const [
             Icons.music_note,
             Icons.bookmark_outlined,
-            Icons.format_align_right
+            Icons.format_align_right,
           ],
           positionsOfMusic: positionsOfMusic,
           sizeoficonOfMusic: sizeoficonOfMusic,
         ),
       );
-    } else if (highlightedWord != null && highlightedVerse == null) {
+    }
+
+    //////////////////////////////////////////////////////
+    // تشغيل كلمة
+    //////////////////////////////////////////////////////
+
+    else if (highlightedWord != null && highlightedVerse == null) {
       return Align(
         alignment: Alignment.bottomRight,
         child: Container(
@@ -791,11 +883,19 @@ class _QuranViewState extends State<QuranView> {
           width: 65,
           height: 65,
           decoration: BoxDecoration(
-              color: scandColor,
-              shape: BoxShape.circle,
-              border: Border.all(color: dilutionScandColor, width: 2)),
+            color: scandColor,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: dilutionScandColor,
+              width: 2,
+            ),
+          ),
           child: IconButton(
-            icon: Icon(Icons.music_note, size: 36, color: mainColor),
+            icon: Icon(
+              Icons.music_note,
+              size: 36,
+              color: mainColor,
+            ),
             onPressed: () async {
               _audioService.playWord(
                 surahNumber,
@@ -807,46 +907,112 @@ class _QuranViewState extends State<QuranView> {
         ),
       );
     }
+
     return const SizedBox();
   }
 
   Widget _buildQalounBottomActionBars() {
     if (highlightedVerse != null && highlightedWord == null) {
       return Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).size.height - 75),
+        padding: EdgeInsets.only(
+          top: MediaQuery.of(context).size.height - 75,
+        ),
         child: BottomBarAnimation2(
           onIconTap: (index) async {
-            if (index == 0) {
-              setState(() {
-                positionsOfMusic = 0;
-                sizeoficonOfMusic = 42;
-              });
-              List<AyahTiming> timings =
-                  await _audioService2.fetchAyahTimings(surahNumber);
-              try {
-                final currentAyahTiming =
-                    timings.firstWhere((t) => t.ayah == highlightedVerse);
+            //////////////////////////////////////////////////
+            // تشغيل الآية
+            //////////////////////////////////////////////////
 
-                _audioService2.playAyah(surahNumber, currentAyahTiming);
-              } catch (e) {
-                debugPrint("Timing not found for this ayah");
+            if (index == 0) {
+              // إيقاف
+              if (isPlayingQalounAyah) {
+                await _audioService2.stop();
+
+                setState(() {
+                  isPlayingQalounAyah = false;
+
+                  positionsOfMusic = null;
+                  sizeoficonOfMusic = null;
+                });
+
+                return;
               }
-            } else if (index == 1) {
-              saveMyAya(highlightedVerse!, surahNumber, surahName ?? "");
-            } else if (index == 2) {
-              setState(() => showTafsir = 1);
+
+              //////////////////////////////////////////////////
+              // التوقيتات
+              //////////////////////////////////////////////////
+
+              List<AyahTiming> timings = await _audioService2.fetchAyahTimings(
+                surahNumber,
+              );
+
+              try {
+                final currentAyahTiming = timings.firstWhere(
+                  (t) => t.ayah == highlightedVerse,
+                );
+
+                //////////////////////////////////////////////////
+                // تشغيل
+                //////////////////////////////////////////////////
+
+                setState(() {
+                  isPlayingQalounAyah = true;
+
+                  positionsOfMusic = -30;
+                  sizeoficonOfMusic = 48;
+                });
+
+                _audioService2.playAyah(
+                  surahNumber,
+                  currentAyahTiming,
+                );
+              } catch (e) {
+                debugPrint(
+                  "Timing not found for this ayah",
+                );
+
+                setState(() {
+                  isPlayingQalounAyah = false;
+
+                  positionsOfMusic = null;
+                  sizeoficonOfMusic = null;
+                });
+              }
+            }
+
+            //////////////////////////////////////////////////
+            // حفظ
+            //////////////////////////////////////////////////
+
+            else if (index == 1) {
+              saveMyAya(
+                highlightedVerse!,
+                surahNumber,
+                surahName ?? "",
+              );
+            }
+
+            //////////////////////////////////////////////////
+            // تفسير
+            //////////////////////////////////////////////////
+
+            else if (index == 2) {
+              setState(() {
+                showTafsir = 1;
+              });
             }
           },
           icons: const [
             Icons.music_note,
             Icons.bookmark_outlined,
-            Icons.format_align_right
+            Icons.format_align_right,
           ],
           positionsOfMusic: positionsOfMusic,
           sizeoficonOfMusic: sizeoficonOfMusic,
         ),
       );
     }
+
     return const SizedBox();
   }
 

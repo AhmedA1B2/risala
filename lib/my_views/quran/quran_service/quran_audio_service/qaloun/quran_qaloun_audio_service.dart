@@ -11,14 +11,14 @@ import 'package:risala/models/reciters/qaloun/ayah_timing.dart';
 
 class QuranQalounAudioService {
   final AudioPlayer player = AudioPlayer();
+  bool get isPlaying => player.playing;
 
   /////////////////////////////////////////////////////////
   Future<bool> checkInternet() async {
     try {
       final result = await InternetAddress.lookup('google.com');
 
-      return result.isNotEmpty &&
-          result[0].rawAddress.isNotEmpty;
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
     } on SocketException {
       return false;
     }
@@ -29,8 +29,7 @@ class QuranQalounAudioService {
     String urlReciter,
     int surah,
   ) async {
-    final url =
-        "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
+    final url = "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
 
     await player.stop();
 
@@ -52,13 +51,11 @@ class QuranQalounAudioService {
       );
 
       if (response.statusCode == 200) {
-        List<dynamic> data =
-            json.decode(response.body);
+        List<dynamic> data = json.decode(response.body);
 
         return data
             .map(
-              (item) =>
-                  AyahTiming.fromJson(item),
+              (item) => AyahTiming.fromJson(item),
             )
             .toList();
       }
@@ -92,7 +89,7 @@ class QuranQalounAudioService {
     );
 
     await player.setAudioSource(audioSource);
-
+    await player.seek(Duration.zero);
     await player.play();
   }
 
@@ -105,13 +102,11 @@ class QuranQalounAudioService {
     Function(double progress)? onProgress,
   ) async {
     try {
-
       /////////////////////////////////////////////////////
       // الصلاحيات
       /////////////////////////////////////////////////////
 
       if (Platform.isAndroid) {
-
         // Android 13+
         await Permission.audio.request();
 
@@ -123,15 +118,13 @@ class QuranQalounAudioService {
       // رابط الملف
       /////////////////////////////////////////////////////
 
-      final url =
-          "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
+      final url = "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
 
       /////////////////////////////////////////////////////
       // مجلد Music الحقيقي
       /////////////////////////////////////////////////////
 
-      final Directory musicDir =
-          Directory(
+      final Directory musicDir = Directory(
         "/storage/emulated/0/Music/Risala Quran/Qaloun$reciterid",
       );
 
@@ -160,13 +153,11 @@ class QuranQalounAudioService {
         url,
         filePath,
         deleteOnError: true,
-
         onReceiveProgress: (
           received,
           total,
         ) {
-          if (total > 0 &&
-              onProgress != null) {
+          if (total > 0 && onProgress != null) {
             onProgress(
               received / total,
             );
@@ -194,9 +185,7 @@ class QuranQalounAudioService {
       );
 
       return filePath;
-
     } catch (e) {
-
       debugPrint(
         "خطأ أثناء التحميل: $e",
       );
@@ -211,11 +200,15 @@ class QuranQalounAudioService {
     String reciterid,
     String surahName,
   ) async {
-
     final filePath =
         "/storage/emulated/0/Music/Risala Quran/Qaloun$reciterid/${surah.toString().padLeft(3, '0')} - $surahName.mp3";
 
     return File(filePath).exists();
+  }
+
+/////////////////////////////////////////////////////////////
+  Future<void> stop() async {
+    await player.stop();
   }
 
   /////////////////////////////////////////////////////////

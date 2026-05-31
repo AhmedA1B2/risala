@@ -76,7 +76,7 @@ class CustomMenuAnimation5State extends State<CustomMenuAnimation5> {
     return Scaffold(
       backgroundColor: whiteColor,
       appBar: AppBar(
-        shadowColor: blackColor,
+        shadowColor: isEidToDay ? blackColor : null,
         elevation: isEidToDay ? 8 : 0,
         backgroundColor: scandColor,
         toolbarHeight: MediaQuery.of(context).size.height * 0.2,
