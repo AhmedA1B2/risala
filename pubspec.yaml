@@ -129,7 +129,8 @@ flutter:
     - assets/json/reciters/hafs/
     - assets/json/reciters/qaloun/
 
-    - assets/json/quran/quran_for_search.json
+    - assets/json/quran/quran_for_search_hafs.json
+    - assets/json/quran/quran_for_search_qaloun.json
     - assets/json/quran/hafs/surahs/
     - assets/json/quran/qaloun/surahs/
 

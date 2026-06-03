@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:risala/main.dart';
 import 'package:risala/models/sura.dart';
 import 'package:risala/vars/colors.dart';
 import 'dart:convert';
@@ -29,6 +30,7 @@ class CustomSearchBar extends StatefulWidget {
 class _CustomSearchBarState extends State<CustomSearchBar> {
   String? selectedValue;
   TextEditingController textEditingController = TextEditingController();
+  String riwoya = sharedPref.getString("riwoya") ?? "hafs";
 
   List<Surah> surahs = [];
   // سنخزن هنا الآيات مع نسخة "نظيفة" للبحث لضمان السرعة
@@ -66,8 +68,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           await rootBundle.loadString('assets/json/surahs.json');
       final List<dynamic> surahsData = json.decode(surahsResponse);
 
-      final String quranResponse = await rootBundle
-          .loadString('assets/json/quran/quran_for_search.json');
+      final String quranResponse = riwoya == "hafs"
+          ? await rootBundle
+              .loadString('assets/json/quran/quran_for_search_hafs.json')
+          : await rootBundle
+              .loadString('assets/json/quran/quran_for_search_qaloun.json');
       final List<dynamic> quranData = json.decode(quranResponse);
 
       // هنا قمنا بحل مشكلة الـ Casting وتجهيز النص للبحث
