@@ -146,7 +146,7 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
                                 });
                               },
                             ),
-                            _buildSectionTitle("رواية حفص"),
+                            _buildSectionTitle(translation!.hafsNarration),
 
                             const SizedBox(width: 20), // مسافة بين الخيارين
 
@@ -166,7 +166,7 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
                               },
                             ),
 
-                            _buildSectionTitle('رواية قالون'),
+                            _buildSectionTitle(translation!.qaloonNarration),
                           ],
                         ),
                         IconButton(
@@ -208,8 +208,7 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
                 sharedPref.setString("selectedValue", selectedValue);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const MainView()),
+                  MaterialPageRoute(builder: (context) => const MainView()),
                 );
               },
             ),

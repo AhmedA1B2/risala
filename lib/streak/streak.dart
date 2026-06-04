@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 // تأكد من مسارات الاستيراد الصحيحة
 import 'package:risala/main.dart';
+import 'package:risala/models/translation.dart';
+import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 import 'usage_tracker.dart';
 
@@ -15,11 +17,12 @@ class _StreakState extends State<Streak> {
   int streakCount = 0;
   bool isGoalCompleted = false;
   late UsageTracker usageTracker;
+  Translation? translation;
 
   @override
   void initState() {
     super.initState();
-
+    loadAllTranslations();
     _loadInitialData();
 
     usageTracker = UsageTracker(
@@ -102,37 +105,39 @@ class _StreakState extends State<Streak> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: scandColor, // تأكد من وجود scandColor في ملف colors.dart
+          backgroundColor:
+              scandColor, // تأكد من وجود scandColor في ملف colors.dart
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.local_fire_department, color: Colors.orange),
-              SizedBox(width: 8),
-              Text("الستريك اليومي", style: TextStyle(color: Colors.white)),
+              const Icon(Icons.local_fire_department, color: Colors.orange),
+              const SizedBox(width: 8),
+              Text(translation!.dailyStreak,
+                  style: const TextStyle(color: Colors.white)),
             ],
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                "استخدم التطبيق لمدة 3 دقائق يومياً لزيادة الستريك الخاص بك.\nإذا لم تدخل للتطبيق لـ 3 أيام متتالية، سيعود الستريك للصفر!",
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+              Text(
+                translation!.dailyStreakDescription,
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              _buildTierRow("1.png", "0 - 9 أيام", 0),
-              _buildTierRow("2.png", "10 - 29 يوم", 10),
-              _buildTierRow("3.png", "30 - 49 يوم", 30),
-              _buildTierRow("4.png", "50 - 99 يوم", 50),
-              _buildTierRow("5.png", "100+ يوم", 100),
+              _buildTierRow("1.png", "0 - 9 ${translation!.daysLabel}", 0),
+              _buildTierRow("2.png", "10 - 29 ${translation!.dayLabel}", 10),
+              _buildTierRow("3.png", "30 - 49 ${translation!.dayLabel}", 30),
+              _buildTierRow("4.png", "50 - 99 ${translation!.dayLabel}", 50),
+              _buildTierRow("5.png", "100+ ${translation!.dayLabel}", 100),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child:
-                  const Text("حسناً", style: TextStyle(color: Colors.orange)),
+              child: Text(translation!.okButton,
+                  style: const TextStyle(color: Colors.orange)),
             ),
           ],
         );
@@ -168,6 +173,15 @@ class _StreakState extends State<Streak> {
     );
   }
 
+  Future<void> loadAllTranslations() async {
+    final list = await loadTranslation(sharedPref.getString("selectedValue"));
+    if (list.isNotEmpty) {
+      setState(() {
+        translation = list.first;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -187,7 +201,8 @@ class _StreakState extends State<Streak> {
           Image.asset(
             getStreakImagePath(),
             width: 32,
-            key: ValueKey(getStreakImagePath()), // فكرة ممتازة لاستخدام Key هنا لتحديث الصورة فوراً
+            key: ValueKey(
+                getStreakImagePath()), // فكرة ممتازة لاستخدام Key هنا لتحديث الصورة فوراً
           )
         ],
       ),

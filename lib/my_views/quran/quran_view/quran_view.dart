@@ -511,8 +511,7 @@ class _QuranViewState extends State<QuranView> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     backgroundColor: scandColor,
-                                    content:
-                                        const Text("تم تحميل السورة بنجاح"),
+                                    content: const Icon(Icons.check),
                                   ),
                                 );
                               }

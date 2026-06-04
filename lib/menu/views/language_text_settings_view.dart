@@ -135,7 +135,7 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                             });
                           },
                         ),
-                        _buildSectionTitle("رواية حفص"),
+                        _buildSectionTitle(trans.hafsNarration),
 
                         const SizedBox(width: 20), // مسافة بين الخيارين
 
@@ -154,7 +154,7 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                           },
                         ),
 
-                        _buildSectionTitle('رواية قالون'),
+                        _buildSectionTitle(trans.qaloonNarration),
                       ],
                     ),
 

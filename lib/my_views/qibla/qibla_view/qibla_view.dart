@@ -52,7 +52,7 @@ class _QiblaViewState extends State<QiblaView> {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         _setFailure(
-          "خدمة الموقع (GPS) مغلقة. يرجى تفعيلها ليتمكن التطبيق من تحديد اتجاهك.",
+          translation!.gpsDisabledForQibla,
           isGpsIssue: true,
         );
         return;
@@ -63,14 +63,13 @@ class _QiblaViewState extends State<QiblaView> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _setFailure("تم رفض صلاحية الوصول للموقع.");
+          _setFailure(translation!.locationPermissionDenied);
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _setFailure(
-            "صلاحية الموقع مرفوضة دائماً، يرجى تفعيلها من إعدادات الهاتف.");
+        _setFailure(translation!.locationPermissionPermanentlyDenied);
         return;
       }
 
@@ -93,8 +92,7 @@ class _QiblaViewState extends State<QiblaView> {
       }
 
       if (!hasMagnetometer) {
-        _setFailure(
-            "عذراً، جهازه لا يدعم مستشعر البوصلة (Magnetometer) اللازم لتحريك السهم.");
+        _setFailure(translation!.compassNotSupportedDetailed);
         return;
       }
 
@@ -108,7 +106,7 @@ class _QiblaViewState extends State<QiblaView> {
         setState(() => _isLoading = false);
       }
     } catch (e) {
-      _setFailure("حدث خطأ غير متوقع أثناء إعداد البوصلة.");
+      _setFailure(translation!.compassSetupError);
     }
   }
 
@@ -171,8 +169,8 @@ class _QiblaViewState extends State<QiblaView> {
                     const SizedBox(height: 16),
                     Text(
                       _isGpsDisabledError
-                          ? "الموقع مغلق"
-                          : "البوصلة غير مدعومة",
+                          ? translation!.locationDisabled
+                          : translation!.compassNotSupported,
                       style: TextStyle(
                           color: scandColor,
                           fontSize: 22,
@@ -205,8 +203,8 @@ class _QiblaViewState extends State<QiblaView> {
                       },
                       child: Text(
                         _isGpsDisabledError
-                            ? "فتح إعدادات الموقع"
-                            : "إعادة المحاولة",
+                            ? translation!.openLocationSettings
+                            : translation!.retry,
                         style:
                             const TextStyle(color: Colors.white, fontSize: 16),
                       ),

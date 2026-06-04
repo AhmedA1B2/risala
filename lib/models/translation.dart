@@ -80,25 +80,40 @@ class Translation {
   final String appearance;
   final String changeAppearance;
   final String previewAppearance; // تم التعديل
-  final String glassEffect;      // تم التعديل
-  final String chooseColor;      // تم التعديل
-  final String morning;          // تم التعديل
-  final String evening;          // تم التعديل
-  final String prayerTime;       // تم التعديل
-  final String sleep;            // تم التعديل
-  final String tasbihAndDhikr;   // تم التعديل
-  final String wakingUp;         // تم التعديل
-  final String adhan;            // تم التعديل
-  final String mosque;           // تم التعديل
-  final String ablution;         // تم التعديل
-  final String homePlace;        // تم التعديل
-  final String restroom;         // تم التعديل
-  final String food;             // تم التعديل
-  final String locationAccessRequired;    // تم التعديل
-  final String permissionDeniedSettings;  // تم التعديل
+  final String glassEffect; // تم التعديل
+  final String chooseColor; // تم التعديل
+  final String morning; // تم التعديل
+  final String evening; // تم التعديل
+  final String prayerTime; // تم التعديل
+  final String sleep; // تم التعديل
+  final String tasbihAndDhikr; // تم التعديل
+  final String wakingUp; // تم التعديل
+  final String adhan; // تم التعديل
+  final String mosque; // تم التعديل
+  final String ablution; // تم التعديل
+  final String homePlace; // تم التعديل
+  final String restroom; // تم التعديل
+  final String food; // تم التعديل
+  final String locationAccessRequired; // تم التعديل
+  final String permissionDeniedSettings; // تم التعديل
   final String permissionDeniedAppSettings; // تم التعديل
-  final String compassNotSupported;       // تم التعديل
-  final String enableLocationService;     // تم التعديل
+  final String compassNotSupported; // تم التعديل
+  final String enableLocationService; // تم التعديل
+
+  final String dailyStreak;
+  final String dailyStreakDescription;
+  final String daysLabel;
+  final String dayLabel;
+  final String okButton;
+  final String hafsNarration;
+  final String qaloonNarration;
+  final String gpsDisabledForQibla;
+  final String locationPermissionPermanentlyDenied;
+  final String compassNotSupportedDetailed;
+  final String compassSetupError;
+  final String locationDisabled;
+  final String openLocationSettings;
+  final String retry;
 
   Translation({
     required this.key,
@@ -187,6 +202,20 @@ class Translation {
     required this.permissionDeniedAppSettings,
     required this.compassNotSupported,
     required this.enableLocationService,
+    required this.dailyStreak,
+    required this.dailyStreakDescription,
+    required this.daysLabel,
+    required this.dayLabel,
+    required this.okButton,
+    required this.hafsNarration,
+    required this.qaloonNarration,
+    required this.gpsDisabledForQibla,
+    required this.locationPermissionPermanentlyDenied,
+    required this.compassNotSupportedDetailed,
+    required this.compassSetupError,
+    required this.locationDisabled,
+    required this.openLocationSettings,
+    required this.retry,
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
@@ -259,7 +288,7 @@ class Translation {
       chooseTime: data["chooseTime"] ?? "",
       time: data["time"] ?? "",
       days: data["days"] ?? "",
-      // 
+      //
       ablution: data["Ablution"] ?? "",
       adhan: data["Adhan"] ?? "",
       appearance: data["Appearance"] ?? "",
@@ -289,6 +318,22 @@ class Translation {
       sleep: data["Sleep"] ?? "",
       tasbihAndDhikr: data["Tasbih and Dhikr"] ?? "",
       wakingUp: data["Waking Up"] ?? "",
+
+      dailyStreak: data["dailyStreak"] ?? "",
+      dailyStreakDescription: data["dailyStreakDescription"] ?? "",
+      daysLabel: data["daysLabel"] ?? "",
+      dayLabel: data["dayLabel"] ?? "",
+      okButton: data["okButton"] ?? "",
+      hafsNarration: data["hafsNarration"] ?? "",
+      qaloonNarration: data["qaloonNarration"] ?? "",
+      gpsDisabledForQibla: data["gpsDisabledForQibla"] ?? "",
+      locationPermissionPermanentlyDenied:
+          data["locationPermissionPermanentlyDenied"] ?? "",
+      compassNotSupportedDetailed: data["compassNotSupportedDetailed"] ?? "",
+      compassSetupError: data["compassSetupError"] ?? "",
+      locationDisabled: data["locationDisabled"] ?? "",
+      openLocationSettings: data["openLocationSettings"] ?? "",
+      retry: data["retry"] ?? "",
     );
   }
 }
