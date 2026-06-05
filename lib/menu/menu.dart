@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_menu_itme/custom_menu_itme1.dart';
 import 'package:risala/main.dart';
+import 'package:risala/menu/views/contact_developer_page.dart';
 import 'package:risala/menu/views/theme_view.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/translation/translation.dart';
@@ -64,7 +65,13 @@ class _MenuState extends State<Menu> {
               CustomMenuItme(
                 textItme: trans.support,
                 iconItme: Icons.support_agent,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ContactDeveloperPage()),
+                  );
+                },
               ),
               CustomMenuItme(
                 textItme: trans.theme,

@@ -146,7 +146,10 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
                                 });
                               },
                             ),
-                            _buildSectionTitle(translation!.hafsNarration),
+                            _buildSectionTitle(translation != null &&
+                                    translation!.hafsNarration.isNotEmpty
+                                ? translation!.hafsNarration
+                                : "رواية حفص"),
 
                             const SizedBox(width: 20), // مسافة بين الخيارين
 
@@ -166,7 +169,10 @@ class _CustomChooseLangViewState extends State<CustomChooseLangView> {
                               },
                             ),
 
-                            _buildSectionTitle(translation!.qaloonNarration),
+                            _buildSectionTitle(translation != null &&
+                                    translation!.qaloonNarration.isNotEmpty
+                                ? translation!.qaloonNarration
+                                : "رواية قالون"),
                           ],
                         ),
                         IconButton(

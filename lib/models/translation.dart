@@ -115,6 +115,12 @@ class Translation {
   final String openLocationSettings;
   final String retry;
 
+  final String contactDeveloper;
+  final String developerSupportTitle;
+  final String developerSupportDescription;
+  final String developerSupportHint;
+  final String contactViaTelegram;
+
   Translation({
     required this.key,
     required this.text,
@@ -216,6 +222,11 @@ class Translation {
     required this.locationDisabled,
     required this.openLocationSettings,
     required this.retry,
+    required this.contactDeveloper,
+    required this.developerSupportTitle,
+    required this.developerSupportDescription,
+    required this.developerSupportHint,
+    required this.contactViaTelegram,
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
@@ -334,6 +345,11 @@ class Translation {
       locationDisabled: data["locationDisabled"] ?? "",
       openLocationSettings: data["openLocationSettings"] ?? "",
       retry: data["retry"] ?? "",
+      contactDeveloper: data["contactDeveloper"] ?? "",
+      developerSupportTitle: data["developerSupportTitle"] ?? "",
+      developerSupportDescription: data["developerSupportDescription"] ?? "",
+      developerSupportHint: data["developerSupportHint"] ?? "",
+      contactViaTelegram: data["contactViaTelegram"] ?? "",
     );
   }
 }

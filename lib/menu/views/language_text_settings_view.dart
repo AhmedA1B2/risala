@@ -120,42 +120,45 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
 
                     const SizedBox(height: 30),
 
-                    Row(
-                      children: [
-                        Radio<String>(
-                          value: "hafs",
-                          activeColor: scandColor,
-                          groupValue: riwoya,
-                          onChanged: (value) {
-                            setState(() {
-                              riwoya = value!;
-                              if (selectedFont != "UthmanicHafs") {
-                                selectedFont = "UthmanicHafs";
-                              }
-                            });
-                          },
-                        ),
-                        _buildSectionTitle(trans.hafsNarration),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Radio<String>(
+                            value: "hafs",
+                            activeColor: scandColor,
+                            groupValue: riwoya,
+                            onChanged: (value) {
+                              setState(() {
+                                riwoya = value!;
+                                if (selectedFont != "UthmanicHafs") {
+                                  selectedFont = "UthmanicHafs";
+                                }
+                              });
+                            },
+                          ),
+                          _buildSectionTitle(trans.hafsNarration),
 
-                        const SizedBox(width: 20), // مسافة بين الخيارين
+                          const SizedBox(width: 20), // مسافة بين الخيارين
 
-                        // خيار رواية قالون
-                        Radio<String>(
-                          value: "qaloun",
-                          activeColor: scandColor,
-                          groupValue: riwoya,
-                          onChanged: (value) {
-                            setState(() {
-                              riwoya = value!;
-                              if (selectedFont != "UthmanicQaloun") {
-                                selectedFont = "UthmanicQaloun";
-                              }
-                            });
-                          },
-                        ),
+                          // خيار رواية قالون
+                          Radio<String>(
+                            value: "qaloun",
+                            activeColor: scandColor,
+                            groupValue: riwoya,
+                            onChanged: (value) {
+                              setState(() {
+                                riwoya = value!;
+                                if (selectedFont != "UthmanicQaloun") {
+                                  selectedFont = "UthmanicQaloun";
+                                }
+                              });
+                            },
+                          ),
 
-                        _buildSectionTitle(trans.qaloonNarration),
-                      ],
+                          _buildSectionTitle(trans.qaloonNarration),
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: 30),

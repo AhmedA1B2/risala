@@ -100,7 +100,14 @@
         "locationDisabled": "الموقع مغلق",
         "compassNotSupported": "البوصلة غير مدعومة",
         "openLocationSettings": "فتح إعدادات الموقع",
-        "retry": "إعادة المحاولة"
+        "retry": "إعادة المحاولة",
+        
+        "contactDeveloper": "التواصل مع المطور",
+        "developerSupportTitle": "هل واجهت مشكلة أو لديك اقتراح؟",
+        "developerSupportDescription": "يمكنك التواصل مباشرة مع مطور التطبيق للإبلاغ عن الأخطاء أو إرسال الاقتراحات والملاحظات.",
+        "developerSupportHint": "يرجى وصف المشكلة بالتفصيل وإرفاق صورة للشاشة إن أمكن.",
+        "contactViaTelegram": "التواصل عبر تيليجرام"
+
       }
     ],
     "en": [
@@ -203,7 +210,12 @@
         "locationDisabled": "Location Disabled",
         "compassNotSupported": "Compass Not Supported",
         "openLocationSettings": "Open Location Settings",
-        "retry": "Retry"
+        "retry": "Retry",
+        "contactDeveloper": "Contact the Developer",
+        "developerSupportTitle": "Have you encountered a problem or have a suggestion?",
+        "developerSupportDescription": "You can contact the app developer directly to report bugs or send suggestions and feedback.",
+        "developerSupportHint": "Please describe the issue in detail and attach a screenshot if possible.",
+        "contactViaTelegram": "Contact via Telegram"
       }
     ],
     "sp": [
@@ -306,7 +318,12 @@
         "locationDisabled": "Ubicación desactivada",
         "compassNotSupported": "Brújula no compatible",
         "openLocationSettings": "Abrir configuración de ubicación",
-        "retry": "Reintentar"
+        "retry": "Reintentar",
+        "contactDeveloper": "Contactar al desarrollador",
+        "developerSupportTitle": "¿Has encontrado un problema o tienes una sugerencia?",
+        "developerSupportDescription": "Puedes contactar directamente con el desarrollador de la aplicación para informar errores o enviar sugerencias y comentarios.",
+        "developerSupportHint": "Describe el problema con detalle y adjunta una captura de pantalla si es posible.",
+        "contactViaTelegram": "Contactar por Telegram"
       }
     ],
     "it": [
@@ -409,7 +426,12 @@
         "locationDisabled": "Posizione disattivata",
         "compassNotSupported": "Bussola non supportata",
         "openLocationSettings": "Apri impostazioni posizione",
-        "retry": "Riprova"
+        "retry": "Riprova",
+        "contactDeveloper": "Contatta lo sviluppatore",
+        "developerSupportTitle": "Hai riscontrato un problema o hai un suggerimento?",
+        "developerSupportDescription": "Puoi contattare direttamente lo sviluppatore dell'app per segnalare errori o inviare suggerimenti e feedback.",
+        "developerSupportHint": "Descrivi il problema in dettaglio e allega uno screenshot se possibile.",
+        "contactViaTelegram": "Contatta tramite Telegram"
       }
     ],
     "in": [
@@ -512,7 +534,12 @@
         "locationDisabled": "Lokasi Dinonaktifkan",
         "compassNotSupported": "Kompas Tidak Didukung",
         "openLocationSettings": "Buka Pengaturan Lokasi",
-        "retry": "Coba Lagi"
+        "retry": "Coba Lagi",
+        "contactDeveloper": "Hubungi Pengembang",
+        "developerSupportTitle": "Mengalami masalah atau punya saran?",
+        "developerSupportDescription": "Anda dapat menghubungi pengembang aplikasi secara langsung untuk melaporkan bug atau mengirim saran dan masukan.",
+        "developerSupportHint": "Harap jelaskan masalah secara rinci dan lampirkan tangkapan layar jika memungkinkan.",
+        "contactViaTelegram": "Hubungi via Telegram"
       }
     ],
     "cn": [
@@ -615,7 +642,12 @@
         "locationDisabled": "位置已关闭",
         "compassNotSupported": "不支持指南针",
         "openLocationSettings": "打开位置设置",
-        "retry": "重试"
+        "retry": "重试",
+        "contactDeveloper": "联系开发者",
+        "developerSupportTitle": "遇到问题或有建议吗？",
+        "developerSupportDescription": "您可以直接联系应用开发者以报告错误或发送建议和反馈。",
+        "developerSupportHint": "请尽可能详细描述问题，并附上截图。",
+        "contactViaTelegram": "通过 Telegram 联系"
       }
     ],
     "bn": [
@@ -718,7 +750,12 @@
         "locationDisabled": "অবস্থান বন্ধ",
         "compassNotSupported": "কম্পাস সমর্থিত নয়",
         "openLocationSettings": "অবস্থান সেটিংস খুলুন",
-        "retry": "আবার চেষ্টা করুন"
+        "retry": "আবার চেষ্টা করুন",
+        "contactDeveloper": "ডেভেলপারের সাথে যোগাযোগ",
+        "developerSupportTitle": "কোনো সমস্যা হয়েছে বা কোনো পরামর্শ আছে?",
+        "developerSupportDescription": "ত্রুটি রিপোর্ট করা বা পরামর্শ ও মতামত পাঠানোর জন্য আপনি সরাসরি অ্যাপের ডেভেলপারের সাথে যোগাযোগ করতে পারেন।",
+        "developerSupportHint": "অনুগ্রহ করে সমস্যাটি বিস্তারিতভাবে বর্ণনা করুন এবং সম্ভব হলে একটি স্ক্রিনশট সংযুক্ত করুন।",
+        "contactViaTelegram": "টেলিগ্রামের মাধ্যমে যোগাযোগ"
       }
     ],
     "ru": [
@@ -821,7 +858,12 @@
         "locationDisabled": "Местоположение отключено",
         "compassNotSupported": "Компас не поддерживается",
         "openLocationSettings": "Открыть настройки местоположения",
-        "retry": "Повторить"
+        "retry": "Повторить",
+        "contactDeveloper": "Связаться с разработчиком",
+        "developerSupportTitle": "Столкнулись с проблемой или есть предложение?",
+        "developerSupportDescription": "Вы можете напрямую связаться с разработчиком приложения, чтобы сообщить об ошибках или отправить предложения и отзывы.",
+        "developerSupportHint": "Пожалуйста, подробно опишите проблему и по возможности приложите снимок экрана.",
+        "contactViaTelegram": "Связаться через Telegram"
       }
     ],
     "jp": [
@@ -924,7 +966,12 @@
         "locationDisabled": "位置情報オフ",
         "compassNotSupported": "コンパス非対応",
         "openLocationSettings": "位置情報設定を開く",
-        "retry": "再試行"
+        "retry": "再試行",
+        "contactDeveloper": "開発者に連絡",
+        "developerSupportTitle": "問題が発生しましたか？それとも提案がありますか？",
+        "developerSupportDescription": "バグの報告やご意見・ご提案の送信のために、アプリ開発者へ直接連絡できます。",
+        "developerSupportHint": "問題をできるだけ詳しく説明し、可能であればスクリーンショットを添付してください。",
+        "contactViaTelegram": "Telegramで連絡"
       }
     ]
   }
