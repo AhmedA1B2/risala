@@ -52,6 +52,7 @@ class _MenuState extends State<Menu> {
             children: [
               CustomMenuItme(
                 textItme: trans.languageAndText,
+                heroTag: "language",
                 iconItme: Icons.language,
                 onPressed: () {
                   Navigator.push(
@@ -63,8 +64,9 @@ class _MenuState extends State<Menu> {
                 },
               ),
               CustomMenuItme(
+                heroTag: "support_agent_rounded",
                 textItme: trans.support,
-                iconItme: Icons.support_agent,
+                iconItme: Icons.support_agent_rounded,
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -75,6 +77,7 @@ class _MenuState extends State<Menu> {
               ),
               CustomMenuItme(
                 textItme: trans.theme,
+                heroTag: "color_lens",
                 iconItme: Icons.color_lens,
                 onPressed: () {
                   Navigator.push(

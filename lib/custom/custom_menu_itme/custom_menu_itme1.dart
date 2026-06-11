@@ -6,9 +6,10 @@ class CustomMenuItme extends StatefulWidget {
       {super.key,
       required this.textItme,
       required this.iconItme,
-      this.onPressed});
+      this.onPressed, required this.heroTag});
 
   final String textItme;
+  final String heroTag;
   final IconData iconItme;
   final void Function()? onPressed;
 
@@ -63,9 +64,12 @@ class _CustomMenuItmeState extends State<CustomMenuItme> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Icon(
-                    widget.iconItme,
-                    color: blackColor,
+                  Hero(
+                    tag: widget.heroTag,
+                    child: Icon(
+                      widget.iconItme,
+                      color: blackColor,
+                    ),
                   ),
                   Text(
                     widget.textItme,

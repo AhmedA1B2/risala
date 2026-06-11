@@ -79,7 +79,18 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                     /// =======================
                     /// LANGUAGE
                     /// =======================
-                    _buildSectionTitle(trans.languageAndText),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Hero(
+                          tag: "language",
+                          child: Icon(
+                            Icons.language,
+                          ),
+                        ),
+                        _buildSectionTitle(trans.languageAndText),
+                      ],
+                    ),
 
                     const SizedBox(height: 10),
 

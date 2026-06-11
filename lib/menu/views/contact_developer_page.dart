@@ -72,10 +72,13 @@ class _ContactDeveloperPageState extends State<ContactDeveloperPage> {
                   color: secondaryColor,
                   borderRadius: BorderRadius.circular(30),
                   border: Border.all(color: dilutionScandColor)),
-              child: Icon(
-                Icons.support_agent_rounded,
-                size: 60,
-                color: primaryColor,
+              child: Hero(
+                tag: "support_agent_rounded",
+                child: Icon(
+                  Icons.support_agent_rounded,
+                  size: 60,
+                  color: primaryColor,
+                ),
               ),
             ),
             const SizedBox(height: 25),

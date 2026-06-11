@@ -88,13 +88,25 @@ class _ThemeViewState extends State<ThemeView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 15),
-            Text(
-              translation != null
-                  ? translation!.changeAppearance.isNotEmpty
-                      ? translation!.changeAppearance
-                      : "تغيير المظهر"
-                  : "تغيير المظهر",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Hero(
+                  tag: "color_lens",
+                  child: Icon(
+                    Icons.color_lens,
+                  ),
+                ),
+                Text(
+                  translation != null
+                      ? translation!.changeAppearance.isNotEmpty
+                          ? translation!.changeAppearance
+                          : "تغيير المظهر"
+                      : "تغيير المظهر",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             const SizedBox(height: 15),
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
