@@ -51,7 +51,7 @@ class QuranHafsAudioService {
   // Cache
   ////////////////////////////////////////////////////////////
 
-  final Map<int, List<AyahTiming>> _timingsCache = {};
+  final Map<String, List<AyahTiming>> _timingsCache = {};
 
   ////////////////////////////////////////////////////////////
   // Internet Check
@@ -171,28 +171,26 @@ class QuranHafsAudioService {
   ) async {
     try {
       //////////////////////////////////////////////////////
-      // Cache
-      //////////////////////////////////////////////////////
-
-      if (_timingsCache.containsKey(
-        surah,
-      )) {
-        return _timingsCache[surah]!;
-      }
-
-      //////////////////////////////////////////////////////
       // Default Reciter
       //////////////////////////////////////////////////////
 
-      if (sharedPref.getInt(
-                "numOfReciter",
-              ) ==
-              null ||
-          sharedPref.getInt(
-                "numOfReciter",
-              )! >
-              18) {
+      if (sharedPref.getInt("numOfReciter") == null ||
+          sharedPref.getInt("numOfReciter")! > 18) {
         reciter = 4;
+      }
+
+      //////////////////////////////////////////////////////
+      // Cache Key
+      //////////////////////////////////////////////////////
+
+      final cacheKey = "${surah}_$reciter";
+
+      //////////////////////////////////////////////////////
+      // Cache
+      //////////////////////////////////////////////////////
+
+      if (_timingsCache.containsKey(cacheKey)) {
+        return _timingsCache[cacheKey]!;
       }
 
       //////////////////////////////////////////////////////
@@ -207,9 +205,7 @@ class QuranHafsAudioService {
             Uri.parse(url),
           )
           .timeout(
-            const Duration(
-              seconds: 20,
-            ),
+            const Duration(seconds: 20),
           );
 
       //////////////////////////////////////////////////////
@@ -225,7 +221,11 @@ class QuranHafsAudioService {
             )
             .toList();
 
-        _timingsCache[surah] = timings;
+        //////////////////////////////////////////////////////
+        // Save Cache
+        //////////////////////////////////////////////////////
+
+        _timingsCache[cacheKey] = timings;
 
         return timings;
       }
@@ -237,7 +237,6 @@ class QuranHafsAudioService {
 
     return [];
   }
-
   ////////////////////////////////////////////////////////////
   // Play Ayah
   ////////////////////////////////////////////////////////////

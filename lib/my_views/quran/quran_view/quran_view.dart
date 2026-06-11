@@ -143,8 +143,7 @@ class _QuranViewState extends State<QuranView> {
           });
         }
 
-        if (state.processingState == ProcessingState.completed ||
-            !state.playing) {
+        if (state.processingState == ProcessingState.completed) {
           setState(() {
             isPlayingHafsAyah = false;
 
@@ -178,8 +177,7 @@ class _QuranViewState extends State<QuranView> {
           });
         }
 
-        if (state.processingState == ProcessingState.completed ||
-            !state.playing) {
+        if (state.processingState == ProcessingState.completed) {
           setState(() {
             isPlayingQalounAyah = false;
 
@@ -567,6 +565,9 @@ class _QuranViewState extends State<QuranView> {
           );
           urlOfReciterHafs = value.urlReciter;
           idOfReciterHafs = value.id;
+
+          _audioService.clearTimingsCache();
+
           await checkDownloaded();
           if (!mounted) return;
 
@@ -680,9 +681,8 @@ class _QuranViewState extends State<QuranView> {
   // 💡 التعديل الجوهري الثالث: إصلاح أزرار التشغيل لتحديث الواجهة فوراً
   void _handleMainHafsPlayButton() async {
     checkDownloaded();
-    if (translation == null) return;
 
-    if (onOff == translation!.turnOn) {
+    if (!isitplay) {
       // التأكد من الإنترنت أولاً قبل فعل أي شيء
       if (!(await _audioService.checkInternet())) {
         _showNoInternetSnackBar();
@@ -696,6 +696,7 @@ class _QuranViewState extends State<QuranView> {
         onOff = translation!.turnOff;
         iconData = Icons.stop;
         highlightedVerse = null;
+        highlightedWord = null;
       });
 
       // 💡 نشغل الصوت بدون كلمة await لكي لا يتجمد الكود هنا
@@ -738,6 +739,8 @@ class _QuranViewState extends State<QuranView> {
           onOff = translation!.turnOff;
           iconData = Icons.stop;
           iconDataPause = Icons.pause;
+          highlightedVerse = null;
+          highlightedWord = null;
         });
 
         // 💡 تشغيل بدون await
@@ -779,6 +782,9 @@ class _QuranViewState extends State<QuranView> {
             //////////////////////////////////////////////////
 
             if (index == 0) {
+              isitplay = false;
+              onOff = translation!.turnOn;
+              iconData = Icons.play_arrow;
               // إيقاف
               if (isPlayingHafsAyah) {
                 await _audioService.stop();
@@ -835,6 +841,7 @@ class _QuranViewState extends State<QuranView> {
                   sizeoficonOfMusic = null;
                 });
               }
+              highlightedVerse = null;
             }
 
             //////////////////////////////////////////////////
@@ -896,6 +903,9 @@ class _QuranViewState extends State<QuranView> {
               color: mainColor,
             ),
             onPressed: () async {
+              isitplay = false;
+              onOff = translation!.turnOn;
+              iconData = Icons.play_arrow;
               _audioService.playWord(
                 surahNumber,
                 highlightedWordVerse!,
@@ -923,6 +933,9 @@ class _QuranViewState extends State<QuranView> {
             //////////////////////////////////////////////////
 
             if (index == 0) {
+              isitplay = false;
+              onOff = translation!.turnOn;
+              iconData = Icons.play_arrow;
               // إيقاف
               if (isPlayingQalounAyah) {
                 await _audioService2.stop();
@@ -977,6 +990,8 @@ class _QuranViewState extends State<QuranView> {
                   sizeoficonOfMusic = null;
                 });
               }
+
+              highlightedVerse = null;
             }
 
             //////////////////////////////////////////////////
