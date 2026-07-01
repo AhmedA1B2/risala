@@ -41,15 +41,12 @@ class _ContactDeveloperPageState extends State<ContactDeveloperPage> {
 
   @override
   Widget build(BuildContext context) {
-    Color primaryColor = scandColor;
-    Color secondaryColor = dilutionamberColor;
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        foregroundColor: primaryColor,
+        foregroundColor: scandColor,
         centerTitle: true,
         title: Text(
           translation != null
@@ -165,7 +162,7 @@ class _ContactDeveloperPageState extends State<ContactDeveloperPage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
+                  backgroundColor: scandColor,
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(

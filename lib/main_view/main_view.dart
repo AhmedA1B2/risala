@@ -185,7 +185,6 @@ class _MainViewState extends State<MainView> with RouteAware {
       // 🔹 تحديد سلوك الضغط ليشمل حتى الأماكن الفارغة (الشفافة) في الشاشة
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        
         FocusScope.of(context).unfocus();
         searchBarKey.currentState?.closeSearchBar();
       },
@@ -193,6 +192,9 @@ class _MainViewState extends State<MainView> with RouteAware {
         key: menuKey,
         title: translation!.theQuran,
         onMenuChanged: (value) {
+          if (sharedPref.getBool("oldUser") != true) {
+            tutorial.next();
+          }
           setState(() => isMenuOpen = value);
         },
         buttonMenuKey: buttonMenuKey,
