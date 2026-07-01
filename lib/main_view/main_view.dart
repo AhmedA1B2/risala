@@ -16,7 +16,6 @@ import 'package:risala/streak/video/my_video_player.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
-import 'package:vibration/vibration.dart';
 
 class MainView extends StatefulWidget {
   const MainView({super.key});
@@ -33,6 +32,8 @@ class _MainViewState extends State<MainView> with RouteAware {
   final GlobalKey keyBottomBarForTuorial2 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial3 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial4 = GlobalKey();
+
+  final GlobalKey<CustomSearchBarState> searchBarKey = GlobalKey();
 
   late TutorialOverlay tutorial;
 
@@ -123,18 +124,34 @@ class _MainViewState extends State<MainView> with RouteAware {
   }
 
   String getStreakVideoPath() {
-    if (streakCount <= 9) return "assets/images/streak/animation/1.mp4";
-    if (streakCount <= 29) return "assets/images/streak/animation/2.mp4";
-    if (streakCount <= 49) return "assets/images/streak/animation/3.mp4";
-    if (streakCount <= 99) return "assets/images/streak/animation/4.mp4";
+    final streak = sharedPref.getInt("streakCount") ?? 0;
+
+    if (streak <= 9) {
+      return "assets/images/streak/animation/1.mp4";
+    }
+
+    if (streak <= 29) {
+      return "assets/images/streak/animation/2.mp4";
+    }
+
+    if (streak <= 49) {
+      return "assets/images/streak/animation/3.mp4";
+    }
+
+    if (streak <= 99) {
+      return "assets/images/streak/animation/4.mp4";
+    }
+
     return "assets/images/streak/animation/5.mp4";
   }
 
   void _handleVideoFinished() {
     sharedPref.setBool("isVideoWatched", true);
 
+    showVideoNotifier.value = false;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      isGoalCompletedNotifier.value = false;
+      isGoalCompletedNotifier.value = true;
     });
   }
 
@@ -164,79 +181,89 @@ class _MainViewState extends State<MainView> with RouteAware {
   }
 
   Widget _buildMainContent() {
-    return CustomMenuAnimation5(
-      key: menuKey,
-      title: translation!.theQuran,
-      onMenuChanged: (value) {
-        setState(() => isMenuOpen = value);
+    return GestureDetector(
+      // 🔹 تحديد سلوك الضغط ليشمل حتى الأماكن الفارغة (الشفافة) في الشاشة
+      behavior: HitTestBehavior.translucent,
+      onTap: () {
+        
+        FocusScope.of(context).unfocus();
+        searchBarKey.currentState?.closeSearchBar();
       },
-      buttonMenuKey: buttonMenuKey,
-      mainView: Stack(
-        children: [
-          searchResults == null
-              ? HomeView(
-                  onTutorialNext: () {
-                    if (sharedPref.getBool("oldUser") != true) {
-                      tutorial.next();
-                    }
-                  },
-                  onPressedCustomIconButtonBookmark: _openQuranViewSaved,
-                  keyBottomBarForTuorial1: keyBottomBarForTuorial1,
-                  keyBottomBarForTuorial2: keyBottomBarForTuorial2,
-                  keyBottomBarForTuorial3: keyBottomBarForTuorial3,
-                  keyBottomBarForTuorial4: keyBottomBarForTuorial4,
-                )
-              : ListView.builder(
-                  itemCount: searchResults!.length,
-                  itemBuilder: (_, index) {
-                    final verse = searchResults![index];
-                    return ListTile(
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => QuranView(
-                              surahNumber: verse['surah_number'],
-                              searchedVerse: verse['verse_number'],
-                              x: 2,
+      child: CustomMenuAnimation5(
+        key: menuKey,
+        title: translation!.theQuran,
+        onMenuChanged: (value) {
+          setState(() => isMenuOpen = value);
+        },
+        buttonMenuKey: buttonMenuKey,
+        mainView: Stack(
+          children: [
+            searchResults == null
+                ? HomeView(
+                    onTutorialNext: () {
+                      if (sharedPref.getBool("oldUser") != true) {
+                        tutorial.next();
+                      }
+                    },
+                    onPressedCustomIconButtonBookmark: _openQuranViewSaved,
+                    keyBottomBarForTuorial1: keyBottomBarForTuorial1,
+                    keyBottomBarForTuorial2: keyBottomBarForTuorial2,
+                    keyBottomBarForTuorial3: keyBottomBarForTuorial3,
+                    keyBottomBarForTuorial4: keyBottomBarForTuorial4,
+                  )
+                : ListView.builder(
+                    itemCount: searchResults!.length,
+                    itemBuilder: (_, index) {
+                      final verse = searchResults![index];
+                      return ListTile(
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => QuranView(
+                                surahNumber: verse['surah_number'],
+                                searchedVerse: verse['verse_number'],
+                                x: 2,
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      title: Text(
-                        verse['content'],
-                        textAlign: TextAlign.right,
-                      ),
-                    );
-                  },
-                ),
-          if (isMenuOpen)
-            GestureDetector(
-              onTap: () {
-                menuKey.currentState?.closeMenu();
-                buttonMenuKey.currentState?.closeButtonMenu();
-              },
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 3, sigmaY: 5),
-                child: Container(
-                  color: blackColor.withOpacity(0.15),
+                          );
+                        },
+                        title: Text(
+                          verse['content'],
+                          textAlign: TextAlign.right,
+                        ),
+                      );
+                    },
+                  ),
+            if (isMenuOpen)
+              GestureDetector(
+                onTap: () {
+                  menuKey.currentState?.closeMenu();
+                  buttonMenuKey.currentState?.closeButtonMenu();
+                },
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 3, sigmaY: 5),
+                  child: Container(
+                    color: blackColor.withOpacity(0.15),
+                  ),
                 ),
               ),
-            ),
-        ],
-      ),
-      menu: Menu(
-        explanatoryTextForTitle: translation!.explanatoryTextForTitle,
-        explanatoryTextForAya: translation!.explanatoryTextForAya,
-        saveText: translation!.save,
-      ),
-      searchWidget: CustomSearchBar(
-        onResults: (results) {
-          setState(() => searchResults = results);
-        },
-        aya: translation!.verse,
-        surah: translation!.surah,
-        hintText: translation!.searchHintText,
+          ],
+        ),
+        menu: Menu(
+          explanatoryTextForTitle: translation!.explanatoryTextForTitle,
+          explanatoryTextForAya: translation!.explanatoryTextForAya,
+          saveText: translation!.save,
+        ),
+        searchWidget: CustomSearchBar(
+          key: searchBarKey,
+          onResults: (results) {
+            setState(() => searchResults = results);
+          },
+          aya: translation!.verse,
+          surah: translation!.surah,
+          hintText: translation!.searchHintText,
+        ),
       ),
     );
   }
@@ -250,17 +277,12 @@ class _MainViewState extends State<MainView> with RouteAware {
     }
 
     return ValueListenableBuilder<bool>(
-      valueListenable: isGoalCompletedNotifier,
-      builder: (context, isGoalCompleted, _) {
-        final isVideoWatched = sharedPref.getBool("isVideoWatched") ?? false;
-
-        final shouldPlayVideo = isVisible && isGoalCompleted && !isVideoWatched;
-
-        if (shouldPlayVideo) {
+      valueListenable: showVideoNotifier,
+      builder: (_, showVideo, __) {
+        if (showVideo && isVisible) {
           return MyVideoPlayer(
             video: getStreakVideoPath(),
             onFinished: () {
-              Vibration.vibrate(duration: 200);
               _handleVideoFinished();
             },
           );

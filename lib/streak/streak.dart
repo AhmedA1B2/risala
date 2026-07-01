@@ -32,6 +32,12 @@ class _StreakState extends State<Streak> {
     usageTracker.init();
   }
 
+  @override
+  void dispose() {
+    usageTracker.dispose();
+    super.dispose();
+  }
+
   void _onStreakUpdated(int count, bool completed) {
     if (!mounted) return;
 
@@ -42,12 +48,10 @@ class _StreakState extends State<Streak> {
 
     sharedPref.setBool("isGoalCompleted", completed);
 
-    // 🔥 التعديل الأهم: قمنا بنقل منطق تشغيل الفيديو إلى هنا
-    // هكذا نتأكد أننا لا نغير الحالة أثناء رسم الواجهة
     if (completed && sharedPref.getBool("isVideoWatched") != true) {
-      sharedPref.setBool("showVideo", true);
-      // ملاحظة: إذا كان لديك مكان آخر يعرض الفيديو بناءً على هذا المتغير،
-      // قد تحتاج إلى استخدام ValueNotifier لتنبيه ذلك المكان بالتغيير.
+      showVideoNotifier.value = true;
+    } else {
+      showVideoNotifier.value = false;
     }
 
     _updateNotifierSafely(completed);
@@ -77,6 +81,7 @@ class _StreakState extends State<Streak> {
     });
 
     sharedPref.setBool("isGoalCompleted", completed);
+    showVideoNotifier.value = false;
     _updateNotifierSafely(completed);
   }
 

@@ -24,45 +24,59 @@ class CustomSearchBar extends StatefulWidget {
   });
 
   @override
-  State<CustomSearchBar> createState() => _CustomSearchBarState();
+  // 🔹 تم تغيير الاسم ليصبح Public (بدون شرطة سفلية)
+  State<CustomSearchBar> createState() => CustomSearchBarState();
 }
 
-class _CustomSearchBarState extends State<CustomSearchBar> {
+class CustomSearchBarState extends State<CustomSearchBar> {
   String? selectedValue;
   TextEditingController textEditingController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   String riwoya = sharedPref.getString("riwoya") ?? "hafs";
 
   List<Surah> surahs = [];
-  // سنخزن هنا الآيات مع نسخة "نظيفة" للبحث لضمان السرعة
   List<Map<String, dynamic>> quranVerses = [];
   bool isLoading = true;
+  bool showSearchBar = false;
 
   @override
   void initState() {
     super.initState();
     loadAllData();
+    // 🔹 تم حذف الـ listener الذي كان يسبب الانكماش الخاطئ
   }
 
-  // 🔹 دالة توحيد النص (تحل مشكلة الهمزات والدقة)
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    textEditingController.dispose();
+    super.dispose();
+  }
+
+  // 🔹 دالة جديدة نتحكم بها من الخارج لإغلاق الشريط ومسح النص
+  void closeSearchBar() {
+    if (showSearchBar) {
+      setState(() {
+        showSearchBar = false;
+        textEditingController.clear(); // حل المشكلة الأولى: مسح النص المكتوب
+      });
+      _focusNode.unfocus();
+      widget.onResults?.call(null); // مسح نتائج البحث من الشاشة للعودة للصفحة الرئيسية
+    }
+  }
+
   String normalizeText(String text) {
     if (text.isEmpty) return "";
-
-    // 1. إزالة التشكيل (حتى لو الملف غير مشكل، قد يكتب المستخدم بتشكيل)
     String normalized = text.replaceAll(
         RegExp(r'[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED]'), '');
-
-    // 2. توحيد الألفات (أ، إ، آ) إلى (ا)
     normalized = normalized.replaceAll(RegExp(r'[أإآ]'), 'ا');
-
-    // 3. توحيد الياء والألف المقصورة والتاء المربوطة (اختياري لزيادة الدقة)
     normalized = normalized.replaceAll('ى', 'ي');
     normalized = normalized.replaceAll('ة', 'ه');
-
     return normalized.trim();
   }
 
-  // 🔹 تحميل البيانات ومعالجتها مسبقاً (حل مشكلة اللاج)
   Future<void> loadAllData() async {
+    // ... نفس الكود الخاص بك لتحميل البيانات ...
     try {
       final String surahsResponse =
           await rootBundle.loadString('assets/json/surahs.json');
@@ -75,7 +89,6 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
               .loadString('assets/json/quran/quran_for_search_qaloun.json');
       final List<dynamic> quranData = json.decode(quranResponse);
 
-      // هنا قمنا بحل مشكلة الـ Casting وتجهيز النص للبحث
       final List<Map<String, dynamic>> processedQuran = quranData.map((item) {
         final Map<String, dynamic> verseMap = Map<String, dynamic>.from(item);
         return {
@@ -105,12 +118,10 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     final normalizedQuery = normalizeText(query);
 
     if (selectedValue == "آية") {
-      // البحث الآن يعتمد على search_content المجهز مسبقاً (سريع جداً)
       final results = quranVerses.where((verse) {
         final String searchContent = verse['search_content'] ?? "";
         return searchContent.contains(normalizedQuery);
       }).toList();
-
       widget.onResults?.call(results);
     } else {
       final results = surahs.where((s) {
@@ -124,17 +135,31 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           'verse_number': 0,
         };
       }).toList();
-
       widget.onResults?.call(results);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double searchBarTargetWidth = screenWidth * 0.70 - 60;
+
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         IconButton(
-          onPressed: isLoading ? null : searchQuran,
+          onPressed: () {
+            if (!showSearchBar) {
+              setState(() {
+                showSearchBar = true;
+              });
+              _focusNode.requestFocus();
+            } else {
+              if (!isLoading) {
+                searchQuran();
+              }
+            }
+          },
           icon: isLoading
               ? const SizedBox(
                   width: 24,
@@ -144,38 +169,50 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           color: mainColor,
           iconSize: 38,
         ),
-        Expanded(
-          // أفضل لتجنب الـ Overflow
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: mainColor,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: TextField(
-              onTap: widget.onSearchBarTap,
-              onChanged: (val) {
-                widget.onSearchBarChanged?.call(val);
-                // تفعيل البحث الفوري لأن اللاج انتهى
-                if (val.isEmpty) {
-                  widget.onResults?.call(null);
-                } else if (val.length > 2) {
-                  searchQuran();
-                }
-              },
-              controller: textEditingController,
-              decoration: InputDecoration(
-                hintText: isLoading ? "جاري التحميل..." : widget.hintText,
-                border: InputBorder.none,
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          width: showSearchBar ? searchBarTargetWidth : 0,
+          margin: showSearchBar ? const EdgeInsets.all(8) : EdgeInsets.zero,
+          decoration: BoxDecoration(
+            color: mainColor,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: ClipRect(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(),
+              child: Container(
+                width: searchBarTargetWidth,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: TextField(
+                  focusNode: _focusNode,
+                  onTap: widget.onSearchBarTap,
+                  onChanged: (val) {
+                    widget.onSearchBarChanged?.call(val);
+                    if (val.isEmpty) {
+                      widget.onResults?.call(null);
+                    } else if (val.length > 2) {
+                      searchQuran();
+                    }
+                  },
+                  controller: textEditingController,
+                  decoration: InputDecoration(
+                    hintText: isLoading ? "جاري التحميل..." : widget.hintText,
+                    border: InputBorder.none,
+                  ),
+                  textAlign: TextAlign.right,
+                  onSubmitted: (_) {
+                    searchQuran();
+                    _focusNode.unfocus();
+                  },
+                ),
               ),
-              textAlign: TextAlign.right,
-              onSubmitted: (_) => searchQuran(),
             ),
           ),
         ),
         Container(
-          width: MediaQuery.of(context).size.width * 0.22,
+          width: screenWidth * 0.22,
           decoration: BoxDecoration(
               color: mainColor, borderRadius: BorderRadius.circular(8)),
           child: DropdownButtonHideUnderline(
@@ -184,14 +221,14 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
               borderRadius: BorderRadius.circular(8),
               dropdownColor: mainColor,
               value: selectedValue == "آية" ? widget.aya : widget.surah,
-              iconEnabledColor: blackColor,
+              iconEnabledColor: Colors.black,
               items: [widget.aya, widget.surah]
                   .map((e) => DropdownMenuItem(
                         value: e,
                         child: Center(
                             child: Text(e,
                                 style: const TextStyle(
-                                    color: blackColor, fontSize: 13))),
+                                    color: Colors.black, fontSize: 13))),
                       ))
                   .toList(),
               onChanged: (value) {
@@ -199,6 +236,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                   selectedValue = (value == widget.aya) ? "آية" : "سورة";
                 });
                 searchQuran();
+                // 🔹 بعد اختيار القائمة المنسدلة، نعيد التركيز إلى حقل النص ليبقى الشريط ظاهراً
+                _focusNode.requestFocus();
               },
             ),
           ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
+import 'package:risala/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UsageTracker with WidgetsBindingObserver {
@@ -55,39 +56,41 @@ class UsageTracker with WidgetsBindingObserver {
     String realToday = _formatDate(DateTime.now());
     if (_currentDateStr != realToday) {
       _currentDateStr = realToday;
-      
+
       // بمجرد استدعاء هذه الدالة، ستقوم هي بتحديث الواجهة بالبيانات الجديدة
-      await _checkNewDay(); 
+      await _checkNewDay();
     }
   }
 
   Future<void> _checkNewDay() async {
     final prefs = await SharedPreferences.getInstance();
+
     final today = _formatDate(DateTime.now());
+
     final lastOpenDate = prefs.getString("lastOpenDate");
 
     if (lastOpenDate != today) {
-      // 1. تصفير البيانات لليوم الجديد
       await prefs.setBool("isVideoWatched", false);
-      await prefs.setBool("showVideo", false);
+
       await prefs.setInt("todayUsageSeconds", 0);
+
       _todaySeconds = 0;
+
       isGoalCompleted = false;
 
-      // 2. التحقق مما إذا كان الستريك قد انكسر
+      showVideoNotifier.value = false;
+
       await _checkBrokenStreak(lastOpenDate);
+
       await prefs.setString("lastOpenDate", today);
 
-      // 🔥 الحل هنا: إخبار الواجهة فوراً بأن الهدف عاد لـ false
-      // هذا سيجبر الواجهة على استخدام المجلد رقم 0 وتحديث الصورة
       if (onStreakUpdated != null) {
-        int currentStreak = prefs.getInt("streakCount") ?? 0;
-        onStreakUpdated!(currentStreak, false); 
+        int streak = prefs.getInt("streakCount") ?? 0;
+        onStreakUpdated!(streak, false);
       }
-      
     } else {
-      // إذا كنا في نفس اليوم، نستعيد البيانات المحفوظة
       _todaySeconds = prefs.getInt("todayUsageSeconds") ?? 0;
+
       isGoalCompleted = _todaySeconds >= requiredSeconds;
     }
   }

@@ -69,16 +69,34 @@ class _ContactDeveloperPageState extends State<ContactDeveloperPage> {
               width: 110,
               height: 110,
               decoration: BoxDecoration(
-                  color: secondaryColor,
+                  color: scandColor,
                   borderRadius: BorderRadius.circular(30),
                   border: Border.all(color: dilutionScandColor)),
-              child: Hero(
-                tag: "support_agent_rounded",
-                child: Icon(
-                  Icons.support_agent_rounded,
-                  size: 60,
-                  color: primaryColor,
-                ),
+              child: Stack(
+                alignment: AlignmentGeometry.center,
+                children: [
+                  const Icon(
+                    Icons.support_agent_rounded,
+                    size: 66,
+                    color: blackColor,
+                  ),
+                  Hero(
+                    tag: "support_agent_rounded",
+                    child: Icon(
+                      Icons.support_agent_rounded,
+                      size: 60,
+                      color: mainColor,
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2.0),
+                    child: Icon(
+                      Icons.support_agent_rounded,
+                      size: 60,
+                      color: Color.fromARGB(26, 0, 0, 0),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 25),
@@ -108,14 +126,14 @@ class _ContactDeveloperPageState extends State<ContactDeveloperPage> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                  color: secondaryColor,
+                  color: mainColor,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: dilutionScandColor)),
+                  border: Border.all(color: scandColor)),
               child: Row(
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: primaryColor,
+                    color: scandColor,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -124,8 +142,7 @@ class _ContactDeveloperPageState extends State<ContactDeveloperPage> {
                           ? translation!.developerSupportHint
                           : 'يرجى وصف المشكلة بالتفصيل وإرفاق صورة للشاشة إن أمكن.',
                       style: const TextStyle(
-                        fontSize: 14,
-                      ),
+                          fontSize: 14, fontWeight: FontWeight.w400),
                     ),
                   ),
                 ],

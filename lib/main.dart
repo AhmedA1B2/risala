@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 
 late SharedPreferences sharedPref;
 late ValueNotifier<bool> isGoalCompletedNotifier;
+late ValueNotifier<bool> showVideoNotifier;
 
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
@@ -32,6 +33,8 @@ void main() async {
   //
   isGoalCompletedNotifier =
       ValueNotifier(sharedPref.getBool("isGoalCompleted") ?? false);
+
+  showVideoNotifier = ValueNotifier(false);
 
   await NotificationService.instance.loadAllTranslations();
 
