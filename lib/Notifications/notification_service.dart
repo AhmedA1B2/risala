@@ -56,7 +56,7 @@ class NotificationService {
     );
 
     await notificationsPlugin.initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: androidSettings,
         iOS: iosSettings,
       ),
@@ -122,11 +122,11 @@ class NotificationService {
       final int systemId = mainId + day;
 
       await notificationsPlugin.zonedSchedule(
-        systemId,
-        title,
-        body,
-        scheduledDate,
-        const NotificationDetails(
+        id: systemId,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             channelId,
             'Weekly Notifications',
@@ -168,7 +168,7 @@ class NotificationService {
 
   Future<void> cancelNotification(int id) async {
     for (int i = 1; i <= 7; i++) {
-      await notificationsPlugin.cancel(id + i);
+      await notificationsPlugin.cancel(id: id + i);
     }
     final box = await Hive.openBox("saved_notifications");
     await box.delete(id);

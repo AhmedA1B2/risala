@@ -29,7 +29,7 @@ class SavedNotification {
 
   factory SavedNotification.fromMap(Map data) {
     // دالة مساعدة للحصول على قيمة int بشكل آمن
-    int _safeInt(dynamic value) {
+    int safeInt(dynamic value) {
       if (value is int) {
         return value;
       } else if (value is String) {
@@ -41,11 +41,11 @@ class SavedNotification {
 
     return SavedNotification(
       // استخدام الدالة المساعدة لضمان أن القيم تكون int
-      id: _safeInt(data["id"]),
+      id: safeInt(data["id"]),
       title: data["title"] as String,
       body: data["body"] as String,
-      hour: _safeInt(data["hour"]),
-      minute: _safeInt(data["minute"]),
+      hour: safeInt(data["hour"]),
+      minute: safeInt(data["minute"]),
       days: List<String>.from(data["days"] ?? []),
     );
   }

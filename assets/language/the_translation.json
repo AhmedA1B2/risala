@@ -106,7 +106,9 @@
         "developerSupportTitle": "هل واجهت مشكلة أو لديك اقتراح؟",
         "developerSupportDescription": "يمكنك التواصل مباشرة مع مطور التطبيق للإبلاغ عن الأخطاء أو إرسال الاقتراحات والملاحظات.",
         "developerSupportHint": "يرجى وصف المشكلة بالتفصيل وإرفاق صورة للشاشة إن أمكن.",
-        "contactViaTelegram": "التواصل عبر تيليجرام"
+        "contactViaTelegram": "التواصل عبر تيليجرام",
+
+        "copy": "تم نسخ الآية"
 
       }
     ],
@@ -215,7 +217,9 @@
         "developerSupportTitle": "Have you encountered a problem or have a suggestion?",
         "developerSupportDescription": "You can contact the app developer directly to report bugs or send suggestions and feedback.",
         "developerSupportHint": "Please describe the issue in detail and attach a screenshot if possible.",
-        "contactViaTelegram": "Contact via Telegram"
+        "contactViaTelegram": "Contact via Telegram",
+
+         "copy": "Verse copied"
       }
     ],
     "sp": [
@@ -324,6 +328,8 @@
         "developerSupportDescription": "Puedes contactar directamente con el desarrollador de la aplicación para informar errores o enviar sugerencias y comentarios.",
         "developerSupportHint": "Describe el problema con detalle y adjunta una captura de pantalla si es posible.",
         "contactViaTelegram": "Contactar por Telegram"
+
+        , "copy": "Versículo copiado"
       }
     ],
     "it": [
@@ -431,7 +437,9 @@
         "developerSupportTitle": "Hai riscontrato un problema o hai un suggerimento?",
         "developerSupportDescription": "Puoi contattare direttamente lo sviluppatore dell'app per segnalare errori o inviare suggerimenti e feedback.",
         "developerSupportHint": "Descrivi il problema in dettaglio e allega uno screenshot se possibile.",
-        "contactViaTelegram": "Contatta tramite Telegram"
+        "contactViaTelegram": "Contatta tramite Telegram",
+
+        "copy": "Versetto copiato"
       }
     ],
     "in": [
@@ -539,7 +547,9 @@
         "developerSupportTitle": "Mengalami masalah atau punya saran?",
         "developerSupportDescription": "Anda dapat menghubungi pengembang aplikasi secara langsung untuk melaporkan bug atau mengirim saran dan masukan.",
         "developerSupportHint": "Harap jelaskan masalah secara rinci dan lampirkan tangkapan layar jika memungkinkan.",
-        "contactViaTelegram": "Hubungi via Telegram"
+        "contactViaTelegram": "Hubungi via Telegram",
+
+        "copy": "Ayat berhasil disalin"
       }
     ],
     "cn": [
@@ -647,7 +657,9 @@
         "developerSupportTitle": "遇到问题或有建议吗？",
         "developerSupportDescription": "您可以直接联系应用开发者以报告错误或发送建议和反馈。",
         "developerSupportHint": "请尽可能详细描述问题，并附上截图。",
-        "contactViaTelegram": "通过 Telegram 联系"
+        "contactViaTelegram": "通过 Telegram 联系",
+
+        "copy":"经文已复制"
       }
     ],
     "bn": [
@@ -755,7 +767,9 @@
         "developerSupportTitle": "কোনো সমস্যা হয়েছে বা কোনো পরামর্শ আছে?",
         "developerSupportDescription": "ত্রুটি রিপোর্ট করা বা পরামর্শ ও মতামত পাঠানোর জন্য আপনি সরাসরি অ্যাপের ডেভেলপারের সাথে যোগাযোগ করতে পারেন।",
         "developerSupportHint": "অনুগ্রহ করে সমস্যাটি বিস্তারিতভাবে বর্ণনা করুন এবং সম্ভব হলে একটি স্ক্রিনশট সংযুক্ত করুন।",
-        "contactViaTelegram": "টেলিগ্রামের মাধ্যমে যোগাযোগ"
+        "contactViaTelegram": "টেলিগ্রামের মাধ্যমে যোগাযোগ",
+
+        "copy":"আয়াত কপি করা হয়েছে"
       }
     ],
     "ru": [
@@ -863,7 +877,9 @@
         "developerSupportTitle": "Столкнулись с проблемой или есть предложение?",
         "developerSupportDescription": "Вы можете напрямую связаться с разработчиком приложения, чтобы сообщить об ошибках или отправить предложения и отзывы.",
         "developerSupportHint": "Пожалуйста, подробно опишите проблему и по возможности приложите снимок экрана.",
-        "contactViaTelegram": "Связаться через Telegram"
+        "contactViaTelegram": "Связаться через Telegram",
+
+        "copy":"Аят скопирован"
       }
     ],
     "jp": [
@@ -971,7 +987,9 @@
         "developerSupportTitle": "問題が発生しましたか？それとも提案がありますか？",
         "developerSupportDescription": "バグの報告やご意見・ご提案の送信のために、アプリ開発者へ直接連絡できます。",
         "developerSupportHint": "問題をできるだけ詳しく説明し、可能であればスクリーンショットを添付してください。",
-        "contactViaTelegram": "Telegramで連絡"
+        "contactViaTelegram": "Telegramで連絡",
+
+        "copy":"節をコピーしました"
       }
     ]
   }

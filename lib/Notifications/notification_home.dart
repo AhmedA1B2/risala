@@ -3,12 +3,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class NotificationHome extends StatefulWidget {
+  const NotificationHome({super.key});
+
   @override
   _NotificationHomeState createState() => _NotificationHomeState();
 }
 
 class _NotificationHomeState extends State<NotificationHome> {
-  final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -24,7 +27,7 @@ class _NotificationHomeState extends State<NotificationHome> {
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    await _notificationsPlugin.initialize(initializationSettings);
+    await _notificationsPlugin.initialize(settings: initializationSettings);
   }
 
   // طلب صلاحية أندرويد 13
@@ -36,7 +39,8 @@ class _NotificationHomeState extends State<NotificationHome> {
 
   // دالة إرسال الإشعار
   Future<void> _showNotification() async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'channel_id',
       'اسم القناة',
       channelDescription: 'وصف القناة للإشعارات',
@@ -45,13 +49,14 @@ class _NotificationHomeState extends State<NotificationHome> {
       ticker: 'ticker',
     );
 
-    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
+    const NotificationDetails platformDetails =
+        NotificationDetails(android: androidDetails);
 
     await _notificationsPlugin.show(
-      0,
-      'مرحباً بك!',
-      'هذا إشعار تجريبي مخصص لأندرويد 13 🚀',
-      platformDetails,
+      id: 0,
+      title: 'مرحباً بك!',
+      body: 'هذا إشعار تجريبي مخصص لأندرويد 13 🚀',
+      notificationDetails: platformDetails,
     );
   }
 
@@ -63,7 +68,8 @@ class _NotificationHomeState extends State<NotificationHome> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.notifications_active, size: 80, color: Colors.blue),
+            const Icon(Icons.notifications_active,
+                size: 80, color: Colors.blue),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _requestPermission,
@@ -73,7 +79,8 @@ class _NotificationHomeState extends State<NotificationHome> {
             ElevatedButton(
               onPressed: _showNotification,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              child: const Text('إرسال إشعار الآن', style: TextStyle(color: Colors.white)),
+              child: const Text('إرسال إشعار الآن',
+                  style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

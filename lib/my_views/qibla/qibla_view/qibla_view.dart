@@ -296,7 +296,22 @@ class _QiblaViewState extends State<QiblaView> {
                           ),
                         ),
                       ),
-                  ]
+                  ],
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            loadAllTranslations();
+                            _checkHardwareAndPermissions();
+                          });
+                        },
+                        icon: const Icon(
+                          Icons.refresh_rounded,
+                          color: blackColor,
+                          size: 48,
+                        )),
+                  )
                 ],
               ),
       ),

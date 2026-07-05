@@ -121,6 +121,8 @@ class Translation {
   final String developerSupportHint;
   final String contactViaTelegram;
 
+  final String copy;
+
   Translation({
     required this.key,
     required this.text,
@@ -227,6 +229,9 @@ class Translation {
     required this.developerSupportDescription,
     required this.developerSupportHint,
     required this.contactViaTelegram,
+
+    required this.copy,
+
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
@@ -350,6 +355,8 @@ class Translation {
       developerSupportDescription: data["developerSupportDescription"] ?? "",
       developerSupportHint: data["developerSupportHint"] ?? "",
       contactViaTelegram: data["contactViaTelegram"] ?? "",
+
+      copy: data["copy"] ?? "",
     );
   }
 }

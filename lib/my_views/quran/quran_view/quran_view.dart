@@ -15,6 +15,7 @@ import 'package:risala/models/reciters/qaloun/reciters_qaloun.dart';
 import 'package:risala/models/tafsir.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/quran/custom/custom_app_bar.dart';
+import 'package:risala/my_views/quran/custom/custom_copysave_button.dart';
 import 'package:risala/my_views/quran/custom/custom_surah_name.dart';
 import 'package:risala/my_views/quran/custom/custom_surah_page.dart';
 import 'package:risala/my_views/quran/custom/custom_surah_page_for_ss.dart';
@@ -519,6 +520,19 @@ class _QuranViewState extends State<QuranView> {
                 )
               : const SizedBox(),
           _buildTafsirOverlay(),
+
+          //if (highlightedVerse != null)
+          //  const CustomCopysaveButton(
+          //    bottom: 180,
+          //    icon: Icons.image,
+          //  ),
+
+          if (highlightedVerse != null)
+            CustomCopysaveButton(
+              bottom: 100,
+              icon: Icons.copy,
+              onTap: () => copySelectedVerse(),
+            ),
           if (isloading) const CustomLoadingScreen2(),
         ],
       ),
@@ -1080,5 +1094,38 @@ class _QuranViewState extends State<QuranView> {
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.4),
     ));
+  }
+
+  Future<void> copySelectedVerse() async {
+    if (highlightedVerse == null) return;
+
+    final jsonString = await rootBundle.loadString(
+      'assets/json/quran/$riwoya/surahs/$surahNumber.json',
+    );
+
+    final List<dynamic> data = json.decode(jsonString);
+
+    final verse = data.firstWhere(
+      (e) => e["verse_number"] == highlightedVerse,
+    );
+
+    final String text = verse["content"];
+
+    await Clipboard.setData(
+      ClipboardData(text: text),
+    );
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: CustomSnackBar(
+            text: translation != null && translation!.copy.isNotEmpty
+                ? translation!.copy
+                : "تم نسخ الآية"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+    );
   }
 }
