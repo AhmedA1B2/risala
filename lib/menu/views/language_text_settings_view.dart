@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risala/main_view/main_view.dart';
 import 'package:risala/models/translation.dart';
+import 'package:risala/my_views/quran/custom/custom_surah_page.dart';
 import 'package:risala/my_views/quran/custom/custom_surah_page_for_ss.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/main.dart';
@@ -297,12 +298,13 @@ class _LanguageTextSettingsViewState extends State<LanguageTextSettingsView> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       sharedPref.setString("selectedValue", selectedValue);
                       sharedPref.setDouble("valueOfSize", titleSize);
                       sharedPref.setString("selectedValue2", selectedFont);
                       sharedPref.setDouble("valueOfSize2", ayaSize);
                       sharedPref.setString("riwoya", riwoya);
+                      clearSurahCacheForSs();
                       clearSurahCache();
 
                       Navigator.pushAndRemoveUntil(

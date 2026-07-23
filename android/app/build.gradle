@@ -34,7 +34,7 @@ if (flutterVersionName == null) {
 android {
     namespace = "com.ahmed.risala"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "29.0.14033849"
+    ndkVersion = "30.0.15729638"
 
     // --- إعدادات توقيع التطبيق ---
     signingConfigs {

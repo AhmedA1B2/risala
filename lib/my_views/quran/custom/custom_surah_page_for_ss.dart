@@ -11,7 +11,7 @@ import 'package:risala/vars/texts.dart';
 
 final Map<int, List<SurahToken>> _surahCache = {};
 
-void clearSurahCache() {
+void clearSurahCacheForSs() {
   _surahCache.clear();
 }
 

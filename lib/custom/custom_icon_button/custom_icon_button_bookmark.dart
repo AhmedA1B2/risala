@@ -13,12 +13,6 @@ class CustomIconButtonBookmark extends StatelessWidget {
         Icons.bookmark,
         color: mainColor,
         size: 36,
-        shadows: const [
-          Shadow(
-            color: blackColor,
-            blurRadius: 5,
-          )
-        ],
       ),
     );
   }
