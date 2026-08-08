@@ -131,14 +131,15 @@ class _QuranViewState extends State<QuranView> {
       (state) {
         if (!mounted) return;
 
-        if (state.processingState == ProcessingState.buffering ||
-            state.processingState == ProcessingState.loading) {
+        if (state.processingState == ProcessingState.loading ||
+            state.processingState == ProcessingState.buffering) {
           setState(() {
             isloading = true;
           });
         }
 
-        if (state.processingState == ProcessingState.ready) {
+        if (state.processingState == ProcessingState.ready ||
+            state.processingState == ProcessingState.completed) {
           setState(() {
             isloading = false;
           });
@@ -146,33 +147,41 @@ class _QuranViewState extends State<QuranView> {
 
         if (state.processingState == ProcessingState.completed) {
           setState(() {
-            isPlayingHafsAyah = false;
-
-            positionsOfMusic = null;
-            sizeoficonOfMusic = null;
-
             isitplay = false;
-
             iconData = Icons.play_arrow;
-
             onOff = translation?.turnOn ?? "تشغيل";
           });
         }
       },
+      onError: (error, stack) {
+        if (!mounted) return;
+
+        setState(() {
+          isloading = false;
+          isitplay = false;
+          iconData = Icons.play_arrow;
+          onOff = translation?.turnOn ?? "تشغيل";
+        });
+
+        _showNoInternetSnackBar();
+      },
     );
+
     // 💡 التعديل الجوهري الثاني: مراقبة حالة مشغل الصوت الثاني (قالون)
+
     playerSub2 = _audioService2.player.playerStateStream.listen(
       (state) {
         if (!mounted) return;
 
-        if (state.processingState == ProcessingState.buffering ||
-            state.processingState == ProcessingState.loading) {
+        if (state.processingState == ProcessingState.loading ||
+            state.processingState == ProcessingState.buffering) {
           setState(() {
             isloading = true;
           });
         }
 
-        if (state.processingState == ProcessingState.ready) {
+        if (state.processingState == ProcessingState.ready ||
+            state.processingState == ProcessingState.completed) {
           setState(() {
             isloading = false;
           });
@@ -180,20 +189,28 @@ class _QuranViewState extends State<QuranView> {
 
         if (state.processingState == ProcessingState.completed) {
           setState(() {
-            isPlayingQalounAyah = false;
-
-            positionsOfMusic = null;
-            sizeoficonOfMusic = null;
-
             isitplay = false;
-
             iconData = Icons.play_arrow;
-
             onOff = translation?.turnOn ?? "تشغيل";
           });
         }
       },
+      onError: (error, stack) {
+        if (!mounted) return;
+
+        setState(() {
+          isloading = false;
+          isitplay = false;
+          iconData = Icons.play_arrow;
+          onOff = translation?.turnOn ?? "تشغيل";
+        });
+
+        _showNoInternetSnackBar();
+      },
     );
+
+/////
+
     if (widget.x == 1) {
       WidgetsBinding.instance.addPostFrameCallback((_) => goToSavedVerse());
     }
@@ -714,7 +731,26 @@ class _QuranViewState extends State<QuranView> {
       });
 
       // 💡 نشغل الصوت بدون كلمة await لكي لا يتجمد الكود هنا
-      _audioService.playSurah(urlOfReciterHafs, surahNumber);
+      try {
+        await _audioService
+            .playSurah(
+              urlOfReciterHafs,
+              surahNumber,
+            )
+            .timeout(
+              const Duration(seconds: 15),
+            );
+      } catch (e) {
+        if (!mounted) return;
+
+        setState(() {
+          isloading = false;
+          isitplay = false;
+          iconData = Icons.play_arrow;
+        });
+
+        _showNoInternetSnackBar();
+      }
     } else {
       _audioService.player.stop();
       setState(() {
@@ -750,7 +786,7 @@ class _QuranViewState extends State<QuranView> {
         // 💡 تحديث الواجهة فوراً
         setState(() {
           isitplay = true;
-          onOff = translation!.turnOff;
+          onOff = translation?.turnOff ?? "إيقاف";
           iconData = Icons.stop;
           iconDataPause = Icons.pause;
           highlightedVerse = null;
@@ -758,7 +794,26 @@ class _QuranViewState extends State<QuranView> {
         });
 
         // 💡 تشغيل بدون await
-        _audioService2.playSurah(urlOfReciterQaloun, surahNumber);
+        try {
+          await _audioService2
+              .playSurah(
+                urlOfReciterQaloun,
+                surahNumber,
+              )
+              .timeout(
+                const Duration(seconds: 15),
+              );
+        } catch (e) {
+          if (!mounted) return;
+
+          setState(() {
+            isloading = false;
+            isitplay = false;
+            iconData = Icons.play_arrow;
+          });
+
+          _showNoInternetSnackBar();
+        }
       } catch (e) {
         debugPrint("Qaloun error: $e");
       }

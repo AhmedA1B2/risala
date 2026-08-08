@@ -31,11 +31,21 @@ class QuranQalounAudioService {
   ) async {
     final url = "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
 
-    await player.stop();
+    try {
+      await player.stop();
 
-    await player.setUrl(url);
+      await player.setUrl(url);
 
-    await player.play();
+      await player.play();
+    } catch (e) {
+      debugPrint("Play Surah Error: $e");
+
+      try {
+        await player.stop();
+      } catch (_) {}
+
+      rethrow;
+    }
   }
 
   /////////////////////////////////////////////////////////

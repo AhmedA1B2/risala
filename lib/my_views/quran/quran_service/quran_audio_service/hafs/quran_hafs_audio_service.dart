@@ -138,29 +138,28 @@ class QuranHafsAudioService {
   // Play Surah
   ////////////////////////////////////////////////////////////
 
-  Future<bool> playSurah(
+  Future<void> playSurah(
     String urlReciter,
     int surah,
   ) async {
+    await _preparePlayer();
+
+    final url = "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
+
     try {
-      await _preparePlayer();
-
-      final url = "$urlReciter${surah.toString().padLeft(3, '0')}.mp3";
-
       await player.setUrl(url);
 
       await player.play();
-
-      return true;
     } catch (e) {
-      debugPrint(
-        "Play Surah Error: $e",
-      );
+      debugPrint("Play Surah Error: $e");
 
-      return false;
+      try {
+        await player.stop();
+      } catch (_) {}
+
+      rethrow;
     }
   }
-
   ////////////////////////////////////////////////////////////
   // Fetch Ayah Timings
   ////////////////////////////////////////////////////////////
