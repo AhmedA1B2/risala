@@ -278,20 +278,25 @@ class _MainViewState extends State<MainView> with RouteAware {
       );
     }
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: showVideoNotifier,
-      builder: (_, showVideo, __) {
-        if (showVideo && isVisible) {
-          return MyVideoPlayer(
-            video: getStreakVideoPath(),
-            onFinished: () {
-              _handleVideoFinished();
-            },
-          );
-        }
+    return Scaffold(
+      backgroundColor: scandColor,
+      body: SafeArea(
+        child: ValueListenableBuilder<bool>(
+          valueListenable: showVideoNotifier,
+          builder: (_, showVideo, __) {
+            if (showVideo && isVisible) {
+              return MyVideoPlayer(
+                video: getStreakVideoPath(),
+                onFinished: () {
+                  _handleVideoFinished();
+                },
+              );
+            }
 
-        return _buildMainContent();
-      },
+            return _buildMainContent();
+          },
+        ),
+      ),
     );
   }
 }

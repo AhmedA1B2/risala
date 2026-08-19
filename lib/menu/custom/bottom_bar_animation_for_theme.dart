@@ -60,6 +60,7 @@ class _BottomBarAnimationForThemeState extends State<BottomBarAnimationForTheme>
       theme: widget.theme,
       children: List.generate(widget.icons.length, (i) {
         return IconBarItme(
+          isitTheme: true,
           size: sizeoficon[i],
           iconbar: widget.icons[i],
           isonpress: AnimatedContainer(

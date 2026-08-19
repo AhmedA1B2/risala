@@ -152,168 +152,186 @@ class _QiblaViewState extends State<QiblaView> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Center(
-        child: _isLoading
-            ? const CustomLoadingScreen2()
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (!_isSupported) ...[
-                    // أيقونة تتغير حسب نوع الخطأ
-                    Icon(
-                      _isGpsDisabledError
-                          ? Icons.location_off
-                          : Icons.error_outline,
-                      color: Colors.red,
-                      size: 80,
+        child: SingleChildScrollView(
+          child: _isLoading
+              ? const CustomLoadingScreen2()
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: 20,
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _isGpsDisabledError
-                          ? translation!.locationDisabled
-                          : translation!.compassNotSupported,
-                      style: TextStyle(
-                          color: scandColor,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 10),
-                      child: Text(
-                        _errorMessage,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: scandColor, fontSize: 16),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: scandColor,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 30, vertical: 12),
-                      ),
-                      onPressed: () async {
-                        if (_isGpsDisabledError) {
-                          // فتح إعدادات الموقع في الهاتف مباشرة
-                          await Geolocator.openLocationSettings();
-                        } else {
-                          // إعادة محاولة الفحص
-                          _checkHardwareAndPermissions();
-                        }
-                      },
-                      child: Text(
+                    if (!_isSupported) ...[
+                      // أيقونة تتغير حسب نوع الخطأ
+                      Icon(
                         _isGpsDisabledError
-                            ? translation!.openLocationSettings
-                            : translation!.retry,
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 16),
+                            ? Icons.location_off
+                            : Icons.error_outline,
+                        color: Colors.red,
+                        size: 80,
                       ),
-                    )
-                  ] else ...[
-                    // واجهة البوصلة عند نجاح كل الفحوصات
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.8,
-                          height: MediaQuery.of(context).size.width * 0.8,
-                          decoration: BoxDecoration(
+                      const SizedBox(height: 16),
+                      Text(
+                        _isGpsDisabledError
+                            ? translation!.locationDisabled
+                            : translation!.compassNotSupported,
+                        style: TextStyle(
                             color: scandColor,
-                            shape: BoxShape.circle,
-                            border:
-                                Border.all(color: dilutionScandColor, width: 4),
-                          ),
-                          child: const Stack(
-                            alignment: AlignmentGeometry.center,
-                            children: [
-                              Positioned(
-                                  top: 15,
-                                  child: Text("N",
-                                      style: TextStyle(
-                                          color: whiteColor,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold))),
-                              Positioned(
-                                  right: 15,
-                                  child: Text("E",
-                                      style: TextStyle(
-                                          color: whiteColor, fontSize: 24))),
-                              Positioned(
-                                  bottom: 15,
-                                  child: Text("S",
-                                      style: TextStyle(
-                                          color: whiteColor, fontSize: 24))),
-                              Positioned(
-                                  left: 15,
-                                  child: Text("W",
-                                      style: TextStyle(
-                                          color: whiteColor, fontSize: 24))),
-                            ],
-                          ),
-                        ),
-                        StreamBuilder<CompassEvent>(
-                          stream: FlutterCompass.events,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasError ||
-                                snapshot.data?.heading == null) {
-                              return const Icon(Icons.navigation,
-                                  size: 150, color: Colors.grey);
-                            }
-                            double heading = snapshot.data!.heading!;
-                            double rotation =
-                                _computeRotationRadians(_cachedQibla!, heading);
-                            return Transform.rotate(
-                              angle: rotation,
-                              child: Icon(Icons.navigation,
-                                  size: 160, color: mainColor),
-                            );
-                          },
-                        ),
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                              color: scandColor,
-                              border: Border.all(
-                                  color: dilutionScandColor, width: 5),
-                              shape: BoxShape.circle),
-                        )
-                      ],
-                    ),
-                    if (_cachedQibla != null && translation != null)
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold),
+                      ),
                       Padding(
-                        padding: const EdgeInsets.only(top: 30),
-                        child: Container(
-                          padding: const EdgeInsets.all(15),
-                          decoration: BoxDecoration(
-                            color: scandColor,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: Text(
-                            "${translation!.qiblaDirection} ${_cachedQibla!.toStringAsFixed(1)}°",
-                            style: const TextStyle(
-                                color: whiteColor, fontSize: 18),
-                          ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 10),
+                        child: Text(
+                          _errorMessage,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: scandColor, fontSize: 16),
                         ),
                       ),
-                  ],
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            loadAllTranslations();
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: scandColor,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 12),
+                        ),
+                        onPressed: () async {
+                          if (_isGpsDisabledError) {
+                            // فتح إعدادات الموقع في الهاتف مباشرة
+                            await Geolocator.openLocationSettings();
+                          } else {
+                            // إعادة محاولة الفحص
                             _checkHardwareAndPermissions();
-                          });
+                          }
                         },
-                        icon: const Icon(
-                          Icons.refresh_rounded,
-                          color: blackColor,
-                          size: 48,
-                        )),
-                  )
-                ],
-              ),
+                        child: Text(
+                          _isGpsDisabledError
+                              ? translation!.openLocationSettings
+                              : translation!.retry,
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16),
+                        ),
+                      )
+                    ] else ...[
+                      // واجهة البوصلة عند نجاح كل الفحوصات
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            height: MediaQuery.of(context).size.width * 0.8,
+                            decoration: BoxDecoration(
+                              color: scandColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: dilutionScandColor, width: 4),
+                            ),
+                            child: const Stack(
+                              alignment: AlignmentGeometry.center,
+                              children: [
+                                Positioned(
+                                    top: 15,
+                                    child: Text("N",
+                                        style: TextStyle(
+                                            color: whiteColor,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold))),
+                                Positioned(
+                                    right: 15,
+                                    child: Text("E",
+                                        style: TextStyle(
+                                            color: whiteColor, fontSize: 24))),
+                                Positioned(
+                                    bottom: 15,
+                                    child: Text("S",
+                                        style: TextStyle(
+                                            color: whiteColor, fontSize: 24))),
+                                Positioned(
+                                    left: 15,
+                                    child: Text("W",
+                                        style: TextStyle(
+                                            color: whiteColor, fontSize: 24))),
+                              ],
+                            ),
+                          ),
+                          StreamBuilder<CompassEvent>(
+                            stream: FlutterCompass.events,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError ||
+                                  snapshot.data?.heading == null) {
+                                return const Icon(Icons.navigation,
+                                    size: 150, color: Colors.grey);
+                              }
+                              double heading = snapshot.data!.heading!;
+                              double rotation = _computeRotationRadians(
+                                  _cachedQibla!, heading);
+                              return Transform.rotate(
+                                angle: rotation,
+                                child: Icon(Icons.navigation,
+                                    size: 160, color: mainColor),
+                              );
+                            },
+                          ),
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                                color: scandColor,
+                                border: Border.all(
+                                    color: dilutionScandColor, width: 5),
+                                shape: BoxShape.circle),
+                          )
+                        ],
+                      ),
+                      if (_cachedQibla != null && translation != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 30),
+                          child: Container(
+                            padding: const EdgeInsets.all(15),
+                            decoration: BoxDecoration(
+                                color: scandColor,
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                    color: dilutionScandColor, width: 2)),
+                            child: Text(
+                              "${translation!.qiblaDirection} ${_cachedQibla!.toStringAsFixed(1)}°",
+                              style: const TextStyle(
+                                  color: whiteColor, fontSize: 18),
+                            ),
+                          ),
+                        ),
+                    ],
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              loadAllTranslations();
+                              _checkHardwareAndPermissions();
+                            });
+                          },
+                          icon: Stack(
+                            children: [
+                              Icon(
+                                Icons.refresh_rounded,
+                                color: dilutionScandColor,
+                                size: 50,
+                              ),
+                              Icon(
+                                Icons.refresh_rounded,
+                                color: scandColor,
+                                size: 48,
+                              ),
+                            ],
+                          )),
+                    ),
+                    const SizedBox(
+                      height: 150,
+                    ),
+                  ],
+                ),
+        ),
       ),
     );
   }

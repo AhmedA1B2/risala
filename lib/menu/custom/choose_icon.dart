@@ -13,13 +13,19 @@ class ChooseIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Icon(
-        shadows: const [
-          Shadow(offset: Offset(0, 0), color: blackColor, blurRadius: 12),
+      child: Stack(
+        children: [
+          Icon(
+            color: blackColor,
+            icon,
+            size: 34,
+          ),
+          Icon(
+            color: color,
+            icon,
+            size: 32,
+          ),
         ],
-        color: color,
-        icon,
-        size: 32,
       ),
     );
   }

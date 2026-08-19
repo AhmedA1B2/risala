@@ -7,12 +7,13 @@ class IconBarItme extends StatefulWidget {
       required this.iconbar,
       this.isonpress,
       this.onPressed,
-      required this.size});
+      required this.size, required this.isitTheme});
 
   final IconData iconbar;
   final Widget? isonpress;
   final void Function()? onPressed;
   final double size;
+  final bool isitTheme;
 
   @override
   State<IconBarItme> createState() => _IconBarItmeState();
@@ -32,14 +33,20 @@ class _IconBarItmeState extends State<IconBarItme> {
           icon: Stack(
             alignment: Alignment.center,
             children: [
-              Icon(
-                widget.iconbar,
-                size: widget.size * 1.06,
-                shadows: const [
-                  Shadow(blurRadius: 5),
-                ],
-                color: blackColor,
-              ),
+              widget.isitTheme
+                  ? Icon(
+                      widget.iconbar,
+                      size: widget.size * 1.1,
+                      color: blackColor,
+                    )
+                  : Icon(
+                      widget.iconbar,
+                      size: widget.size * 1.06,
+                      shadows: const [
+                        Shadow(blurRadius: 5),
+                      ],
+                      color: blackColor,
+                    ),
               Icon(
                 widget.iconbar,
                 size: widget.size,

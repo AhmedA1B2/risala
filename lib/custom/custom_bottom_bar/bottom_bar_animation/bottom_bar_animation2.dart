@@ -20,13 +20,10 @@ class BottomBarAnimation2 extends StatefulWidget {
   final double? sizeoficonOfMusic;
 
   @override
-  State<BottomBarAnimation2> createState() =>
-      _BottomBarAnimation2State();
+  State<BottomBarAnimation2> createState() => _BottomBarAnimation2State();
 }
 
-class _BottomBarAnimation2State
-    extends State<BottomBarAnimation2> {
-
+class _BottomBarAnimation2State extends State<BottomBarAnimation2> {
   int? currentIndex;
 
   late List<double> sizeoficon;
@@ -36,11 +33,9 @@ class _BottomBarAnimation2State
   void initState() {
     super.initState();
 
-    sizeoficon =
-        List.filled(widget.icons.length, 42);
+    sizeoficon = List.filled(widget.icons.length, 42);
 
-    positions =
-        List.filled(widget.icons.length, 0);
+    positions = List.filled(widget.icons.length, 0);
   }
 
   @override
@@ -49,17 +44,10 @@ class _BottomBarAnimation2State
   ) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.positionsOfMusic == null &&
-        widget.sizeoficonOfMusic == null) {
-
+    if (widget.positionsOfMusic == null && widget.sizeoficonOfMusic == null) {
       if (currentIndex != null) {
-
         setState(() {
-
-          for (int i = 0;
-              i < widget.icons.length;
-              i++) {
-
+          for (int i = 0; i < widget.icons.length; i++) {
             positions[i] = 0;
             sizeoficon[i] = 42;
           }
@@ -71,32 +59,21 @@ class _BottomBarAnimation2State
   }
 
   Future<void> animateTo(int index) async {
-
-    final isSelected =
-        currentIndex == index;
+    final isSelected = currentIndex == index;
 
     setState(() {
-
-      for (int i = 0;
-          i < widget.icons.length;
-          i++) {
-
+      for (int i = 0; i < widget.icons.length; i++) {
         positions[i] = 0;
         sizeoficon[i] = 42;
       }
 
       if (!isSelected) {
+        positions[index] = widget.positionsOfMusic ?? -30;
 
-        positions[index] =
-            widget.positionsOfMusic ?? -30;
-
-        sizeoficon[index] =
-            widget.sizeoficonOfMusic ?? 48;
+        sizeoficon[index] = widget.sizeoficonOfMusic ?? 48;
 
         currentIndex = index;
-
       } else {
-
         currentIndex = null;
       }
     });
@@ -108,44 +85,27 @@ class _BottomBarAnimation2State
   Widget build(BuildContext context) {
     return Stack(
       children: [
-
         const BottomBarItme2(),
-
         Padding(
-          padding:
-              const EdgeInsets.only(top: 5.0),
-
+          padding: const EdgeInsets.only(top: 5.0),
           child: Row(
             textDirection: TextDirection.rtl,
-
-            mainAxisAlignment:
-                MainAxisAlignment.spaceAround,
-
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: List.generate(
               widget.icons.length,
               (i) {
-
                 return AnimatedContainer(
-                  duration:
-                      const Duration(milliseconds: 250),
-
+                  duration: const Duration(milliseconds: 250),
                   curve: Curves.easeOut,
-
-                  transform:
-                      Matrix4.translationValues(
+                  transform: Matrix4.translationValues(
                     0,
                     positions[i],
                     0,
                   ),
-
                   child: AnimatedScale(
                     scale: sizeoficon[i] / 42,
-
-                    duration:
-                        const Duration(milliseconds: 250),
-
+                    duration: const Duration(milliseconds: 250),
                     curve: Curves.easeOut,
-
                     child: Container(
                       decoration: BoxDecoration(
                         color: scandColor,
@@ -154,15 +114,11 @@ class _BottomBarAnimation2State
                           color: blackColor,
                         ),
                       ),
-
                       child: IconBarItme(
                         size: 42,
-
-                        iconbar:
-                            widget.icons[i],
-
-                        onPressed: () =>
-                            animateTo(i),
+                        isitTheme: false,
+                        iconbar: widget.icons[i],
+                        onPressed: () => animateTo(i),
                       ),
                     ),
                   ),

@@ -64,6 +64,7 @@ class _BottomBarAnimation3State extends State<BottomBarAnimation3> {
                     )
                   ]),
               child: IconBarItme(
+                isitTheme: false,
                 size: 42,
                 iconbar: widget.icons[i],
                 onPressed: () => animateTo(i),
