@@ -14,20 +14,22 @@ class CustomCopysaveButton extends StatelessWidget {
     return Positioned(
       right: 20,
       bottom: bottom,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.all(4),
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: scandColor,
-            border: Border.all(color: mainColor, width: 2),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            icon,
-            size: 28,
-            color: mainColor,
+      child: SafeArea(
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: scandColor,
+              border: Border.all(color: mainColor, width: 2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: 28,
+              color: mainColor,
+            ),
           ),
         ),
       ),

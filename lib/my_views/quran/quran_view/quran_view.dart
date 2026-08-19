@@ -456,82 +456,92 @@ class _QuranViewState extends State<QuranView> {
               const SizedBox(height: 80)
             ],
           ),
-          riwoya == "hafs"
-              ? _buildHafsBottomActionBars()
-              : _buildQalounBottomActionBars(),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              top: false,
+              child: riwoya == "hafs"
+                  ? _buildHafsBottomActionBars()
+                  : _buildQalounBottomActionBars(),
+            ),
+          ),
           isitplay && highlightedVerse == null && highlightedWord == null
               ? Positioned(
                   bottom: 12,
                   right: 12,
-                  child: Card(
-                    color: scandColor,
-                    margin: const EdgeInsets.all(8),
-                    child: IconButton(
-                      icon: isDownloading
-                          ? SizedBox(
-                              width: 36,
-                              height: 36,
-                              child: CircularProgressIndicator(
-                                value: downloadProgress,
+                  child: SafeArea(
+                    child: Card(
+                      color: scandColor,
+                      margin: const EdgeInsets.all(8),
+                      child: IconButton(
+                        icon: isDownloading
+                            ? SizedBox(
+                                width: 36,
+                                height: 36,
+                                child: CircularProgressIndicator(
+                                  value: downloadProgress,
+                                  color: mainColor,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Icon(
+                                isDownloaded
+                                    ? Icons.check_circle
+                                    : Icons.download,
                                 color: mainColor,
-                                strokeWidth: 2,
+                                size: 36,
                               ),
-                            )
-                          : Icon(
-                              isDownloaded
-                                  ? Icons.check_circle
-                                  : Icons.download,
-                              color: mainColor,
-                              size: 36,
-                            ),
-                      onPressed: isDownloaded || isDownloading
-                          ? null
-                          : () async {
-                              setState(() {
-                                isDownloading = true;
-                                downloadProgress = 0;
-                              });
+                        onPressed: isDownloaded || isDownloading
+                            ? null
+                            : () async {
+                                setState(() {
+                                  isDownloading = true;
+                                  downloadProgress = 0;
+                                });
 
-                              final result = riwoya == "hafs"
-                                  ? await _audioService.downloadSurah(
-                                      urlOfReciterHafs,
-                                      surahNumber,
-                                      surahName ?? "",
-                                      idOfReciterHafs.toString(),
-                                      (progress) {
-                                        setState(() {
-                                          downloadProgress = progress;
-                                        });
-                                      },
-                                    )
-                                  : await _audioService2.downloadSurah(
-                                      urlOfReciterQaloun,
-                                      surahNumber,
-                                      surahName ?? "",
-                                      idOfReciterQaloun,
-                                      (progress) {
-                                        setState(() {
-                                          downloadProgress = progress;
-                                        });
-                                      },
-                                    );
+                                final result = riwoya == "hafs"
+                                    ? await _audioService.downloadSurah(
+                                        urlOfReciterHafs,
+                                        surahNumber,
+                                        surahName ?? "",
+                                        idOfReciterHafs.toString(),
+                                        (progress) {
+                                          setState(() {
+                                            downloadProgress = progress;
+                                          });
+                                        },
+                                      )
+                                    : await _audioService2.downloadSurah(
+                                        urlOfReciterQaloun,
+                                        surahNumber,
+                                        surahName ?? "",
+                                        idOfReciterQaloun,
+                                        (progress) {
+                                          setState(() {
+                                            downloadProgress = progress;
+                                          });
+                                        },
+                                      );
 
-                              if (!mounted) return;
+                                if (!mounted) return;
 
-                              setState(() {
-                                isDownloading = false;
-                                isDownloaded = result != null;
-                              });
+                                setState(() {
+                                  isDownloading = false;
+                                  isDownloaded = result != null;
+                                });
 
-                              if (result != null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    backgroundColor: scandColor,
-                                    content: const Icon(Icons.check),
-                                  ),
-                                );
-                              }
-                            },
+                                if (result != null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      backgroundColor: scandColor,
+                                      content: const Icon(Icons.check),
+                                    ),
+                                  );
+                                }
+                              },
+                      ),
                     ),
                   ),
                 )
@@ -840,109 +850,104 @@ class _QuranViewState extends State<QuranView> {
 
   Widget _buildHafsBottomActionBars() {
     if (highlightedVerse != null && highlightedWord == null) {
-      return Padding(
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).size.height - 75,
-        ),
-        child: BottomBarAnimation2(
-          onIconTap: (index) async {
-            //////////////////////////////////////////////////
-            // تشغيل الآية
-            //////////////////////////////////////////////////
+      return BottomBarAnimation2(
+        onIconTap: (index) async {
+          //////////////////////////////////////////////////
+          // تشغيل الآية
+          //////////////////////////////////////////////////
 
-            if (index == 0) {
-              isitplay = false;
-              onOff = translation!.turnOn;
-              iconData = Icons.play_arrow;
-              // إيقاف
-              if (isPlayingHafsAyah) {
-                await _audioService.stop();
+          if (index == 0) {
+            isitplay = false;
+            onOff = translation!.turnOn;
+            iconData = Icons.play_arrow;
+            // إيقاف
+            if (isPlayingHafsAyah) {
+              await _audioService.stop();
 
-                setState(() {
-                  isPlayingHafsAyah = false;
-
-                  positionsOfMusic = null;
-                  sizeoficonOfMusic = null;
-                });
-
-                return;
-              }
-
-              //////////////////////////////////////////////////
-              // التوقيتات
-              //////////////////////////////////////////////////
-
-              List<AyahTiming> timings = await _audioService.fetchAyahTimings(
-                surahNumber,
-                idOfReciterHafs,
-              );
-
-              try {
-                final currentAyahTiming = timings.firstWhere(
-                  (t) => t.ayah == highlightedVerse,
-                );
-
-                //////////////////////////////////////////////////
-                // تشغيل
-                //////////////////////////////////////////////////
-
-                setState(() {
-                  isPlayingHafsAyah = true;
-
-                  positionsOfMusic = -30;
-                  sizeoficonOfMusic = 48;
-                });
-
-                _audioService.playAyah(
-                  urlOfReciterHafs,
-                  surahNumber,
-                  currentAyahTiming,
-                );
-              } catch (e) {
-                debugPrint(
-                  "Timing not found for this ayah",
-                );
-
-                setState(() {
-                  isPlayingHafsAyah = false;
-
-                  positionsOfMusic = null;
-                  sizeoficonOfMusic = null;
-                });
-              }
-              highlightedVerse = null;
-            }
-
-            //////////////////////////////////////////////////
-            // حفظ
-            //////////////////////////////////////////////////
-
-            else if (index == 1) {
-              saveMyAya(
-                highlightedVerse!,
-                surahNumber,
-                surahName ?? "",
-              );
-            }
-
-            //////////////////////////////////////////////////
-            // تفسير
-            //////////////////////////////////////////////////
-
-            else if (index == 2) {
               setState(() {
-                showTafsir = 1;
+                isPlayingHafsAyah = false;
+
+                positionsOfMusic = null;
+                sizeoficonOfMusic = null;
+              });
+
+              return;
+            }
+
+            //////////////////////////////////////////////////
+            // التوقيتات
+            //////////////////////////////////////////////////
+
+            List<AyahTiming> timings = await _audioService.fetchAyahTimings(
+              surahNumber,
+              idOfReciterHafs,
+            );
+
+            try {
+              final currentAyahTiming = timings.firstWhere(
+                (t) => t.ayah == highlightedVerse,
+              );
+
+              //////////////////////////////////////////////////
+              // تشغيل
+              //////////////////////////////////////////////////
+
+              setState(() {
+                isPlayingHafsAyah = true;
+
+                positionsOfMusic = -30;
+                sizeoficonOfMusic = 48;
+              });
+
+              _audioService.playAyah(
+                urlOfReciterHafs,
+                surahNumber,
+                currentAyahTiming,
+              );
+            } catch (e) {
+              debugPrint(
+                "Timing not found for this ayah",
+              );
+
+              setState(() {
+                isPlayingHafsAyah = false;
+
+                positionsOfMusic = null;
+                sizeoficonOfMusic = null;
               });
             }
-          },
-          icons: const [
-            Icons.music_note,
-            Icons.bookmark_outlined,
-            Icons.format_align_right,
-          ],
-          positionsOfMusic: positionsOfMusic,
-          sizeoficonOfMusic: sizeoficonOfMusic,
-        ),
+            highlightedVerse = null;
+          }
+
+          //////////////////////////////////////////////////
+          // حفظ
+          //////////////////////////////////////////////////
+
+          else if (index == 1) {
+            saveMyAya(
+              highlightedVerse!,
+              surahNumber,
+              surahName ?? "",
+            );
+          }
+
+          //////////////////////////////////////////////////
+          // تفسير
+          //////////////////////////////////////////////////
+
+          else if (index == 2) {
+            setState(() {
+              showTafsir = 1;
+            });
+          }
+        },
+        icons: const [
+          Icons.music_note,
+          Icons.bookmark_outlined,
+          Icons.format_align_right,
+        ],
+        positionsOfMusic: positionsOfMusic,
+        sizeoficonOfMusic: sizeoficonOfMusic,
       );
     }
 
