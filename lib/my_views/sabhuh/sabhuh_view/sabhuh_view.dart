@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:risala/main.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/sabhuh/custom/custom_sabhuh_item.dart';
+import 'package:risala/my_views/sabhuh/custom/sabhuh_circle.dart';
+import 'package:risala/my_views/sabhuh/custom/sabhuh_circle_column.dart';
 import 'package:risala/my_views/sabhuh/service/click_sound_service.dart';
 import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
@@ -30,6 +32,29 @@ class _SabhuhViewState extends State<SabhuhView> {
     loadAdhkar();
     loadAllTranslations();
   }
+
+  ////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////
+
+  int inOutColor = -1;
+
+  List<Color> inColor = [
+    dilutionScandColor,
+    dilutionScandColor,
+    dilutionScandColor,
+    dilutionScandColor,
+    dilutionScandColor,
+  ];
+  List<Color> outColor = [
+    dilutionScandColor,
+    dilutionScandColor,
+    dilutionScandColor,
+    dilutionScandColor,
+    dilutionScandColor,
+  ];
+
+  ////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////
 
   Future<void> loadAdhkar() async {
     myDhkar = sharedPref.getString("myDhkar") ?? "tsbyh";
@@ -111,6 +136,12 @@ class _SabhuhViewState extends State<SabhuhView> {
                           IconButton(
                             onPressed: () {
                               setState(() {
+                                inOutColor = -1;
+                                inColor[0] = dilutionScandColor;
+                                inColor[1] = dilutionScandColor;
+                                inColor[2] = dilutionScandColor;
+                                inColor[3] = dilutionScandColor;
+                                inColor[4] = dilutionScandColor;
                                 conter = 0;
                                 sharedPref.setInt("sabhuhConter", conter);
                               });
@@ -130,7 +161,8 @@ class _SabhuhViewState extends State<SabhuhView> {
                 // بطاقة الذكر
                 if (selectedDhikr != null)
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    margin: const EdgeInsets.symmetric(
+                        vertical: 20, horizontal: 35),
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: mainColor,
@@ -211,6 +243,19 @@ class _SabhuhViewState extends State<SabhuhView> {
                     setState(() {
                       conter += 1;
 
+                      if (inOutColor != 4) {
+                        inOutColor++;
+                      } else {
+                        inOutColor = 0;
+                      }
+
+                      if (inOutColor > -1 &&
+                          inColor[inOutColor] != scandColor) {
+                        inColor[inOutColor] = scandColor;
+                      } else {
+                        inColor[inOutColor] = dilutionScandColor;
+                      }
+
                       ClickSoundService().play();
                       sharedPref.setInt("sabhuhConter", conter);
                     });
@@ -224,6 +269,11 @@ class _SabhuhViewState extends State<SabhuhView> {
               ),
             ),
           ),
+        ),
+
+        SabhuhCircleColumn(
+          inColor: inColor,
+          outColor: outColor,
         ),
 
         // عرض الأذكار

@@ -175,9 +175,10 @@
     "explanationjp": "預言者（平安あれ）が、就寝前にファーティマとアリー（アッラーのご満悦あれ）に助言されたこと。",
     "explanationin": "Wasiat Nabi shallallahu 'alaihi wa sallam kepada Fatimah dan Ali radhiyallahu 'anhuma saat hendak tidur."
   },
+
   {
     "category": "أذكار النوم",
-    "arabic": "قُلْ هُوَ ٱللَّهُ أَحَدٌ، ٱللَّهُ ٱلصَّمَدُ... (الإخلاص)\nقُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ... (الفلق)\nقُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ... (الناس)",
+    "arabic": "سورة الإخلاص\nسورة الفلق\nسورة الناس",
     "reference": "البخاري 5017",
     "en": "Surah Al-Ikhlas, Al-Falaq, and An-Nas.",
     "sp": "Sura Al-Ikhlas, Al-Falaq y An-Nas.",
@@ -199,7 +200,7 @@
   },
   {
     "category": "أذكار النوم",
-    "arabic": "آمَنَ الرَّسُولُ بِمَا أُنْزِلَ إِلَيْهِ مِنْ رَبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ... (إلى آخر السورة)",
+    "arabic": "آخر آيتين من سورة البقرة",
     "reference": "البقرة 285 - 286",
     "en": "The Messenger has believed in what was revealed to him from his Lord, and [so have] the believers... (Last two verses of Surat Al-Baqarah).",
     "sp": "El Mensajero cree en lo que se le ha revelado de su Señor, y los creyentes... (Últimos dos versículos de Sura Al-Baqara).",
@@ -221,7 +222,7 @@
   },
   {
     "category": "أذكار النوم",
-    "arabic": "اللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ لاَ تَأْخُذُهُ سِنَةٌ وَلاَ نَوْمٌ... (آية الكرسي)",
+    "arabic": "آية الكرسي",
     "reference": "آية الكرسي - البقرة 255",
     "en": "Ayat Al-Kursi (Al-Baqarah 2:255).",
     "sp": "Ayat Al-Kursi (Al-Baqara 2:255).",
@@ -240,7 +241,8 @@
     "explanationru": "Того, кто прочитает его, Аллах будет охранять, и шайтан не приблизится к нему до самого утра.",
     "explanationjp": "これを唱える者には、アッラーからの守護者がつき、朝まで悪魔が近づくことはありません。",
     "explanationin": "Barang siapa membacanya, maka akan senantiasa ada penjaga dari Allah untuknya, dan syaitan tidak akan mendekatinya hingga pagi."
-  },
+  }
+,
   {
     "category": "أذكار القلق والأرق",
     "arabic": "اللهم رب السموات السبع وما أظلت، ورب الأرضين وما أقلت، ورب الشياطين وما أضلت، كن لي جارا من خلقك كلهم جميعا أن يفرط علي أحد منهم أو أن يبغي علي، عز جارك، وجل ثناؤك ولا إله غيرك، ولا إله إلا أنت.",

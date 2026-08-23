@@ -7,13 +7,13 @@ class BottomBarItme2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
           color: whiteColor,
-          border: Border(
-            top: BorderSide(
-              color: blackColor,
-            ),
-          )),
+          border: Border.all(
+            color: blackColor,
+          ),
+          borderRadius: BorderRadius.circular(20)),
       height: 75,
     );
   }

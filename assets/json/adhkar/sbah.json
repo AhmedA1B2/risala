@@ -1,7 +1,7 @@
 [
   {
     "category": "أذكار الصباح",
-    "arabic": "أعوذ بالله من الشيطان الرجيم\nاللّهُ لاَ إِلَـهَ إِلاَّ هُوَ الْحَيُّ الْقَيُّومُ .....",
+    "arabic": "آية الكرسي",
     "reference": "آية الكرسي - البقرة 255",
     "en": "Ayat Al-Kursi (Al-Baqarah 2:255).",
     "sp": "Ayat Al-Kursi (Al-Baqara 2:255).",
@@ -23,7 +23,7 @@
   },
   {
     "category": "أذكار الصباح",
-    "arabic": "بسم الله الرحمن الرحيم\nقل هو الله أحد...\nقل أعوذ برب الفلق...\nقل أعوذ برب الناس...",
+    "arabic": "سورة الإخلاص\nسورة الفلق\nسورة الناس",
     "en": "Surah Al-Ikhlas and the two Surahs of refuge (Al-Falaq and An-Nas).",
     "sp": "Sura Al-Ikhlas y las dos suras protectoras (Al-Falaq y An-Nas).",
     "it": "Sura Al-Ikhlas e le due sure di protezione (Al-Falaq e An-Nas).",
@@ -44,7 +44,7 @@
   },
   {
     "category": "أذكار الصباح",
-    "arabic": "اللهم أنت ربي لا إله إلا أنت خلقتني وأنا عبدك وأنا على عهدك ووعدك ما استطعت...",
+    "arabic": "اللهم أنت ربي، لا إله إلا أنت، خلقتني وأنا عبدك، وأنا على عهدك ووعدك ما استطعت، أعوذ بك من شر ما صنعت، أبوء لك بنعمتك عليّ، وأبوء لك بذنبي، فاغفر لي، فإنه لا يغفر الذنوب إلا أنت.",
     "en": "O Allah, You are my Lord, none has the right to be worshipped except You. You created me and I am Your servant...",
     "sp": "Oh Alá, Tú eres mi Señor, no hay divinidad excepto Tú...",
     "it": "O Allah, Tu sei il mio Signore, non c'è divinità eccetto Te...",
@@ -53,8 +53,8 @@
     "ru": "О Аллах, Ты мой Господь, нет божества кроме Тебя...",
     "jp": "アッラーよ、あなたは私の主です。あなた以外に神はありません...",
     "in": "Ya Allah, Engkau adalah Tuhanku, tiada Tuhan selain Engkau...",
-    "explanationar": "سيد الاستغفار، من قالها موقنًا بها حين يصبح فمات دخل الجنة.",
-    "explanationen": "The master supplication for forgiveness. Whoever says it with certainty in the morning and dies that day will enter Paradise.",
+    "explanationar": "سيد الاستغفار، من قالها موقنًا بها حين يصبح فمات يومه قبل أن يمسي فهو من أهل الجنة.",
+    "explanationen": "The master supplication for forgiveness. Whoever says it with certainty in the morning and dies that day before evening will be among the people of Paradise.",
     "explanationsp": "Es la mejor súplica de perdón.",
     "explanationit": "È la migliore supplica di perdono.",
     "explanationcn": "这是求饶的最佳祈祷词。",
@@ -62,7 +62,8 @@
     "explanationru": "Это главное прошение о прощении.",
     "explanationjp": "最も優れた赦しの祈りです。",
     "explanationin": "Ini adalah doa istighfar terbaik."
-  },
+  }
+,
   {
     "category": "أذكار الصباح",
     "arabic": "رضيت بالله ربًا وبالإسلام دينًا وبمحمد صلى الله عليه وسلم نبيًا",
