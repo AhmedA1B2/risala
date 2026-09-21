@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,11 +7,9 @@ import 'package:just_audio/just_audio.dart';
 import 'package:risala/custom/custom_bottom_bar/bottom_bar_animation/bottom_bar_animation2.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen2.dart';
 import 'package:risala/custom/custom_snack_bar/custom_snack_bar.dart';
-import 'package:risala/custom/custom_snack_bar/custom_snack_bar_icon.dart';
 import 'package:risala/main.dart';
 import 'package:risala/main_view/main_view.dart';
 import 'package:risala/models/reciters/hafs/reciters_hafs.dart';
-import 'package:risala/models/reciters/qaloun/ayah_timing.dart';
 import 'package:risala/models/reciters/qaloun/reciters_qaloun.dart';
 import 'package:risala/models/tafsir.dart';
 import 'package:risala/models/translation.dart';
@@ -80,6 +79,17 @@ class _QuranViewState extends State<QuranView> {
   double downloadProgress = 0;
   bool isDownloaded = false;
 
+  // مراقبة التحميل حتى لا تبقى شاشة التحميل عالقة
+  Timer? _loadingWatchdog;
+  int? _loadingWatchdogRequestId;
+
+  // رقم العملية الحالية لمنع ظهور رسالة خطأ بعد أن يضغط المستخدم إيقاف
+  int _playRequestId = 0;
+
+  // مهلة فحص الاتصال ومهلة بدء تحميل الصوت
+  static const Duration _internetCheckTimeout = Duration(seconds: 4);
+  static const Duration _loadingTimeout = Duration(seconds: 8);
+
   int idOfReciterHafs = sharedPref.getInt("idOfReciter") ?? 4;
   String urlOfReciterHafs = sharedPref.getString("urlOfReciterHafs") ??
       "https://server11.mp3quran.net/shatri/";
@@ -136,18 +146,30 @@ class _QuranViewState extends State<QuranView> {
           setState(() {
             isloading = true;
           });
+
+          if (isitplay) {
+            _startLoadingWatchdog(
+              player: _audioService.player,
+              requestId: _playRequestId,
+            );
+          }
         }
 
-        if (state.processingState == ProcessingState.ready ||
-            state.processingState == ProcessingState.completed) {
+        if (state.processingState == ProcessingState.ready) {
+          _cancelLoadingWatchdog();
+
           setState(() {
             isloading = false;
           });
         }
 
         if (state.processingState == ProcessingState.completed) {
+          _cancelLoadingWatchdog();
+
           setState(() {
+            isloading = false;
             isitplay = false;
+            isPlayerPause = false;
             iconData = Icons.play_arrow;
             onOff = translation?.turnOn ?? "تشغيل";
           });
@@ -156,17 +178,10 @@ class _QuranViewState extends State<QuranView> {
       onError: (error, stack) {
         if (!mounted) return;
 
-        setState(() {
-          isloading = false;
-          isitplay = false;
-          iconData = Icons.play_arrow;
-          onOff = translation?.turnOn ?? "تشغيل";
-        });
-
-        _showNoInternetSnackBar();
+        _resetMainPlaybackUi();
+        _showWeakInternetSnackBar();
       },
     );
-
     // 💡 التعديل الجوهري الثاني: مراقبة حالة مشغل الصوت الثاني (قالون)
 
     playerSub2 = _audioService2.player.playerStateStream.listen(
@@ -178,18 +193,30 @@ class _QuranViewState extends State<QuranView> {
           setState(() {
             isloading = true;
           });
+
+          if (isitplay) {
+            _startLoadingWatchdog(
+              player: _audioService2.player,
+              requestId: _playRequestId,
+            );
+          }
         }
 
-        if (state.processingState == ProcessingState.ready ||
-            state.processingState == ProcessingState.completed) {
+        if (state.processingState == ProcessingState.ready) {
+          _cancelLoadingWatchdog();
+
           setState(() {
             isloading = false;
           });
         }
 
         if (state.processingState == ProcessingState.completed) {
+          _cancelLoadingWatchdog();
+
           setState(() {
+            isloading = false;
             isitplay = false;
+            isPlayerPause = false;
             iconData = Icons.play_arrow;
             onOff = translation?.turnOn ?? "تشغيل";
           });
@@ -198,17 +225,10 @@ class _QuranViewState extends State<QuranView> {
       onError: (error, stack) {
         if (!mounted) return;
 
-        setState(() {
-          isloading = false;
-          isitplay = false;
-          iconData = Icons.play_arrow;
-          onOff = translation?.turnOn ?? "تشغيل";
-        });
-
-        _showNoInternetSnackBar();
+        _resetMainPlaybackUi();
+        _showWeakInternetSnackBar();
       },
     );
-
 /////
 
     if (widget.x == 1) {
@@ -219,8 +239,140 @@ class _QuranViewState extends State<QuranView> {
     }
   }
 
+  Future<bool?> _checkInternetSafely(
+    Future<bool> Function() checkInternet,
+  ) async {
+    try {
+      return await checkInternet().timeout(
+        _internetCheckTimeout,
+      );
+    } on SocketException {
+      // لا يوجد اتصال بالإنترنت
+      return false;
+    } on TimeoutException {
+      // الاتصال موجود/محتمل، لكن الاستجابة بطيئة جدًا
+      return null;
+    } catch (_) {
+      // خطأ غير متوقع في فحص الاتصال
+      return null;
+    }
+  }
+
+  void _cancelLoadingWatchdog() {
+    _loadingWatchdog?.cancel();
+    _loadingWatchdog = null;
+    _loadingWatchdogRequestId = null;
+  }
+
+  void _startLoadingWatchdog({
+    required AudioPlayer player,
+    required int requestId,
+  }) {
+    // لا تعِد تشغيل المؤقت مع كل buffering؛ المهلة تبدأ من بداية الطلب
+    // وتبقى ثابتة حتى نجاح التشغيل أو فشل الطلب.
+    if (_loadingWatchdog != null &&
+        _loadingWatchdog!.isActive &&
+        _loadingWatchdogRequestId == requestId) {
+      return;
+    }
+
+    _cancelLoadingWatchdog();
+    _loadingWatchdogRequestId = requestId;
+
+    _loadingWatchdog = Timer(_loadingTimeout, () async {
+      if (!mounted) return;
+      if (requestId != _playRequestId) return;
+      if (!isitplay) return;
+
+      final processingState = player.processingState;
+
+      // إذا أصبح المشغل جاهزًا بالفعل، فلا نوقف التلاوة لمجرد انتهاء المؤقت.
+      // هذا مهم خصوصًا عندما يكون الصوت مخزنًا محليًا أو تم تحميله مسبقًا.
+      if (processingState != ProcessingState.loading &&
+          processingState != ProcessingState.buffering) {
+        _cancelLoadingWatchdog();
+
+        if (mounted) {
+          setState(() {
+            isloading = false;
+          });
+        }
+        return;
+      }
+
+      try {
+        await player.stop();
+      } catch (_) {}
+
+      if (!mounted) return;
+      if (requestId != _playRequestId) return;
+
+      _cancelLoadingWatchdog();
+
+      setState(() {
+        isloading = false;
+        isitplay = false;
+        isPlayerPause = false;
+        iconData = Icons.play_arrow;
+        iconDataPause = Icons.pause_rounded;
+        onOff = translation?.turnOn ?? "تشغيل";
+      });
+
+      _showWeakInternetSnackBar();
+    });
+  }
+
+  void _resetMainPlaybackUi() {
+    _cancelLoadingWatchdog();
+
+    if (!mounted) return;
+
+    setState(() {
+      isloading = false;
+      isitplay = false;
+      isPlayerPause = false;
+      iconData = Icons.play_arrow;
+      iconDataPause = Icons.pause_rounded;
+      onOff = translation?.turnOn ?? "تشغيل";
+    });
+  }
+
+  Future<void> _runHafsPlayback(int requestId) async {
+    try {
+      await _audioService.playSurah(
+        urlOfReciterHafs,
+        surahNumber,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      if (requestId != _playRequestId) return;
+      if (!isitplay) return;
+
+      _resetMainPlaybackUi();
+      _showWeakInternetSnackBar();
+    }
+  }
+
+  Future<void> _runQalounPlayback(int requestId) async {
+    try {
+      await _audioService2.playSurah(
+        urlOfReciterQaloun,
+        surahNumber,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      if (requestId != _playRequestId) return;
+      if (!isitplay) return;
+
+      _resetMainPlaybackUi();
+      _showWeakInternetSnackBar();
+    }
+  }
+
   @override
   void dispose() {
+    _cancelLoadingWatchdog();
+
     playerSub1.cancel();
     playerSub2.cancel();
     _audioService.dispose();
@@ -720,55 +872,61 @@ class _QuranViewState extends State<QuranView> {
   }
 
   // 💡 التعديل الجوهري الثالث: إصلاح أزرار التشغيل لتحديث الواجهة فوراً
-  void _handleMainHafsPlayButton() async {
-    checkDownloaded();
+  Future<void> _handleMainHafsPlayButton() async {
+    // إيقاف
+    if (isitplay) {
+      _playRequestId++;
+      _cancelLoadingWatchdog();
 
-    if (!isitplay) {
-      // التأكد من الإنترنت أولاً قبل فعل أي شيء
-      if (!(await _audioService.checkInternet())) {
-        _showNoInternetSnackBar();
-        return;
-      }
-
-      // 💡 نحدث الواجهة فوراً (نغير الأيقونة لزر التوقف، ونخفي التحميل إن وجد)
-      setState(() {
-        isitplay = true;
-        iconDataPause = Icons.pause;
-        onOff = translation!.turnOff;
-        iconData = Icons.stop;
-        highlightedVerse = null;
-        highlightedWord = null;
-      });
-
-      // 💡 نشغل الصوت بدون كلمة await لكي لا يتجمد الكود هنا
       try {
-        await _audioService
-            .playSurah(
-              urlOfReciterHafs,
-              surahNumber,
-            )
-            .timeout(
-              const Duration(seconds: 15),
-            );
-      } catch (e) {
-        if (!mounted) return;
+        await _audioService.player.stop();
+      } catch (_) {}
 
-        setState(() {
-          isloading = false;
-          isitplay = false;
-          iconData = Icons.play_arrow;
-        });
-
-        _showNoInternetSnackBar();
-      }
-    } else {
-      _audioService.player.stop();
-      setState(() {
-        isitplay = false;
-        onOff = translation!.turnOn;
-        iconData = Icons.play_arrow;
-      });
+      _resetMainPlaybackUi();
+      return;
     }
+
+    // فحص الإنترنت
+    final internet = await _checkInternetSafely(
+      _audioService.checkInternet,
+    );
+
+    if (!mounted) return;
+
+    // لا يوجد إنترنت
+    if (internet == false) {
+      _showNoInternetSnackBar();
+      return;
+    }
+
+    // الإنترنت ضعيف أو الفحص استغرق وقتًا طويلًا
+    if (internet == null) {
+      _showWeakInternetSnackBar();
+      return;
+    }
+
+    // عملية تشغيل جديدة
+    final requestId = ++_playRequestId;
+
+    setState(() {
+      isitplay = true;
+      isloading = true;
+      isPlayerPause = false;
+      iconDataPause = Icons.pause;
+      onOff = translation?.turnOff ?? "إيقاف";
+      iconData = Icons.stop;
+      highlightedVerse = null;
+      highlightedWord = null;
+    });
+
+    // لا نستخدم timeout على playSurah نفسه
+    // لأن Future الخاصة به قد تستمر حتى نهاية التلاوة
+    _startLoadingWatchdog(
+      player: _audioService.player,
+      requestId: requestId,
+    );
+
+    unawaited(_runHafsPlayback(requestId));
   }
 
   void _handlePauseHafsButton() {
@@ -782,59 +940,58 @@ class _QuranViewState extends State<QuranView> {
     setState(() => isPlayerPause = !isPlayerPause);
   }
 
-  void _handleMainQalounPlayButton() async {
-    checkDownloaded();
+  Future<void> _handleMainQalounPlayButton() async {
+    // إيقاف
+    if (isitplay) {
+      _playRequestId++;
+      _cancelLoadingWatchdog();
 
-    if (!isitplay) {
       try {
-        final hasInternet = await _audioService2.checkInternet();
-        if (!hasInternet) {
-          _showNoInternetSnackBar();
-          return;
-        }
+        await _audioService2.player.stop();
+      } catch (_) {}
 
-        // 💡 تحديث الواجهة فوراً
-        setState(() {
-          isitplay = true;
-          onOff = translation?.turnOff ?? "إيقاف";
-          iconData = Icons.stop;
-          iconDataPause = Icons.pause;
-          highlightedVerse = null;
-          highlightedWord = null;
-        });
-
-        // 💡 تشغيل بدون await
-        try {
-          await _audioService2
-              .playSurah(
-                urlOfReciterQaloun,
-                surahNumber,
-              )
-              .timeout(
-                const Duration(seconds: 15),
-              );
-        } catch (e) {
-          if (!mounted) return;
-
-          setState(() {
-            isloading = false;
-            isitplay = false;
-            iconData = Icons.play_arrow;
-          });
-
-          _showNoInternetSnackBar();
-        }
-      } catch (e) {
-        debugPrint("Qaloun error: $e");
-      }
-    } else {
-      _audioService2.player.stop();
-      setState(() {
-        isitplay = false;
-        onOff = translation!.turnOn;
-        iconData = Icons.play_arrow;
-      });
+      _resetMainPlaybackUi();
+      return;
     }
+
+    // فحص الإنترنت
+    final internet = await _checkInternetSafely(
+      _audioService2.checkInternet,
+    );
+
+    if (!mounted) return;
+
+    // لا يوجد إنترنت
+    if (internet == false) {
+      _showNoInternetSnackBar();
+      return;
+    }
+
+    // الإنترنت ضعيف
+    if (internet == null) {
+      _showWeakInternetSnackBar();
+      return;
+    }
+
+    final requestId = ++_playRequestId;
+
+    setState(() {
+      isitplay = true;
+      isloading = true;
+      isPlayerPause = false;
+      onOff = translation?.turnOff ?? "إيقاف";
+      iconData = Icons.stop;
+      iconDataPause = Icons.pause;
+      highlightedVerse = null;
+      highlightedWord = null;
+    });
+
+    _startLoadingWatchdog(
+      player: _audioService2.player,
+      requestId: requestId,
+    );
+
+    unawaited(_runQalounPlayback(requestId));
   }
 
   void _handlePauseQalounButton() {
@@ -878,40 +1035,62 @@ class _QuranViewState extends State<QuranView> {
             // التوقيتات
             //////////////////////////////////////////////////
 
-            List<AyahTiming> timings = await _audioService.fetchAyahTimings(
-              surahNumber,
-              idOfReciterHafs,
+            final internet = await _checkInternetSafely(
+              _audioService.checkInternet,
             );
 
+            if (!mounted) return;
+
+            if (internet == false) {
+              _showNoInternetSnackBar();
+              return;
+            }
+
+            if (internet == null) {
+              _showWeakInternetSnackBar();
+              return;
+            }
+
             try {
+              final timings = await _audioService
+                  .fetchAyahTimings(
+                    surahNumber,
+                    idOfReciterHafs,
+                  )
+                  .timeout(_loadingTimeout);
+
+              if (!mounted) return;
+
               final currentAyahTiming = timings.firstWhere(
                 (t) => t.ayah == highlightedVerse,
               );
 
-              //////////////////////////////////////////////////
-              // تشغيل
-              //////////////////////////////////////////////////
-
               setState(() {
                 isPlayingHafsAyah = true;
-
                 positionsOfMusic = -30;
                 sizeoficonOfMusic = 48;
               });
 
-              _audioService.playAyah(
+              await _audioService.playAyah(
                 urlOfReciterHafs,
                 surahNumber,
                 currentAyahTiming,
               );
-            } catch (e) {
-              debugPrint(
-                "Timing not found for this ayah",
-              );
+            } on TimeoutException {
+              if (!mounted) return;
+              _showWeakInternetSnackBar();
 
               setState(() {
                 isPlayingHafsAyah = false;
+                positionsOfMusic = null;
+                sizeoficonOfMusic = null;
+              });
+            } catch (_) {
+              if (!mounted) return;
+              _showWeakInternetSnackBar();
 
+              setState(() {
+                isPlayingHafsAyah = false;
                 positionsOfMusic = null;
                 sizeoficonOfMusic = null;
               });
@@ -977,10 +1156,27 @@ class _QuranViewState extends State<QuranView> {
               color: mainColor,
             ),
             onPressed: () async {
+              final internet = await _checkInternetSafely(
+                _audioService.checkInternet,
+              );
+
+              if (!mounted) return;
+
+              if (internet == false) {
+                _showNoInternetSnackBar();
+                return;
+              }
+
+              if (internet == null) {
+                _showWeakInternetSnackBar();
+                return;
+              }
+
               isitplay = false;
-              onOff = translation!.turnOn;
+              onOff = translation?.turnOn ?? "تشغيل";
               iconData = Icons.play_arrow;
-              _audioService.playWord(
+
+              await _audioService.playWord(
                 surahNumber,
                 highlightedWordVerse!,
                 highlightedWord!,
@@ -1025,14 +1221,38 @@ class _QuranViewState extends State<QuranView> {
               }
 
               //////////////////////////////////////////////////
+              // التحقق من الإنترنت
+              //////////////////////////////////////////////////
+
+              final internet = await _checkInternetSafely(
+                _audioService2.checkInternet,
+              );
+
+              if (!mounted) return;
+
+              if (internet == false) {
+                _showNoInternetSnackBar();
+                return;
+              }
+
+              if (internet == null) {
+                _showWeakInternetSnackBar();
+                return;
+              }
+
+              //////////////////////////////////////////////////
               // التوقيتات
               //////////////////////////////////////////////////
 
-              List<AyahTiming> timings = await _audioService2.fetchAyahTimings(
-                surahNumber,
-              );
-
               try {
+                final timings = await _audioService2
+                    .fetchAyahTimings(
+                      surahNumber,
+                    )
+                    .timeout(_loadingTimeout);
+
+                if (!mounted) return;
+
                 final currentAyahTiming = timings.firstWhere(
                   (t) => t.ayah == highlightedVerse,
                 );
@@ -1048,21 +1268,28 @@ class _QuranViewState extends State<QuranView> {
                   sizeoficonOfMusic = 48;
                 });
 
-                _audioService2.playAyah(
+                await _audioService2.playAyah(
                   surahNumber,
                   currentAyahTiming,
                 );
-              } catch (e) {
-                debugPrint(
-                  "Timing not found for this ayah",
-                );
+              } on TimeoutException {
+                if (!mounted) return;
+                _showWeakInternetSnackBar();
 
                 setState(() {
                   isPlayingQalounAyah = false;
-
                   positionsOfMusic = null;
                   sizeoficonOfMusic = null;
                 });
+              } catch (_) {
+                if (!mounted) return;
+                setState(() {
+                  isPlayingQalounAyah = false;
+                  positionsOfMusic = null;
+                  sizeoficonOfMusic = null;
+                });
+
+                _showWeakInternetSnackBar();
               }
 
               highlightedVerse = null;
@@ -1147,13 +1374,49 @@ class _QuranViewState extends State<QuranView> {
   }
 
   void _showNoInternetSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: const CustomSnackBarIcon(icon: Icons.wifi_off_rounded),
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).size.height * 0.4),
-    ));
+    setState(() {
+      highlightedWord = null;
+      highlightedWordVerse = null;
+    });
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const CustomSnackBar(
+            text: "الإنترنت غير متوفر",
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.05,
+          ),
+        ),
+      );
+  }
+
+  void _showWeakInternetSnackBar() {
+    setState(() {
+      highlightedWord = null;
+      highlightedWordVerse = null;
+    });
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: const CustomSnackBar(
+            text: "الإنترنت ضعيف، يرجى المحاولة مرة أخرى",
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).size.height * 0.05,
+          ),
+        ),
+      );
   }
 
   Future<void> copySelectedVerse() async {

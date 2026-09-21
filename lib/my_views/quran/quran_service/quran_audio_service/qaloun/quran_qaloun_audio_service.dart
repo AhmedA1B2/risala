@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -14,15 +15,24 @@ class QuranQalounAudioService {
   bool get isPlaying => player.playing;
 
   /////////////////////////////////////////////////////////
-  Future<bool> checkInternet() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
+Future<bool> checkInternet() async {
+  try {
+    final result = await InternetAddress.lookup(
+      'google.com',
+    ).timeout(
+      const Duration(seconds: 4),
+    );
 
-      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
-    } on SocketException {
-      return false;
-    }
+    return result.isNotEmpty &&
+        result.first.rawAddress.isNotEmpty;
+  } on SocketException {
+    return false;
+  } on TimeoutException {
+    return false;
+  } catch (_) {
+    return false;
   }
+}
 
   /////////////////////////////////////////////////////////
   Future<void> playSurah(
