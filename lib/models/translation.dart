@@ -115,6 +115,12 @@ class Translation {
   final String openLocationSettings;
   final String retry;
 
+  // نصوص البوصلة الجديدة (تُقرأ من ملف الترجمات JSON)
+  final String qiblaSavedLocation;
+  final String qiblaCoordinatesLocation;
+  final String qiblaLocationUsed;
+  final String qiblaNoSavedLocationError;
+
   final String contactDeveloper;
   final String developerSupportTitle;
   final String developerSupportDescription;
@@ -224,14 +230,17 @@ class Translation {
     required this.locationDisabled,
     required this.openLocationSettings,
     required this.retry,
+    this.qiblaSavedLocation = 'Last saved location',
+    this.qiblaCoordinatesLocation = 'Location from GPS coordinates',
+    this.qiblaLocationUsed = 'Location used',
+    this.qiblaNoSavedLocationError =
+        'Could not determine your current location and no previous location is saved. Check location permission and try again.',
     required this.contactDeveloper,
     required this.developerSupportTitle,
     required this.developerSupportDescription,
     required this.developerSupportHint,
     required this.contactViaTelegram,
-
     required this.copy,
-
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
@@ -350,6 +359,12 @@ class Translation {
       locationDisabled: data["locationDisabled"] ?? "",
       openLocationSettings: data["openLocationSettings"] ?? "",
       retry: data["retry"] ?? "",
+      qiblaSavedLocation:
+          data["qiblaSavedLocation"] ?? data["SavedLocation"] ?? "",
+      qiblaCoordinatesLocation: data["qiblaCoordinatesLocation"] ?? "",
+      qiblaLocationUsed: data["qiblaLocationUsed"] ?? "",
+      qiblaNoSavedLocationError:
+          data["qiblaNoSavedLocationError"] ?? data["compassSetupError"] ?? "",
       contactDeveloper: data["contactDeveloper"] ?? "",
       developerSupportTitle: data["developerSupportTitle"] ?? "",
       developerSupportDescription: data["developerSupportDescription"] ?? "",
