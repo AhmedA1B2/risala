@@ -5,12 +5,14 @@ import 'package:risala/custom/custom_bottom_bar/bottom_bar_animation/bottom_bar_
 import 'package:risala/custom/custom_list_items/custom_list/custom_list1.dart';
 import 'package:risala/main.dart';
 import 'package:risala/my_views/custom_notification/custom_notification_view/custom_notification.dart';
+import 'package:risala/my_views/hadith/hadith_view/hadith_view.dart';
 import 'package:risala/my_views/qibla/qibla_view/qibla_view.dart';
 import 'package:risala/my_views/sabhuh/sabhuh_view/sabhuh_view.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView(
       {super.key,
+      required this.keyBottomBarForTuorial0,
       required this.keyBottomBarForTuorial1,
       required this.keyBottomBarForTuorial2,
       required this.keyBottomBarForTuorial3,
@@ -18,6 +20,7 @@ class HomeView extends StatefulWidget {
       required this.onTutorialNext,
       this.onPressedCustomIconButtonBookmark});
 
+  final GlobalKey keyBottomBarForTuorial0;
   final GlobalKey keyBottomBarForTuorial1;
   final GlobalKey keyBottomBarForTuorial2;
   final GlobalKey keyBottomBarForTuorial3;
@@ -46,12 +49,14 @@ class _HomeViewState extends State<HomeView> {
                             widget.onPressedCustomIconButtonBookmark,
                       )
                     : showRightView == 1
-                        ? const QiblaView()
+                        ? const HadithView()
                         : showRightView == 2
-                            ? const CustomNotification() //const AdhanView()
+                            ? const QiblaView()
                             : showRightView == 3
-                                ? const SabhuhView()
-                                : const SizedBox(),
+                                ? const CustomNotification() //const AdhanView()
+                                : showRightView == 4
+                                    ? const SabhuhView()
+                                    : const SizedBox(),
               )
             : CustomBg(
                 topMargin: 0,
@@ -62,18 +67,21 @@ class _HomeViewState extends State<HomeView> {
                             widget.onPressedCustomIconButtonBookmark,
                       )
                     : showRightView == 1
-                        ? const QiblaView()
+                        ? const HadithView()
                         : showRightView == 2
-                            ? const CustomNotification() //const AdhanView()
+                            ? const QiblaView()
                             : showRightView == 3
-                                ? const SabhuhView()
-                                : const SizedBox(),
+                                ? const CustomNotification() //const AdhanView()
+                                : showRightView == 4
+                                    ? const SabhuhView()
+                                    : const SizedBox(),
               ),
         Positioned(
           bottom: 8,
           width: MediaQuery.of(context).size.width,
           child: BottomBarAnimation1(
             keyBottomBarAnimation1: [
+              widget.keyBottomBarForTuorial0,
               widget.keyBottomBarForTuorial1,
               widget.keyBottomBarForTuorial2,
               widget.keyBottomBarForTuorial3,
@@ -88,23 +96,29 @@ class _HomeViewState extends State<HomeView> {
               } else if (index == 1) {
                 setState(() {
                   showRightView = 1;
-                  topBorderRadius = 500;
+                  topBorderRadius = 20;
                 });
               } else if (index == 2) {
                 setState(() {
                   showRightView = 2;
-                  topBorderRadius = 50;
+                  topBorderRadius = 500;
                 });
               } else if (index == 3) {
                 setState(() {
-                  topBorderRadius = 100;
                   showRightView = 3;
+                  topBorderRadius = 50;
+                });
+              } else if (index == 4) {
+                setState(() {
+                  topBorderRadius = 100;
+                  showRightView = 4;
                 });
               }
               widget.onTutorialNext();
             },
             icons: const [
               Icons.menu_book_sharp,
+              Icons.book_sharp,
               Icons.track_changes_rounded,
               Icons.edit_notifications,
               Icons.spa_sharp,

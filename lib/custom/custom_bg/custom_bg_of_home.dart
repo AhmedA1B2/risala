@@ -33,7 +33,10 @@ class CustomBg extends StatelessWidget {
             borderRadius:
                 BorderRadius.vertical(top: Radius.circular(topBorderRadius)),
             border: const Border.fromBorderSide(
-              BorderSide(color: blackColor, width: 2),
+              BorderSide(
+                  color: blackColor,
+                  width: 2,
+                  strokeAlign: BorderSide.strokeAlignOutside),
             ),
           ),
           child: child,

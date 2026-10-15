@@ -28,6 +28,7 @@ class _MainViewState extends State<MainView> with RouteAware {
   final GlobalKey<CustomMenuAnimation5State> menuKey = GlobalKey();
   final GlobalKey<CustomMenuButton1State> buttonMenuKey = GlobalKey();
 
+  final GlobalKey keyBottomBarForTuorial0 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial1 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial2 = GlobalKey();
   final GlobalKey keyBottomBarForTuorial3 = GlobalKey();
@@ -108,7 +109,7 @@ class _MainViewState extends State<MainView> with RouteAware {
         TutorialStep(
             key: keyBottomBarForTuorial2, text: translation!.tutorialCompass),
         TutorialStep(
-            key: keyBottomBarForTuorial1, text: translation!.tutorialHome),
+            key: keyBottomBarForTuorial0, text: translation!.tutorialHome),
         TutorialStep(key: buttonMenuKey, text: translation!.tutorialMenu),
       ],
     );
@@ -208,6 +209,7 @@ class _MainViewState extends State<MainView> with RouteAware {
                       }
                     },
                     onPressedCustomIconButtonBookmark: _openQuranViewSaved,
+                    keyBottomBarForTuorial0: keyBottomBarForTuorial0,
                     keyBottomBarForTuorial1: keyBottomBarForTuorial1,
                     keyBottomBarForTuorial2: keyBottomBarForTuorial2,
                     keyBottomBarForTuorial3: keyBottomBarForTuorial3,

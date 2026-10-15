@@ -142,6 +142,9 @@ flutter:
     - assets/images/streak/1/
     - assets/images/streak/animation/
 
+    - assets/json/bukhari/
+    - assets/json/bukhari/names_of_chapters/
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
