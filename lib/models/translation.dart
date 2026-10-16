@@ -51,6 +51,7 @@ class Translation {
   final String tutorialTasbih;
   final String tutorialNotifications;
   final String tutorialCompass;
+  final String tutorialHadith;
   final String tutorialHome;
   final String tutorialMenu;
 
@@ -128,6 +129,8 @@ class Translation {
   final String contactViaTelegram;
 
   final String copy;
+
+  final String hadithLangMessage;
 
   Translation({
     required this.key,
@@ -241,6 +244,8 @@ class Translation {
     required this.developerSupportHint,
     required this.contactViaTelegram,
     required this.copy,
+    required this.hadithLangMessage,
+    required this.tutorialHadith,
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
@@ -372,6 +377,8 @@ class Translation {
       contactViaTelegram: data["contactViaTelegram"] ?? "",
 
       copy: data["copy"] ?? "",
+      hadithLangMessage: data["hadithLangMessage"] ?? "",
+      tutorialHadith: data["tutorialHadith"] ?? "",
     );
   }
 }

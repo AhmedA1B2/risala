@@ -2,6 +2,7 @@
     {
         "ar": [
             {
+                "tutorialHadith": "هنا تجد أحاديث صحيح البخاري، ويمكنك استعراض فصول الكتاب واختيار أي فصل للاطلاع على أحاديثه.",
                 "theQuran": "ٱلْقُرْآنُ",
                 "ok": "حسنًا",
                 "languageAndText": "اللغة و النص",
@@ -110,11 +111,13 @@
                 "qiblaSavedLocation": "آخر موقع محفوظ",
                 "qiblaCoordinatesLocation": "موقع محدد بإحداثيات GPS",
                 "qiblaLocationUsed": "الموقع المستخدم",
-                "qiblaNoSavedLocationError": "تعذر تحديد الموقع الحالي ولم يوجد موقع سابق محفوظ. تحقق من صلاحية الموقع وحاول مجددًا."
+                "qiblaNoSavedLocationError": "تعذر تحديد الموقع الحالي ولم يوجد موقع سابق محفوظ. تحقق من صلاحية الموقع وحاول مجددًا.",
+                "hadithLangMessage":"نعتذر منك، ولكن لغتك غير مدعومة حاليًا. يتوفر كتاب صحيح البخاري حاليًا باللغتين العربية والإنجليزية فقط. إذا كان بإمكانك المساعدة في توفير الكتاب بلغتك، أو تعرف شخصًا يمكنه ذلك، فيُرجى التواصل معنا."
             }
         ],
         "en": [
             {
+                "tutorialHadith": "Here you can explore the Hadiths of Sahih al-Bukhari, browse the book's chapters, and select any chapter to read its Hadiths.",
                 "theQuran": "The Quran",
                 "ok": "OK",
                 "languageAndText": "Language & Text",
@@ -223,11 +226,13 @@
                 "qiblaSavedLocation": "Last saved location",
                 "qiblaCoordinatesLocation": "Location from GPS coordinates",
                 "qiblaLocationUsed": "Location used",
-                "qiblaNoSavedLocationError": "Could not determine your current location, and no previous location is saved. Check location permission and try again."
+                "qiblaNoSavedLocationError": "Could not determine your current location, and no previous location is saved. Check location permission and try again.",
+                "hadithLangMessage": "We apologize, but your language is not currently supported. Sahih al-Bukhari is currently available only in Arabic and English. If you can help provide the book in your language, or know someone who can, please contact us."
             }
         ],
         "sp": [
             {
+                "tutorialHadith": "Aquí puedes consultar los hadices de Sahih al-Bujari, explorar los capítulos del libro y seleccionar cualquier capítulo para leer sus hadices.",
                 "theQuran": "El Corán",
                 "ok": "Aceptar",
                 "languageAndText": "Idioma y texto",
@@ -336,11 +341,14 @@
                 "qiblaSavedLocation": "Última ubicación guardada",
                 "qiblaCoordinatesLocation": "Ubicación obtenida por coordenadas GPS",
                 "qiblaLocationUsed": "Ubicación utilizada",
-                "qiblaNoSavedLocationError": "No se pudo determinar la ubicación actual y no hay una ubicación anterior guardada. Comprueba el permiso de ubicación e inténtalo de nuevo."
+                "qiblaNoSavedLocationError": "No se pudo determinar la ubicación actual y no hay una ubicación anterior guardada. Comprueba el permiso de ubicación e inténtalo de nuevo.",
+                "hadithLangMessage": "Lo sentimos, pero tu idioma aún no es compatible. El libro Sahih al-Bujari está disponible actualmente solo en árabe e inglés. Si puedes ayudar a proporcionar el libro en tu idioma, o conoces a alguien que pueda hacerlo, ponte en contacto con nosotros."
+
             }
         ],
         "it": [
             {
+                "tutorialHadith": "Qui puoi consultare gli hadith di Sahih al-Bukhari, esplorare i capitoli del libro e selezionare un capitolo per leggere i relativi hadith.",
                 "theQuran": "Il Corano",
                 "ok": "OK",
                 "languageAndText": "Lingua e testo",
@@ -449,11 +457,13 @@
                 "qiblaSavedLocation": "Ultima posizione salvata",
                 "qiblaCoordinatesLocation": "Posizione ottenuta dalle coordinate GPS",
                 "qiblaLocationUsed": "Posizione utilizzata",
-                "qiblaNoSavedLocationError": "Impossibile determinare la posizione attuale e non è disponibile una posizione precedente salvata. Controlla il permesso di posizione e riprova."
-            }
+                "qiblaNoSavedLocationError": "Impossibile determinare la posizione attuale e non è disponibile una posizione precedente salvata. Controlla il permesso di posizione e riprova.",
+                "hadithLangMessage": "Ci scusiamo, ma la tua lingua non è attualmente supportata. Il libro Sahih al-Bukhari è attualmente disponibile solo in arabo e inglese. Se puoi aiutarci a rendere disponibile il libro nella tua lingua, o conosci qualcuno che possa farlo, contattaci."
+        }
         ],
         "in": [
             {
+                "tutorialHadith": "Di sini Anda dapat membaca hadis-hadis Sahih al-Bukhari, menelusuri bab-bab kitab, dan memilih bab untuk melihat hadis-hadis di dalamnya.",
                 "theQuran": "Al-Qur'an",
                 "ok": "OK",
                 "languageAndText": "Bahasa & Teks",
@@ -562,11 +572,13 @@
                 "qiblaSavedLocation": "Lokasi terakhir tersimpan",
                 "qiblaCoordinatesLocation": "Lokasi dari koordinat GPS",
                 "qiblaLocationUsed": "Lokasi yang digunakan",
-                "qiblaNoSavedLocationError": "Lokasi saat ini tidak dapat ditentukan dan tidak ada lokasi sebelumnya yang tersimpan. Periksa izin lokasi lalu coba lagi."
+                "qiblaNoSavedLocationError": "Lokasi saat ini tidak dapat ditentukan dan tidak ada lokasi sebelumnya yang tersimpan. Periksa izin lokasi lalu coba lagi.",
+                "hadithLangMessage": "Mohon maaf, bahasa Anda saat ini belum didukung. Kitab Sahih al-Bukhari saat ini hanya tersedia dalam bahasa Arab dan Inggris. Jika Anda dapat membantu menyediakan kitab ini dalam bahasa Anda, atau mengenal seseorang yang dapat membantu, silakan hubungi kami."
             }
         ],
         "cn": [
             {
+                "tutorialHadith": "这里收录了《布哈里圣训实录》的圣训。您可以浏览本书的各个章节，并选择任意章节查看其中的圣训。",
                 "theQuran": "古兰经",
                 "ok": "确定",
                 "languageAndText": "语言与文本",
@@ -675,11 +687,13 @@
                 "qiblaSavedLocation": "上次保存的位置",
                 "qiblaCoordinatesLocation": "根据 GPS 坐标确定的位置",
                 "qiblaLocationUsed": "使用的位置",
-                "qiblaNoSavedLocationError": "无法确定当前位置，也没有保存过以前的位置。请检查位置权限后重试。"
+                "qiblaNoSavedLocationError": "无法确定当前位置，也没有保存过以前的位置。请检查位置权限后重试。",
+                "hadithLangMessage": "很抱歉，目前尚不支持您的语言。《布哈里圣训实录》目前仅提供阿拉伯语和英语版本。如果您能帮助我们提供您所使用语言的版本，或者认识能够提供帮助的人，请联系我们。"
             }
         ],
         "bn": [
             {
+                "tutorialHadith": "এখানে আপনি সহিহ আল-বুখারির হাদিসগুলো দেখতে পারবেন, বইয়ের অধ্যায়গুলো ব্রাউজ করতে পারবেন এবং যেকোনো অধ্যায় নির্বাচন করে তার হাদিসগুলো পড়তে পারবেন।",
                 "theQuran": "আল-কুরআন",
                 "ok": "ঠিক আছে",
                 "languageAndText": "ভাষা ও পাঠ্য",
@@ -788,11 +802,13 @@
                 "qiblaSavedLocation": "সর্বশেষ সংরক্ষিত অবস্থান",
                 "qiblaCoordinatesLocation": "GPS স্থানাঙ্ক থেকে নির্ধারিত অবস্থান",
                 "qiblaLocationUsed": "ব্যবহৃত অবস্থান",
-                "qiblaNoSavedLocationError": "বর্তমান অবস্থান নির্ধারণ করা যায়নি এবং আগের কোনো অবস্থান সংরক্ষিত নেই। অবস্থানের অনুমতি পরীক্ষা করে আবার চেষ্টা করুন।"
+                "qiblaNoSavedLocationError": "বর্তমান অবস্থান নির্ধারণ করা যায়নি এবং আগের কোনো অবস্থান সংরক্ষিত নেই। অবস্থানের অনুমতি পরীক্ষা করে আবার চেষ্টা করুন।",
+                "hadithLangMessage": "আমরা দুঃখিত, তবে আপনার ভাষা বর্তমানে সমর্থিত নয়। সহিহ আল-বুখারি বর্তমানে শুধুমাত্র আরবি ও ইংরেজি ভাষায় উপলব্ধ। আপনি যদি আপনার ভাষায় বইটি সরবরাহ করতে সাহায্য করতে পারেন, অথবা এমন কাউকে চেনেন যিনি সাহায্য করতে পারেন, তাহলে অনুগ্রহ করে আমাদের সাথে যোগাযোগ করুন।"
             }
         ],
         "ru": [
             {
+                "tutorialHadith": "Здесь вы можете ознакомиться с хадисами из «Сахих аль-Бухари», просматривать главы книги и выбирать любую главу для чтения хадисов.",
                 "theQuran": "Коран",
                 "ok": "ОК",
                 "languageAndText": "Язык и текст",
@@ -901,11 +917,13 @@
                 "qiblaSavedLocation": "Последнее сохранённое местоположение",
                 "qiblaCoordinatesLocation": "Местоположение по координатам GPS",
                 "qiblaLocationUsed": "Используемое местоположение",
-                "qiblaNoSavedLocationError": "Не удалось определить текущее местоположение, и ранее сохранённого местоположения нет. Проверьте разрешение на доступ к местоположению и повторите попытку."
+                "qiblaNoSavedLocationError": "Не удалось определить текущее местоположение, и ранее сохранённого местоположения нет. Проверьте разрешение на доступ к местоположению и повторите попытку.",
+                "hadithLangMessage": "Приносим извинения, но ваш язык пока не поддерживается. Сахих аль-Бухари в настоящее время доступен только на арабском и английском языках. Если вы можете помочь с переводом книги на ваш язык или знаете кого-то, кто может помочь, пожалуйста, свяжитесь с нами."
             }
         ],
         "jp": [
             {
+                "tutorialHadith": "ここでは『サヒーフ・アル＝ブハーリー』のハディースを閲覧できます。本の各章を確認し、好きな章を選んで収録されているハディースを読むことができます。",
                 "theQuran": "クルアーン",
                 "ok": "ОК",
                 "languageAndText": "言語とテキスト",
@@ -1014,7 +1032,8 @@
                 "qiblaSavedLocation": "最後に保存した位置情報",
                 "qiblaCoordinatesLocation": "GPS 座標から取得した位置情報",
                 "qiblaLocationUsed": "使用中の位置情報",
-                "qiblaNoSavedLocationError": "現在地を特定できず、保存済みの位置情報もありません。位置情報の権限を確認して、もう一度お試しください。"
+                "qiblaNoSavedLocationError": "現在地を特定できず、保存済みの位置情報もありません。位置情報の権限を確認して、もう一度お試しください。",
+                "hadithLangMessage": "申し訳ありませんが、現在お使いの言語には対応していません。サヒーフ・アル＝ブハーリーは現在、アラビア語と英語のみで利用できます。お使いの言語で本を提供するためにご協力いただける場合、または協力できる方をご存じの場合は、ぜひご連絡ください。"
             }
         ]
     }

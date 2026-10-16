@@ -109,6 +109,8 @@ class _MainViewState extends State<MainView> with RouteAware {
         TutorialStep(
             key: keyBottomBarForTuorial2, text: translation!.tutorialCompass),
         TutorialStep(
+            key: keyBottomBarForTuorial1, text: translation!.tutorialHadith),
+        TutorialStep(
             key: keyBottomBarForTuorial0, text: translation!.tutorialHome),
         TutorialStep(key: buttonMenuKey, text: translation!.tutorialMenu),
       ],
