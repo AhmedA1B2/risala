@@ -24,6 +24,8 @@ import 'package:risala/translation/translation.dart';
 import 'package:risala/vars/colors.dart';
 import 'package:risala/vars/texts.dart';
 
+enum _PlaybackKind { none, surah, ayah, word }
+
 class QuranView extends StatefulWidget {
   const QuranView({
     super.key,
@@ -99,166 +101,152 @@ class _QuranViewState extends State<QuranView> {
 
   String riwoya = sharedPref.getString("riwoya") ?? "hafs";
 
-  late StreamSubscription playerSub1;
-  late StreamSubscription playerSub2;
+  late StreamSubscription<PlayerState> playerSub1;
+  late StreamSubscription<PlayerState> playerSub2;
   int _savedRetry = 0;
   int _searchRetry = 0;
 
-  Future<void> checkDownloaded() async {
-    bool downloaded;
+  // حالة عملية الصوت النشطة؛ أحداث أي مشغل آخر يتم تجاهلها.
+  AudioPlayer? _activePlayer;
+  _PlaybackKind _playbackKind = _PlaybackKind.none;
+  String? _activeRiwoya;
+  bool _isPreparingMainPlayback = false;
+  bool _isAyahBusy = false;
+  bool _isWordBusy = false;
+  Future<void> _audioStopQueue = Future<void>.value();
+  Timer? _savedRetryTimer;
+  Timer? _searchRetryTimer;
 
-    if (riwoya == "hafs") {
-      downloaded = await _audioService.isSurahDownloaded(
-        surahNumber,
-        idOfReciterHafs,
-        surahName ?? "",
-      );
-    } else {
-      downloaded = await _audioService2.isSurahDownloaded(
-        surahNumber,
-        idOfReciterQaloun,
-        surahName ?? "",
-      );
+  // تحميل التفسير مرة واحدة لكل لغة بدل فك JSON عند كل إعادة بناء.
+  final Map<String, Future<Map<String, String>>> _tafsirDataByLanguage = {};
+
+  Future<void> checkDownloaded() async {
+    final int checkedSurah = surahNumber;
+    final String checkedRiwoya = riwoya;
+    final int checkedHafsReciter = idOfReciterHafs;
+    final String checkedQalounReciter = idOfReciterQaloun;
+    final String? checkedName = surahName;
+
+    if (checkedName == null || checkedName.isEmpty) {
+      if (mounted) setState(() => isDownloaded = false);
+      return;
     }
 
-    if (!mounted) return;
+    var downloaded = false;
+    try {
+      if (checkedRiwoya == "hafs") {
+        downloaded = await _audioService.isSurahDownloaded(
+          checkedSurah,
+          checkedHafsReciter,
+          checkedName,
+        );
+      } else {
+        downloaded = await _audioService2.isSurahDownloaded(
+          checkedSurah,
+          checkedQalounReciter,
+          checkedName,
+        );
+      }
+    } catch (_) {
+      downloaded = false;
+    }
 
-    setState(() {
-      isDownloaded = downloaded;
-    });
+    if (!mounted ||
+        checkedSurah != surahNumber ||
+        checkedRiwoya != riwoya ||
+        checkedHafsReciter != idOfReciterHafs ||
+        checkedQalounReciter != idOfReciterQaloun ||
+        checkedName != surahName) {
+      return;
+    }
+    setState(() => isDownloaded = downloaded);
   }
 
   @override
   void initState() {
     super.initState();
-    loadAllTranslations();
-    loadSurahName();
-    loadData();
-    checkDownloaded();
 
-    // 💡 التعديل الجوهري الأول: مراقبة حالة مشغل الصوت الأول (حفص)
     playerSub1 = _audioService.player.playerStateStream.listen(
-      (state) {
-        if (!mounted) return;
-
-        if (state.processingState == ProcessingState.loading ||
-            state.processingState == ProcessingState.buffering) {
-          setState(() {
-            isloading = true;
-          });
-
-          if (isitplay) {
-            _startLoadingWatchdog(
-              player: _audioService.player,
-              requestId: _playRequestId,
-            );
-          }
-        }
-
-        if (state.processingState == ProcessingState.ready) {
-          _cancelLoadingWatchdog();
-
-          setState(() {
-            isloading = false;
-          });
-        }
-
-        if (state.processingState == ProcessingState.completed) {
-          _cancelLoadingWatchdog();
-
-          setState(() {
-            isloading = false;
-            isitplay = false;
-            isPlayerPause = false;
-            iconData = Icons.play_arrow;
-            onOff = translation?.turnOn ?? "تشغيل";
-          });
-        }
-      },
-      onError: (error, stack) {
-        if (!mounted) return;
-
-        _resetMainPlaybackUi();
-        _showWeakInternetSnackBar();
+      (state) => _handlePlayerState(_audioService.player, state),
+      onError: (Object error, StackTrace stack) {
+        _handlePlayerError(_audioService.player);
       },
     );
-    // 💡 التعديل الجوهري الثاني: مراقبة حالة مشغل الصوت الثاني (قالون)
-
     playerSub2 = _audioService2.player.playerStateStream.listen(
-      (state) {
-        if (!mounted) return;
-
-        if (state.processingState == ProcessingState.loading ||
-            state.processingState == ProcessingState.buffering) {
-          setState(() {
-            isloading = true;
-          });
-
-          if (isitplay) {
-            _startLoadingWatchdog(
-              player: _audioService2.player,
-              requestId: _playRequestId,
-            );
-          }
-        }
-
-        if (state.processingState == ProcessingState.ready) {
-          _cancelLoadingWatchdog();
-
-          setState(() {
-            isloading = false;
-          });
-        }
-
-        if (state.processingState == ProcessingState.completed) {
-          _cancelLoadingWatchdog();
-
-          setState(() {
-            isloading = false;
-            isitplay = false;
-            isPlayerPause = false;
-            iconData = Icons.play_arrow;
-            onOff = translation?.turnOn ?? "تشغيل";
-          });
-        }
-      },
-      onError: (error, stack) {
-        if (!mounted) return;
-
-        _resetMainPlaybackUi();
-        _showWeakInternetSnackBar();
+      (state) => _handlePlayerState(_audioService2.player, state),
+      onError: (Object error, StackTrace stack) {
+        _handlePlayerError(_audioService2.player);
       },
     );
-/////
+
+    unawaited(_initializeView());
 
     if (widget.x == 1) {
       WidgetsBinding.instance.addPostFrameCallback((_) => goToSavedVerse());
-    }
-    if (widget.x == 2) {
+    } else if (widget.x == 2) {
       WidgetsBinding.instance.addPostFrameCallback((_) => goToSearchedVerse());
     }
+  }
+
+  Future<void> _initializeView() async {
+    await Future.wait<void>([
+      loadAllTranslations(),
+      loadSurahName(),
+      loadData(),
+    ]);
+    if (mounted) await checkDownloaded();
+  }
+
+  void _handlePlayerState(AudioPlayer player, PlayerState state) {
+    if (!mounted || !identical(player, _activePlayer)) return;
+
+    final requestId = _playRequestId;
+    switch (state.processingState) {
+      case ProcessingState.loading:
+      case ProcessingState.buffering:
+        if (!isloading) setState(() => isloading = true);
+        if (_playbackKind != _PlaybackKind.none) {
+          _startLoadingWatchdog(player: player, requestId: requestId);
+        }
+        break;
+      case ProcessingState.ready:
+        _cancelLoadingWatchdog(requestId: requestId);
+        if (isloading) setState(() => isloading = false);
+        break;
+      case ProcessingState.completed:
+        _cancelLoadingWatchdog(requestId: requestId);
+        _finishPlayback(requestId);
+        break;
+      case ProcessingState.idle:
+        // قد تكون idle حالة طبيعية قبل ضبط المصدر. لا نعيد ضبط الواجهة
+        // هنا لأن ذلك قد يلغي عملية تشغيل بدأت للتو.
+        break;
+    }
+  }
+
+  void _handlePlayerError(AudioPlayer player) {
+    if (!mounted || !identical(player, _activePlayer)) return;
+    final requestId = _playRequestId;
+    _finishPlayback(requestId);
+    _showWeakInternetSnackBar();
   }
 
   Future<bool?> _checkInternetSafely(
     Future<bool> Function() checkInternet,
   ) async {
     try {
-      return await checkInternet().timeout(
-        _internetCheckTimeout,
-      );
+      return await checkInternet().timeout(_internetCheckTimeout);
     } on SocketException {
-      // لا يوجد اتصال بالإنترنت
       return false;
     } on TimeoutException {
-      // الاتصال موجود/محتمل، لكن الاستجابة بطيئة جدًا
       return null;
     } catch (_) {
-      // خطأ غير متوقع في فحص الاتصال
       return null;
     }
   }
 
-  void _cancelLoadingWatchdog() {
+  void _cancelLoadingWatchdog({int? requestId}) {
+    if (requestId != null && _loadingWatchdogRequestId != requestId) return;
     _loadingWatchdog?.cancel();
     _loadingWatchdog = null;
     _loadingWatchdogRequestId = null;
@@ -268,8 +256,11 @@ class _QuranViewState extends State<QuranView> {
     required AudioPlayer player,
     required int requestId,
   }) {
-    // لا تعِد تشغيل المؤقت مع كل buffering؛ المهلة تبدأ من بداية الطلب
-    // وتبقى ثابتة حتى نجاح التشغيل أو فشل الطلب.
+    if (!mounted ||
+        requestId != _playRequestId ||
+        !identical(player, _activePlayer)) {
+      return;
+    }
     if (_loadingWatchdog != null &&
         _loadingWatchdog!.isActive &&
         _loadingWatchdogRequestId == requestId) {
@@ -278,93 +269,211 @@ class _QuranViewState extends State<QuranView> {
 
     _cancelLoadingWatchdog();
     _loadingWatchdogRequestId = requestId;
-
     _loadingWatchdog = Timer(_loadingTimeout, () async {
-      if (!mounted) return;
-      if (requestId != _playRequestId) return;
-      if (!isitplay) return;
+      if (!mounted ||
+          requestId != _playRequestId ||
+          !identical(player, _activePlayer)) {
+        return;
+      }
 
-      final processingState = player.processingState;
-
-      // إذا أصبح المشغل جاهزًا بالفعل، فلا نوقف التلاوة لمجرد انتهاء المؤقت.
-      // هذا مهم خصوصًا عندما يكون الصوت مخزنًا محليًا أو تم تحميله مسبقًا.
-      if (processingState != ProcessingState.loading &&
-          processingState != ProcessingState.buffering) {
-        _cancelLoadingWatchdog();
-
-        if (mounted) {
-          setState(() {
-            isloading = false;
-          });
+      final state = player.processingState;
+      if (state == ProcessingState.ready ||
+          state == ProcessingState.completed) {
+        _cancelLoadingWatchdog(requestId: requestId);
+        if (mounted && requestId == _playRequestId) {
+          setState(() => isloading = false);
         }
         return;
       }
 
-      try {
-        await player.stop();
-      } catch (_) {}
-
-      if (!mounted) return;
-      if (requestId != _playRequestId) return;
-
-      _cancelLoadingWatchdog();
-
-      setState(() {
-        isloading = false;
-        isitplay = false;
-        isPlayerPause = false;
-        iconData = Icons.play_arrow;
-        iconDataPause = Icons.pause_rounded;
-        onOff = translation?.turnOn ?? "تشغيل";
-      });
-
+      // أبطل العملية قبل إيقاف المشغلات، حتى لا تعيد أحداث الإيقاف حالتها.
+      _finishPlayback(requestId);
+      await _stopBothPlayersSafely();
+      if (!mounted || requestId != _playRequestId) return;
       _showWeakInternetSnackBar();
     });
   }
 
-  void _resetMainPlaybackUi() {
-    _cancelLoadingWatchdog();
+  Future<void> _stopBothPlayersSafely() {
+    // تسلسل عمليات stop يمنع عملية إيقاف أقدم من قطع تشغيل أحدث.
+    final next = _audioStopQueue.then((_) async {
+      try {
+        await _audioService.player.stop();
+      } catch (_) {}
+      try {
+        await _audioService2.player.stop();
+      } catch (_) {}
+    });
+    _audioStopQueue = next;
+    return next;
+  }
 
-    if (!mounted) return;
+  void _finishPlayback(int requestId) {
+    if (!mounted || requestId != _playRequestId) return;
+    _cancelLoadingWatchdog(requestId: requestId);
+    _activePlayer = null;
+    _activeRiwoya = null;
+    _playbackKind = _PlaybackKind.none;
+    _isPreparingMainPlayback = false;
+    _isAyahBusy = false;
+    _isWordBusy = false;
 
     setState(() {
       isloading = false;
       isitplay = false;
       isPlayerPause = false;
+      isPlayingHafsAyah = false;
+      isPlayingQalounAyah = false;
+      isPlayingAyah = false;
+      positionsOfMusic = null;
+      sizeoficonOfMusic = null;
       iconData = Icons.play_arrow;
       iconDataPause = Icons.pause_rounded;
       onOff = translation?.turnOn ?? "تشغيل";
     });
   }
 
-  Future<void> _runHafsPlayback(int requestId) async {
-    try {
-      await _audioService.playSurah(
-        urlOfReciterHafs,
-        surahNumber,
-      );
-    } catch (_) {
-      if (!mounted) return;
-      if (requestId != _playRequestId) return;
-      if (!isitplay) return;
+  Future<void> _stopPlayback() async {
+    ++_playRequestId;
+    _cancelLoadingWatchdog();
+    _activePlayer = null;
+    _activeRiwoya = null;
+    _playbackKind = _PlaybackKind.none;
+    _isPreparingMainPlayback = false;
+    _isAyahBusy = false;
+    _isWordBusy = false;
 
-      _resetMainPlaybackUi();
+    if (mounted) {
+      setState(() {
+        isloading = false;
+        isitplay = false;
+        isPlayerPause = false;
+        isPlayingHafsAyah = false;
+        isPlayingQalounAyah = false;
+        isPlayingAyah = false;
+        positionsOfMusic = null;
+        sizeoficonOfMusic = null;
+        iconData = Icons.play_arrow;
+        iconDataPause = Icons.pause_rounded;
+        onOff = translation?.turnOn ?? "تشغيل";
+      });
+    }
+    await _stopBothPlayersSafely();
+  }
+
+  String _localSurahFilePath({
+    required bool hafs,
+    required int requestedSurah,
+    required String requestedName,
+    required int hafsReciterId,
+    required String qalounReciterId,
+  }) {
+    final paddedSurah = requestedSurah.toString().padLeft(3, '0');
+    if (hafs) {
+      return '/storage/emulated/0/Music/Risala Quran/$hafsReciterId/'
+          '$paddedSurah - $requestedName--$hafsReciterId.mp3';
+    }
+    return '/storage/emulated/0/Music/Risala Quran/Qaloun$qalounReciterId/'
+        '$paddedSurah - $requestedName.mp3';
+  }
+
+  Future<void> _queueLocalFilePlayback({
+    required int requestId,
+    required AudioPlayer player,
+    required String filePath,
+  }) {
+    final next = _audioStopQueue.then((_) async {
+      if (!mounted ||
+          requestId != _playRequestId ||
+          !identical(_activePlayer, player)) {
+        return;
+      }
+      try {
+        await player.setFilePath(filePath);
+      } catch (_) {
+        if (mounted &&
+            requestId == _playRequestId &&
+            identical(_activePlayer, player)) {
+          _finishPlayback(requestId);
+          _showWeakInternetSnackBar();
+        }
+        return;
+      }
+      if (!mounted ||
+          requestId != _playRequestId ||
+          !identical(_activePlayer, player)) {
+        return;
+      }
+      unawaited(_playConfiguredPlayer(player, requestId));
+    });
+    _audioStopQueue = next;
+    return next;
+  }
+
+  Future<void> _playConfiguredPlayer(AudioPlayer player, int requestId) async {
+    try {
+      await player.play();
+    } catch (_) {
+      if (!mounted ||
+          requestId != _playRequestId ||
+          !identical(_activePlayer, player)) {
+        return;
+      }
+      _finishPlayback(requestId);
       _showWeakInternetSnackBar();
     }
   }
 
-  Future<void> _runQalounPlayback(int requestId) async {
+  Future<void> _runHafsPlayback(
+    int requestId,
+    int requestedSurah,
+    String requestedUrl,
+    String? localFilePath,
+  ) async {
     try {
-      await _audioService2.playSurah(
-        urlOfReciterQaloun,
-        surahNumber,
-      );
+      if (localFilePath != null) {
+        await _queueLocalFilePlayback(
+          requestId: requestId,
+          player: _audioService.player,
+          filePath: localFilePath,
+        );
+      } else {
+        await _audioService.playSurah(requestedUrl, requestedSurah);
+      }
     } catch (_) {
-      if (!mounted) return;
-      if (requestId != _playRequestId) return;
-      if (!isitplay) return;
+      if (!mounted ||
+          requestId != _playRequestId ||
+          !identical(_activePlayer, _audioService.player)) {
+        return;
+      }
+      _finishPlayback(requestId);
+      _showWeakInternetSnackBar();
+    }
+  }
 
-      _resetMainPlaybackUi();
+  Future<void> _runQalounPlayback(
+    int requestId,
+    int requestedSurah,
+    String requestedUrl,
+    String? localFilePath,
+  ) async {
+    try {
+      if (localFilePath != null) {
+        await _queueLocalFilePlayback(
+          requestId: requestId,
+          player: _audioService2.player,
+          filePath: localFilePath,
+        );
+      } else {
+        await _audioService2.playSurah(requestedUrl, requestedSurah);
+      }
+    } catch (_) {
+      if (!mounted ||
+          requestId != _playRequestId ||
+          !identical(_activePlayer, _audioService2.player)) {
+        return;
+      }
+      _finishPlayback(requestId);
       _showWeakInternetSnackBar();
     }
   }
@@ -372,7 +481,8 @@ class _QuranViewState extends State<QuranView> {
   @override
   void dispose() {
     _cancelLoadingWatchdog();
-
+    _savedRetryTimer?.cancel();
+    _searchRetryTimer?.cancel();
     playerSub1.cancel();
     playerSub2.cancel();
     _audioService.dispose();
@@ -382,139 +492,232 @@ class _QuranViewState extends State<QuranView> {
   }
 
   Future<void> loadSurahName() async {
-    String jsonString = await rootBundle.loadString('assets/json/surahs.json');
-    List<dynamic> jsonData = json.decode(jsonString);
-    var surahData = jsonData.firstWhere((item) => item["number"] == surahNumber,
-        orElse: () => null);
+    try {
+      final jsonString = await rootBundle.loadString('assets/json/surahs.json');
+      final List<dynamic> jsonData = json.decode(jsonString) as List<dynamic>;
+      Map<String, dynamic>? surahData;
+      for (final item in jsonData) {
+        if (item is Map && item['number'] == surahNumber) {
+          surahData = Map<String, dynamic>.from(item);
+          break;
+        }
+      }
 
-    if (surahData != null) {
+      if (!mounted) return;
+      final language = sharedPref.getString("selectedValue") ?? "ar";
       setState(() {
-        surahName = sharedPref.getString("selectedValue") != "ar"
-            ? surahData["englishName"]
-            : surahData["name"] ?? "";
+        if (surahData == null) {
+          surahName = '';
+        } else if (language == 'ar') {
+          surahName = (surahData!['name'] as String?) ?? '';
+        } else {
+          surahName = (surahData!['englishName'] as String?) ??
+              (surahData!['name'] as String?) ??
+              '';
+        }
+      });
+    } catch (_) {
+      if (mounted) setState(() => surahName = '');
+    }
+  }
+
+  Future<void> loadData() async {
+    try {
+      final loadedHafs = await loadRecitersHafs();
+      final loadedQaloun = await loadRecitersQalouin();
+      if (!mounted) return;
+
+      setState(() {
+        recitersHafs = loadedHafs;
+        recitersQaloun = loadedQaloun;
+        selectedReciterHafs = _findHafsReciter(idOfReciterHafs, loadedHafs);
+        selectedReciterQaloun =
+            _findQalounReciter(idOfReciterQaloun, loadedQaloun);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        recitersHafs = [];
+        recitersQaloun = [];
+        selectedReciterHafs = null;
+        selectedReciterQaloun = null;
       });
     }
   }
 
-  void loadData() async {
-    recitersHafs = await loadRecitersHafs();
-    recitersQaloun = await loadRecitersQalouin();
-    if (!mounted) return;
-    setState(() {});
+  RecitersHafs? _findHafsReciter(int id, List<RecitersHafs> list) {
+    for (final reciter in list) {
+      if (reciter.id == id) return reciter;
+    }
+    return null;
+  }
+
+  RecitersQaloun? _findQalounReciter(String id, List<RecitersQaloun> list) {
+    for (final reciter in list) {
+      if (reciter.id == id) return reciter;
+    }
+    return null;
   }
 
   Future<List<RecitersHafs>> loadRecitersHafs() async {
-    String jsonString =
-        await rootBundle.loadString('assets/json/reciters/hafs/surah.json');
-    final Map<String, dynamic> jsonData = json.decode(jsonString);
-    List<dynamic> recitations = jsonData["recitations"];
-    return recitations.map((item) => RecitersHafs.fromMap(item)).toList();
+    final jsonString = await rootBundle.loadString(
+      'assets/json/reciters/hafs/surah.json',
+    );
+    final Map<String, dynamic> jsonData =
+        json.decode(jsonString) as Map<String, dynamic>;
+    final List<dynamic> recitations = jsonData['recitations'] as List<dynamic>;
+    return recitations
+        .map((item) => RecitersHafs.fromMap(item as Map<String, dynamic>))
+        .toList();
   }
 
   Future<List<RecitersQaloun>> loadRecitersQalouin() async {
-    String jsonString =
-        await rootBundle.loadString('assets/json/reciters/qaloun/surah.json');
-    final Map<String, dynamic> jsonData = json.decode(jsonString);
-    List<dynamic> recitations = jsonData["recitations"];
-    return recitations.map((item) => RecitersQaloun.fromMap(item)).toList();
+    final jsonString = await rootBundle.loadString(
+      'assets/json/reciters/qaloun/surah.json',
+    );
+    final Map<String, dynamic> jsonData =
+        json.decode(jsonString) as Map<String, dynamic>;
+    final List<dynamic> recitations = jsonData['recitations'] as List<dynamic>;
+    return recitations
+        .map((item) => RecitersQaloun.fromMap(item as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> loadAllTranslations() async {
-    final list = await loadTranslation(sharedPref.getString("selectedValue"));
-    if (!mounted) return;
-    setState(() {
-      translation = list.first;
-      onOff = translation?.turnOn ?? "تشغيل";
-    });
-  }
-
-  void saveMyAya(int verse, int surah, String surahName) async {
-    await sharedPref.setInt('ayasaved', verse);
-    await sharedPref.setInt('surahsaved', surah);
-    await sharedPref.setString('namesaved', surahName);
-
-    if (!mounted) return;
-
-    String messageText = "تم الحفظ";
-    if (translation != null && translation!.saved.isNotEmpty) {
-      messageText = translation!.saved;
+    try {
+      final list = await loadTranslation(
+        sharedPref.getString("selectedValue") ?? "ar",
+      );
+      if (!mounted) return;
+      setState(() {
+        translation = list.isNotEmpty ? list.first : null;
+        onOff = translation?.turnOn ?? "تشغيل";
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        translation = null;
+        onOff = "تشغيل";
+      });
     }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: CustomSnackBar(text: messageText),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-    );
-    setState(() => highlightedVerse = null);
   }
 
-  void goToSavedVerse() {
-    if (_savedRetry > 10) return;
-
-    if (ayasaved == null || surahsaved != surahNumber) {
+  Future<void> saveMyAya(int verse, int surah, String savedSurahName) async {
+    try {
+      await sharedPref.setInt('ayasaved', verse);
+      await sharedPref.setInt('surahsaved', surah);
+      await sharedPref.setString('namesaved', savedSurahName);
+    } catch (_) {
+      if (!mounted) return;
+      _showGeneralSnackBar("تعذر حفظ الآية، يرجى المحاولة مرة أخرى");
       return;
     }
 
-    Future.delayed(
-      const Duration(milliseconds: 200),
-      () {
-        if (!mounted) return;
+    if (!mounted) return;
+    setState(() {
+      ayasaved = verse;
+      surahsaved = surah;
+      highlightedVerse = null;
+      highlightedWord = null;
+      highlightedWordVerse = null;
+    });
 
-        final ctx = verseContexts[ayasaved!];
-
-        if (ctx != null && ctx.mounted) {
-          // تحديد الآية دائماً
-          setState(() {
-            highlightedVerse = ayasaved;
-          });
-
-          Scrollable.ensureVisible(
-            ctx,
-            duration: const Duration(milliseconds: 400),
-            alignment: 0.15,
-          );
-        } else {
-          _savedRetry++;
-          goToSavedVerse();
-        }
-      },
+    _showGeneralSnackBar(
+      translation != null && translation!.saved.isNotEmpty
+          ? translation!.saved
+          : "تم الحفظ",
     );
   }
 
+  void _showGeneralSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: CustomSnackBar(text: message),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+      );
+  }
+
+  void goToSavedVerse() {
+    if (!mounted || _savedRetry >= 10) return;
+    final savedAyah = ayasaved;
+    if (savedAyah == null || surahsaved != surahNumber) return;
+
+    _savedRetryTimer?.cancel();
+    _savedRetryTimer = Timer(const Duration(milliseconds: 180), () {
+      if (!mounted) return;
+      final ctx = verseContexts[savedAyah];
+      if (ctx != null && ctx.mounted) {
+        setState(() => highlightedVerse = savedAyah);
+        unawaited(Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 400),
+          alignment: 0.15,
+        ));
+      } else {
+        _savedRetry++;
+        goToSavedVerse();
+      }
+    });
+  }
+
   void goToSearchedVerse() {
-    if (_searchRetry > 10) return;
+    final searchedAyah = widget.searchedVerse;
+    if (!mounted || searchedAyah == null || _searchRetry >= 10) return;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final ctx = verseContexts[widget.searchedVerse];
+      final ctx = verseContexts[searchedAyah];
       if (ctx != null && ctx.mounted) {
-        Scrollable.ensureVisible(
+        setState(() {
+          highlightedVerse = searchedAyah;
+          highlightedWord = null;
+          highlightedWordVerse = null;
+        });
+        unawaited(Scrollable.ensureVisible(
           ctx,
           duration: const Duration(milliseconds: 400),
           alignment: 0.3,
-        );
-        setState(() {
-          highlightedVerse = widget.searchedVerse;
-        });
+        ));
       } else {
         _searchRetry++;
-        goToSearchedVerse();
+        _searchRetryTimer?.cancel();
+        _searchRetryTimer = Timer(
+          const Duration(milliseconds: 180),
+          goToSearchedVerse,
+        );
       }
     });
   }
 
   int showTafsir = 0;
+
+  Future<Map<String, String>> _loadTafsirMap(String language) {
+    return _tafsirDataByLanguage.putIfAbsent(language, () async {
+      final response = await rootBundle.loadString(
+        'assets/json/tafsir/$language.json',
+      );
+      final List<dynamic> data = json.decode(response) as List<dynamic>;
+      final map = <String, String>{};
+      for (final item in data) {
+        if (item is! Map<String, dynamic>) continue;
+        final tafsir = Tafsir.fromJson(item);
+        map['${tafsir.surah}:${tafsir.ayah}'] = tafsir.tafsir;
+      }
+      return map;
+    });
+  }
+
   Future<String?> getTafsir(int surah, int ayah) async {
-    final String response = await rootBundle.loadString(
-        'assets/json/tafsir/${sharedPref.getString("selectedValue") ?? "ar"}.json');
-    final List<dynamic> data = json.decode(response);
+    final language = sharedPref.getString("selectedValue") ?? "ar";
     try {
-      return data
-          .map((item) => Tafsir.fromJson(item))
-          .firstWhere((t) => t.surah == surah && t.ayah == ayah)
-          .tafsir;
-    } catch (e) {
+      final map = await _loadTafsirMap(language);
+      return map['$surah:$ayah'];
+    } catch (_) {
       return null;
     }
   }
@@ -529,7 +732,7 @@ class _QuranViewState extends State<QuranView> {
             padding: EdgeInsets.zero,
             children: [
               CustomAppBar(
-                isitplay: isitplay,
+                isitplay: isitplay || _isPreparingMainPlayback,
                 topButton: riwoya == "hafs"
                     ? _buildReciterHafsDropdown()
                     : _buildReciterQalounDropdown(),
@@ -558,22 +761,9 @@ class _QuranViewState extends State<QuranView> {
                       onVerseSelected: (verse) => setState(() {
                         highlightedVerse = verse;
                         highlightedWord = null;
+                        highlightedWordVerse = null;
                       }),
-                      onWordSelected: (wordKey) {
-                        if (wordKey.isEmpty) {
-                          setState(() {
-                            highlightedWord = null;
-                            highlightedWordVerse = null;
-                          });
-                          return;
-                        }
-                        final parts = wordKey.split('-');
-                        setState(() {
-                          highlightedWordVerse = int.parse(parts[0]);
-                          highlightedWord = int.parse(parts[1]);
-                          highlightedVerse = null;
-                        });
-                      },
+                      onWordSelected: _handleWordSelected,
                     )
                   : CustomSurahPage(
                       surahNumber: surahNumber,
@@ -587,22 +777,9 @@ class _QuranViewState extends State<QuranView> {
                       onVerseSelected: (verse) => setState(() {
                         highlightedVerse = verse;
                         highlightedWord = null;
+                        highlightedWordVerse = null;
                       }),
-                      onWordSelected: (wordKey) {
-                        if (wordKey.isEmpty) {
-                          setState(() {
-                            highlightedWord = null;
-                            highlightedWordVerse = null;
-                          });
-                          return;
-                        }
-                        final parts = wordKey.split('-');
-                        setState(() {
-                          highlightedWordVerse = int.parse(parts[0]);
-                          highlightedWord = int.parse(parts[1]);
-                          highlightedVerse = null;
-                        });
-                      },
+                      onWordSelected: _handleWordSelected,
                     ),
               _buildNextSurahButton(),
               const SizedBox(height: 80)
@@ -619,7 +796,7 @@ class _QuranViewState extends State<QuranView> {
                   : _buildQalounBottomActionBars(),
             ),
           ),
-          isitplay && highlightedVerse == null && highlightedWord == null
+          highlightedVerse == null && highlightedWord == null
               ? Positioned(
                   bottom: 12,
                   right: 12,
@@ -647,52 +824,7 @@ class _QuranViewState extends State<QuranView> {
                               ),
                         onPressed: isDownloaded || isDownloading
                             ? null
-                            : () async {
-                                setState(() {
-                                  isDownloading = true;
-                                  downloadProgress = 0;
-                                });
-
-                                final result = riwoya == "hafs"
-                                    ? await _audioService.downloadSurah(
-                                        urlOfReciterHafs,
-                                        surahNumber,
-                                        surahName ?? "",
-                                        idOfReciterHafs.toString(),
-                                        (progress) {
-                                          setState(() {
-                                            downloadProgress = progress;
-                                          });
-                                        },
-                                      )
-                                    : await _audioService2.downloadSurah(
-                                        urlOfReciterQaloun,
-                                        surahNumber,
-                                        surahName ?? "",
-                                        idOfReciterQaloun,
-                                        (progress) {
-                                          setState(() {
-                                            downloadProgress = progress;
-                                          });
-                                        },
-                                      );
-
-                                if (!mounted) return;
-
-                                setState(() {
-                                  isDownloading = false;
-                                  isDownloaded = result != null;
-                                });
-
-                                if (result != null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      backgroundColor: scandColor,
-                                      content: const Icon(Icons.check),
-                                    ),
-                                  );
-                                }
-                              },
+                            : _downloadCurrentSurah,
                       ),
                     ),
                   ),
@@ -708,11 +840,11 @@ class _QuranViewState extends State<QuranView> {
 
           if (highlightedVerse != null)
             CustomCopysaveButton(
-              bottom: 100,
+              bottom: 120,
               icon: Icons.copy,
               onTap: () => copySelectedVerse(),
             ),
-          if (isloading) const CustomLoadingScreen2(),
+          if (isloading) const IgnorePointer(child: CustomLoadingScreen2()),
         ],
       ),
     );
@@ -720,103 +852,129 @@ class _QuranViewState extends State<QuranView> {
 
   Widget _buildReciterHafsDropdown() {
     return Container(
-      width: 100,
+      width: 120,
       decoration: BoxDecoration(
-          color: whiteColor, borderRadius: BorderRadius.circular(12)),
+        color: whiteColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: DropdownButton<RecitersHafs>(
         isExpanded: true,
-        menuWidth: 220,
-        hint: Text(
-            sharedPref.getInt("numOfReciter") != null
-                ? "القارئ ${sharedPref.getInt("numOfReciter")}"
-                : "القارئ",
-            overflow: TextOverflow.ellipsis),
+        menuWidth: 240,
         value: selectedReciterHafs,
+        hint: Text(
+          sharedPref.getInt("numOfReciter") != null
+              ? "القارئ ${sharedPref.getInt("numOfReciter")}"
+              : "القارئ",
+          overflow: TextOverflow.ellipsis,
+        ),
         items: recitersHafs
-            .map((reciter) => DropdownMenuItem(
+            .map((reciter) => DropdownMenuItem<RecitersHafs>(
                   value: reciter,
-                  child: Text(reciter.reciterName,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: const TextStyle(fontSize: 14)),
+                  child: Text(
+                    reciter.reciterName,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(fontSize: 14),
+                  ),
                 ))
             .toList(),
-        onChanged: (value) async {
-          if (value == null) return;
-          selectedReciterHafs = value;
-          sharedPref.setString(
-            "urlOfReciterHafs",
-            value.urlReciter,
-          );
-          sharedPref.setInt(
-            "idOfReciter",
-            value.id,
-          );
-          sharedPref.setInt(
-            "numOfReciter",
-            value.number,
-          );
-          urlOfReciterHafs = value.urlReciter;
-          idOfReciterHafs = value.id;
-
-          _audioService.clearTimingsCache();
-
-          await checkDownloaded();
-          if (!mounted) return;
-
-          setState(() {});
-        },
+        onChanged: recitersHafs.isEmpty
+            ? null
+            : (value) async {
+                if (value == null) return;
+                if (_playbackKind != _PlaybackKind.none ||
+                    _isPreparingMainPlayback) {
+                  await _stopPlayback();
+                }
+                if (!mounted) return;
+                setState(() {
+                  selectedReciterHafs = value;
+                  urlOfReciterHafs = value.urlReciter;
+                  idOfReciterHafs = value.id;
+                  isDownloaded = false;
+                });
+                _audioService.clearTimingsCache();
+                await sharedPref.setString(
+                    "urlOfReciterHafs", value.urlReciter);
+                await sharedPref.setInt("idOfReciter", value.id);
+                await sharedPref.setInt("numOfReciter", value.number);
+                if (mounted) await checkDownloaded();
+              },
       ),
     );
   }
 
   Widget _buildReciterQalounDropdown() {
     return Container(
-      width: 100,
+      width: 120,
       decoration: BoxDecoration(
-          color: whiteColor, borderRadius: BorderRadius.circular(12)),
+        color: whiteColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: DropdownButton<RecitersQaloun>(
         isExpanded: true,
-        menuWidth: 220,
-        hint: Text(
-            sharedPref.getInt("numOfReciterQaloun") != null
-                ? "القارئ ${sharedPref.getInt("numOfReciterQaloun")}"
-                : "القارئ",
-            overflow: TextOverflow.ellipsis),
+        menuWidth: 240,
         value: selectedReciterQaloun,
+        hint: Text(
+          sharedPref.getInt("numOfReciterQaloun") != null
+              ? "القارئ ${sharedPref.getInt("numOfReciterQaloun")}"
+              : "القارئ",
+          overflow: TextOverflow.ellipsis,
+        ),
         items: recitersQaloun
-            .map((reciter) => DropdownMenuItem(
+            .map((reciter) => DropdownMenuItem<RecitersQaloun>(
                   value: reciter,
-                  child: Text(reciter.reciterName,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: const TextStyle(fontSize: 14)),
+                  child: Text(
+                    reciter.reciterName,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(fontSize: 14),
+                  ),
                 ))
             .toList(),
-        onChanged: (value) async {
-          if (value == null) return;
-          selectedReciterQaloun = value;
-          sharedPref.setString(
-            "urlOfReciterQaloun",
-            value.urlReciter,
-          );
-          sharedPref.setString(
-            "idOfReciterQaloun",
-            value.id,
-          );
-          sharedPref.setInt(
-            "numOfReciterQaloun",
-            value.number,
-          );
-          urlOfReciterQaloun = value.urlReciter;
-          idOfReciterQaloun = value.id;
-          await checkDownloaded();
-          if (!mounted) return;
-
-          setState(() {});
-        },
+        onChanged: recitersQaloun.isEmpty
+            ? null
+            : (value) async {
+                if (value == null) return;
+                if (_playbackKind != _PlaybackKind.none ||
+                    _isPreparingMainPlayback) {
+                  await _stopPlayback();
+                }
+                if (!mounted) return;
+                setState(() {
+                  selectedReciterQaloun = value;
+                  urlOfReciterQaloun = value.urlReciter;
+                  idOfReciterQaloun = value.id;
+                  isDownloaded = false;
+                });
+                await sharedPref.setString(
+                    "urlOfReciterQaloun", value.urlReciter);
+                await sharedPref.setString("idOfReciterQaloun", value.id);
+                await sharedPref.setInt("numOfReciterQaloun", value.number);
+                if (mounted) await checkDownloaded();
+              },
       ),
     );
+  }
+
+  void _handleWordSelected(String wordKey) {
+    if (wordKey.isEmpty) {
+      setState(() {
+        highlightedWord = null;
+        highlightedWordVerse = null;
+      });
+      return;
+    }
+    final parts = wordKey.split('-');
+    if (parts.length != 2) return;
+    final verse = int.tryParse(parts[0]);
+    final word = int.tryParse(parts[1]);
+    if (verse == null || word == null || verse < 1 || word < 1) return;
+    setState(() {
+      highlightedWordVerse = verse;
+      highlightedWord = word;
+      highlightedVerse = null;
+    });
   }
 
   Widget _buildNextSurahButton() {
@@ -871,253 +1029,201 @@ class _QuranViewState extends State<QuranView> {
     );
   }
 
-  // 💡 التعديل الجوهري الثالث: إصلاح أزرار التشغيل لتحديث الواجهة فوراً
-  Future<void> _handleMainHafsPlayButton() async {
-    // إيقاف
-    if (isitplay) {
-      _playRequestId++;
-      _cancelLoadingWatchdog();
+  Future<void> _handleMainHafsPlayButton() => _handleMainPlayButton(hafs: true);
 
-      try {
-        await _audioService.player.stop();
-      } catch (_) {}
+  Future<void> _handleMainQalounPlayButton() =>
+      _handleMainPlayButton(hafs: false);
 
-      _resetMainPlaybackUi();
-      return;
-    }
+  Future<void> _handleMainPlayButton({required bool hafs}) async {
+    final requestedRiwoya = hafs ? 'hafs' : 'qaloun';
+    final requestedPlayer = hafs ? _audioService.player : _audioService2.player;
 
-    // فحص الإنترنت
-    final internet = await _checkInternetSafely(
-      _audioService.checkInternet,
-    );
-
-    if (!mounted) return;
-
-    // لا يوجد إنترنت
-    if (internet == false) {
-      _showNoInternetSnackBar();
-      return;
-    }
-
-    // الإنترنت ضعيف أو الفحص استغرق وقتًا طويلًا
-    if (internet == null) {
-      _showWeakInternetSnackBar();
-      return;
-    }
-
-    // عملية تشغيل جديدة
-    final requestId = ++_playRequestId;
-
-    setState(() {
-      isitplay = true;
-      isloading = true;
-      isPlayerPause = false;
-      iconDataPause = Icons.pause;
-      onOff = translation?.turnOff ?? "إيقاف";
-      iconData = Icons.stop;
-      highlightedVerse = null;
-      highlightedWord = null;
-    });
-
-    // لا نستخدم timeout على playSurah نفسه
-    // لأن Future الخاصة به قد تستمر حتى نهاية التلاوة
-    _startLoadingWatchdog(
-      player: _audioService.player,
-      requestId: requestId,
-    );
-
-    unawaited(_runHafsPlayback(requestId));
-  }
-
-  void _handlePauseHafsButton() {
-    if (isPlayerPause) {
-      _audioService.player.play();
-      iconDataPause = Icons.pause;
-    } else {
-      _audioService.player.pause();
-      iconDataPause = Icons.play_arrow;
-    }
-    setState(() => isPlayerPause = !isPlayerPause);
-  }
-
-  Future<void> _handleMainQalounPlayButton() async {
-    // إيقاف
-    if (isitplay) {
-      _playRequestId++;
-      _cancelLoadingWatchdog();
-
-      try {
-        await _audioService2.player.stop();
-      } catch (_) {}
-
-      _resetMainPlaybackUi();
-      return;
-    }
-
-    // فحص الإنترنت
-    final internet = await _checkInternetSafely(
-      _audioService2.checkInternet,
-    );
-
-    if (!mounted) return;
-
-    // لا يوجد إنترنت
-    if (internet == false) {
-      _showNoInternetSnackBar();
-      return;
-    }
-
-    // الإنترنت ضعيف
-    if (internet == null) {
-      _showWeakInternetSnackBar();
+    if (_isPreparingMainPlayback ||
+        (_playbackKind == _PlaybackKind.surah &&
+            _activeRiwoya == requestedRiwoya &&
+            identical(_activePlayer, requestedPlayer))) {
+      await _stopPlayback();
       return;
     }
 
     final requestId = ++_playRequestId;
+    _cancelLoadingWatchdog();
+    _activePlayer = null;
+    _activeRiwoya = null;
+    _playbackKind = _PlaybackKind.none;
+    _isAyahBusy = false;
+    _isWordBusy = false;
+    _isPreparingMainPlayback = true;
 
-    setState(() {
-      isitplay = true;
-      isloading = true;
-      isPlayerPause = false;
-      onOff = translation?.turnOff ?? "إيقاف";
-      iconData = Icons.stop;
-      iconDataPause = Icons.pause;
-      highlightedVerse = null;
-      highlightedWord = null;
-    });
+    if (mounted) {
+      setState(() {
+        isitplay = true;
+        isloading = true;
+        isPlayerPause = false;
+        iconDataPause = Icons.pause_rounded;
+        onOff = translation?.turnOff ?? "إيقاف";
+        iconData = Icons.stop;
+        highlightedVerse = null;
+        highlightedWord = null;
+        highlightedWordVerse = null;
+      });
+    }
 
-    _startLoadingWatchdog(
-      player: _audioService2.player,
-      requestId: requestId,
-    );
+    try {
+      await _stopBothPlayersSafely();
+      if (!mounted || requestId != _playRequestId) return;
 
-    unawaited(_runQalounPlayback(requestId));
+      // تأكد من توفر اسم السورة قبل استخدامه في فحص الملف المحلي.
+      if (surahName == null || surahName!.isEmpty) {
+        await loadSurahName();
+      }
+      if (!mounted || requestId != _playRequestId) return;
+
+      final requestedSurah = surahNumber;
+      final requestedName = surahName ?? '';
+      final requestedUrl = hafs ? urlOfReciterHafs : urlOfReciterQaloun;
+      final requestedHafsId = idOfReciterHafs;
+      final requestedQalounId = idOfReciterQaloun;
+
+      bool localFileAvailable = false;
+      try {
+        localFileAvailable = hafs
+            ? await _audioService.isSurahDownloaded(
+                requestedSurah, requestedHafsId, requestedName)
+            : await _audioService2.isSurahDownloaded(
+                requestedSurah, requestedQalounId, requestedName);
+      } catch (_) {
+        localFileAvailable = false;
+      }
+      if (!mounted || requestId != _playRequestId) return;
+
+      String? requestedLocalPath;
+      if (localFileAvailable) {
+        requestedLocalPath = _localSurahFilePath(
+          hafs: hafs,
+          requestedSurah: requestedSurah,
+          requestedName: requestedName,
+          hafsReciterId: requestedHafsId,
+          qalounReciterId: requestedQalounId,
+        );
+        // لا تعتمد على سجل التنزيل وحده؛ تحقق من وجود الملف نفسه.
+        localFileAvailable = await File(requestedLocalPath).exists();
+      }
+
+      if (!localFileAvailable) {
+        requestedLocalPath = null;
+        final internet = await _checkInternetSafely(
+          hafs ? _audioService.checkInternet : _audioService2.checkInternet,
+        );
+        if (!mounted || requestId != _playRequestId) return;
+        if (internet == false) {
+          _finishPlayback(requestId);
+          _showNoInternetSnackBar();
+          return;
+        }
+        if (internet == null) {
+          _finishPlayback(requestId);
+          _showWeakInternetSnackBar();
+          return;
+        }
+      }
+
+      if (!mounted || requestId != _playRequestId) return;
+      setState(() {
+        _isPreparingMainPlayback = false;
+        _activePlayer = requestedPlayer;
+        _activeRiwoya = requestedRiwoya;
+        _playbackKind = _PlaybackKind.surah;
+        isitplay = true;
+        isloading = true;
+      });
+      _startLoadingWatchdog(player: requestedPlayer, requestId: requestId);
+
+      if (hafs) {
+        unawaited(_runHafsPlayback(
+          requestId,
+          requestedSurah,
+          requestedUrl,
+          requestedLocalPath,
+        ));
+      } else {
+        unawaited(_runQalounPlayback(
+          requestId,
+          requestedSurah,
+          requestedUrl,
+          requestedLocalPath,
+        ));
+      }
+    } catch (_) {
+      if (!mounted || requestId != _playRequestId) return;
+      _finishPlayback(requestId);
+      _showWeakInternetSnackBar();
+    }
   }
 
-  void _handlePauseQalounButton() {
-    if (isPlayerPause) {
-      _audioService2.player.play();
-      iconDataPause = Icons.pause;
-    } else {
-      _audioService2.player.pause();
-      iconDataPause = Icons.play_arrow;
+  Future<void> _handlePauseHafsButton() =>
+      _toggleMainPause(_audioService.player);
+  Future<void> _handlePauseQalounButton() =>
+      _toggleMainPause(_audioService2.player);
+
+  Future<void> _toggleMainPause(AudioPlayer player) async {
+    if (!identical(player, _activePlayer) ||
+        _playbackKind != _PlaybackKind.surah) {
+      return;
     }
-    setState(() => isPlayerPause = !isPlayerPause);
+    final requestId = _playRequestId;
+    try {
+      if (isPlayerPause) {
+        // play() may complete only when playback ends; do not await it in the UI callback.
+        unawaited(_resumePlayer(player, requestId));
+        if (!mounted || requestId != _playRequestId) return;
+        setState(() {
+          isPlayerPause = false;
+          iconDataPause = Icons.pause_rounded;
+        });
+      } else {
+        await player.pause();
+        if (!mounted || requestId != _playRequestId) return;
+        setState(() {
+          isPlayerPause = true;
+          iconDataPause = Icons.play_arrow;
+          isloading = false;
+        });
+        _cancelLoadingWatchdog(requestId: requestId);
+      }
+    } catch (_) {
+      if (!mounted || requestId != _playRequestId) return;
+      _finishPlayback(requestId);
+      _showWeakInternetSnackBar();
+    }
+  }
+
+  Future<void> _resumePlayer(AudioPlayer player, int requestId) async {
+    try {
+      await player.play();
+    } catch (_) {
+      if (!mounted ||
+          requestId != _playRequestId ||
+          !identical(player, _activePlayer)) {
+        return;
+      }
+      _finishPlayback(requestId);
+      _showWeakInternetSnackBar();
+    }
   }
 
   Widget _buildHafsBottomActionBars() {
     if (highlightedVerse != null && highlightedWord == null) {
       return BottomBarAnimation2(
         onIconTap: (index) async {
-          //////////////////////////////////////////////////
-          // تشغيل الآية
-          //////////////////////////////////////////////////
-
           if (index == 0) {
-            isitplay = false;
-            onOff = translation!.turnOn;
-            iconData = Icons.play_arrow;
-            // إيقاف
-            if (isPlayingHafsAyah) {
-              await _audioService.stop();
-
-              setState(() {
-                isPlayingHafsAyah = false;
-
-                positionsOfMusic = null;
-                sizeoficonOfMusic = null;
-              });
-
-              return;
-            }
-
-            //////////////////////////////////////////////////
-            // التوقيتات
-            //////////////////////////////////////////////////
-
-            final internet = await _checkInternetSafely(
-              _audioService.checkInternet,
-            );
-
-            if (!mounted) return;
-
-            if (internet == false) {
-              _showNoInternetSnackBar();
-              return;
-            }
-
-            if (internet == null) {
-              _showWeakInternetSnackBar();
-              return;
-            }
-
-            try {
-              final timings = await _audioService
-                  .fetchAyahTimings(
-                    surahNumber,
-                    idOfReciterHafs,
-                  )
-                  .timeout(_loadingTimeout);
-
-              if (!mounted) return;
-
-              final currentAyahTiming = timings.firstWhere(
-                (t) => t.ayah == highlightedVerse,
-              );
-
-              setState(() {
-                isPlayingHafsAyah = true;
-                positionsOfMusic = -30;
-                sizeoficonOfMusic = 48;
-              });
-
-              await _audioService.playAyah(
-                urlOfReciterHafs,
-                surahNumber,
-                currentAyahTiming,
-              );
-            } on TimeoutException {
-              if (!mounted) return;
-              _showWeakInternetSnackBar();
-
-              setState(() {
-                isPlayingHafsAyah = false;
-                positionsOfMusic = null;
-                sizeoficonOfMusic = null;
-              });
-            } catch (_) {
-              if (!mounted) return;
-              _showWeakInternetSnackBar();
-
-              setState(() {
-                isPlayingHafsAyah = false;
-                positionsOfMusic = null;
-                sizeoficonOfMusic = null;
-              });
-            }
-            highlightedVerse = null;
-          }
-
-          //////////////////////////////////////////////////
-          // حفظ
-          //////////////////////////////////////////////////
-
-          else if (index == 1) {
-            saveMyAya(
-              highlightedVerse!,
-              surahNumber,
-              surahName ?? "",
-            );
-          }
-
-          //////////////////////////////////////////////////
-          // تفسير
-          //////////////////////////////////////////////////
-
-          else if (index == 2) {
-            setState(() {
-              showTafsir = 1;
-            });
+            await _playSelectedAyah(hafs: true);
+          } else if (index == 1) {
+            final verse = highlightedVerse;
+            if (verse != null)
+              await saveMyAya(verse, surahNumber, surahName ?? "");
+          } else if (index == 2) {
+            setState(() => showTafsir = 1);
           }
         },
         icons: const [
@@ -1130,11 +1236,7 @@ class _QuranViewState extends State<QuranView> {
       );
     }
 
-    //////////////////////////////////////////////////////
-    // تشغيل كلمة
-    //////////////////////////////////////////////////////
-
-    else if (highlightedWord != null && highlightedVerse == null) {
+    if (highlightedWord != null && highlightedVerse == null) {
       return Align(
         alignment: Alignment.bottomRight,
         child: Container(
@@ -1144,229 +1246,351 @@ class _QuranViewState extends State<QuranView> {
           decoration: BoxDecoration(
             color: scandColor,
             shape: BoxShape.circle,
-            border: Border.all(
-              color: dilutionScandColor,
-              width: 2,
-            ),
+            border: Border.all(color: dilutionScandColor, width: 2),
           ),
           child: IconButton(
-            icon: Icon(
-              Icons.music_note,
-              size: 36,
-              color: mainColor,
-            ),
-            onPressed: () async {
-              final internet = await _checkInternetSafely(
-                _audioService.checkInternet,
-              );
-
-              if (!mounted) return;
-
-              if (internet == false) {
-                _showNoInternetSnackBar();
-                return;
-              }
-
-              if (internet == null) {
-                _showWeakInternetSnackBar();
-                return;
-              }
-
-              isitplay = false;
-              onOff = translation?.turnOn ?? "تشغيل";
-              iconData = Icons.play_arrow;
-
-              await _audioService.playWord(
-                surahNumber,
-                highlightedWordVerse!,
-                highlightedWord!,
-              );
-            },
+            icon: Icon(Icons.music_note, size: 36, color: mainColor),
+            onPressed: _playSelectedWord,
           ),
         ),
       );
     }
-
-    return const SizedBox();
+    return const SizedBox.shrink();
   }
 
   Widget _buildQalounBottomActionBars() {
-    if (highlightedVerse != null && highlightedWord == null) {
-      return Padding(
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).size.height - 75,
-        ),
-        child: BottomBarAnimation2(
-          onIconTap: (index) async {
-            //////////////////////////////////////////////////
-            // تشغيل الآية
-            //////////////////////////////////////////////////
+    if (highlightedVerse == null || highlightedWord != null) {
+      return const SizedBox.shrink();
+    }
+    return BottomBarAnimation2(
+      onIconTap: (index) async {
+        if (index == 0) {
+          await _playSelectedAyah(hafs: false);
+        } else if (index == 1) {
+          final verse = highlightedVerse;
+          if (verse != null)
+            await saveMyAya(verse, surahNumber, surahName ?? "");
+        } else if (index == 2) {
+          setState(() => showTafsir = 1);
+        }
+      },
+      icons: const [
+        Icons.music_note,
+        Icons.bookmark_outlined,
+        Icons.format_align_right,
+      ],
+      positionsOfMusic: positionsOfMusic,
+      sizeoficonOfMusic: sizeoficonOfMusic,
+    );
+  }
 
-            if (index == 0) {
-              isitplay = false;
-              onOff = translation!.turnOn;
-              iconData = Icons.play_arrow;
-              // إيقاف
-              if (isPlayingQalounAyah) {
-                await _audioService2.stop();
+  Future<void> _playSelectedAyah({required bool hafs}) async {
+    final selectedVerse = highlightedVerse;
+    if (selectedVerse == null) return;
 
-                setState(() {
-                  isPlayingQalounAyah = false;
-
-                  positionsOfMusic = null;
-                  sizeoficonOfMusic = null;
-                });
-
-                return;
-              }
-
-              //////////////////////////////////////////////////
-              // التحقق من الإنترنت
-              //////////////////////////////////////////////////
-
-              final internet = await _checkInternetSafely(
-                _audioService2.checkInternet,
-              );
-
-              if (!mounted) return;
-
-              if (internet == false) {
-                _showNoInternetSnackBar();
-                return;
-              }
-
-              if (internet == null) {
-                _showWeakInternetSnackBar();
-                return;
-              }
-
-              //////////////////////////////////////////////////
-              // التوقيتات
-              //////////////////////////////////////////////////
-
-              try {
-                final timings = await _audioService2
-                    .fetchAyahTimings(
-                      surahNumber,
-                    )
-                    .timeout(_loadingTimeout);
-
-                if (!mounted) return;
-
-                final currentAyahTiming = timings.firstWhere(
-                  (t) => t.ayah == highlightedVerse,
-                );
-
-                //////////////////////////////////////////////////
-                // تشغيل
-                //////////////////////////////////////////////////
-
-                setState(() {
-                  isPlayingQalounAyah = true;
-
-                  positionsOfMusic = -30;
-                  sizeoficonOfMusic = 48;
-                });
-
-                await _audioService2.playAyah(
-                  surahNumber,
-                  currentAyahTiming,
-                );
-              } on TimeoutException {
-                if (!mounted) return;
-                _showWeakInternetSnackBar();
-
-                setState(() {
-                  isPlayingQalounAyah = false;
-                  positionsOfMusic = null;
-                  sizeoficonOfMusic = null;
-                });
-              } catch (_) {
-                if (!mounted) return;
-                setState(() {
-                  isPlayingQalounAyah = false;
-                  positionsOfMusic = null;
-                  sizeoficonOfMusic = null;
-                });
-
-                _showWeakInternetSnackBar();
-              }
-
-              highlightedVerse = null;
-            }
-
-            //////////////////////////////////////////////////
-            // حفظ
-            //////////////////////////////////////////////////
-
-            else if (index == 1) {
-              saveMyAya(
-                highlightedVerse!,
-                surahNumber,
-                surahName ?? "",
-              );
-            }
-
-            //////////////////////////////////////////////////
-            // تفسير
-            //////////////////////////////////////////////////
-
-            else if (index == 2) {
-              setState(() {
-                showTafsir = 1;
-              });
-            }
-          },
-          icons: const [
-            Icons.music_note,
-            Icons.bookmark_outlined,
-            Icons.format_align_right,
-          ],
-          positionsOfMusic: positionsOfMusic,
-          sizeoficonOfMusic: sizeoficonOfMusic,
-        ),
-      );
+    final player = hafs ? _audioService.player : _audioService2.player;
+    final selectedRiwoya = hafs ? 'hafs' : 'qaloun';
+    if (_playbackKind == _PlaybackKind.ayah &&
+        identical(player, _activePlayer) &&
+        _activeRiwoya == selectedRiwoya) {
+      await _stopPlayback();
+      return;
+    }
+    if (_isAyahBusy) {
+      await _stopPlayback();
+      return;
     }
 
-    return const SizedBox();
+    _isAyahBusy = true;
+    final requestId = ++_playRequestId;
+    _cancelLoadingWatchdog();
+    _activePlayer = null;
+    _activeRiwoya = null;
+    _playbackKind = _PlaybackKind.none;
+    _isPreparingMainPlayback = false;
+    _isWordBusy = false;
+    if (mounted) {
+      setState(() {
+        isitplay = false;
+        isloading = true;
+        isPlayerPause = false;
+        iconData = Icons.play_arrow;
+        onOff = translation?.turnOn ?? "تشغيل";
+        positionsOfMusic = -30;
+        sizeoficonOfMusic = 48;
+      });
+    }
+
+    try {
+      await _stopBothPlayersSafely();
+      if (!mounted || requestId != _playRequestId) return;
+
+      final internet = await _checkInternetSafely(
+        hafs ? _audioService.checkInternet : _audioService2.checkInternet,
+      );
+      if (!mounted || requestId != _playRequestId) return;
+      if (internet == false) {
+        _finishPlayback(requestId);
+        _showNoInternetSnackBar();
+        return;
+      }
+      if (internet == null) {
+        _finishPlayback(requestId);
+        _showWeakInternetSnackBar();
+        return;
+      }
+
+      if (hafs) {
+        final timings = await _audioService
+            .fetchAyahTimings(surahNumber, idOfReciterHafs)
+            .timeout(_loadingTimeout);
+        if (!mounted || requestId != _playRequestId) return;
+        final matchingTimings =
+            timings.where((item) => item.ayah == selectedVerse);
+        if (matchingTimings.isEmpty) {
+          throw StateError('No timing found for selected ayah.');
+        }
+        final timing = matchingTimings.first;
+        setState(() {
+          _activePlayer = player;
+          _activeRiwoya = selectedRiwoya;
+          _playbackKind = _PlaybackKind.ayah;
+          isloading = true;
+          isPlayingHafsAyah = true;
+          positionsOfMusic = -30;
+          sizeoficonOfMusic = 48;
+        });
+        _startLoadingWatchdog(player: player, requestId: requestId);
+        await _audioService.playAyah(urlOfReciterHafs, surahNumber, timing);
+      } else {
+        final timings = await _audioService2
+            .fetchAyahTimings(surahNumber)
+            .timeout(_loadingTimeout);
+        if (!mounted || requestId != _playRequestId) return;
+        final matchingTimings =
+            timings.where((item) => item.ayah == selectedVerse);
+        if (matchingTimings.isEmpty) {
+          throw StateError('No timing found for selected ayah.');
+        }
+        final timing = matchingTimings.first;
+        setState(() {
+          _activePlayer = player;
+          _activeRiwoya = selectedRiwoya;
+          _playbackKind = _PlaybackKind.ayah;
+          isloading = true;
+          isPlayingQalounAyah = true;
+          positionsOfMusic = -30;
+          sizeoficonOfMusic = 48;
+        });
+        _startLoadingWatchdog(player: player, requestId: requestId);
+        await _audioService2.playAyah(surahNumber, timing);
+      }
+
+      // خدمة حفص قد تعود بعد بدء الصوت لا بعد انتهائه؛ اكتمال المشغل
+      // نفسه هو المصدر الموثوق لإعادة ضبط الحالة في هذا الفرع.
+      if (!hafs && mounted && requestId == _playRequestId) {
+        _finishPlayback(requestId);
+      }
+    } on TimeoutException {
+      if (!mounted || requestId != _playRequestId) return;
+      _finishPlayback(requestId);
+      _showWeakInternetSnackBar();
+    } catch (_) {
+      if (!mounted || requestId != _playRequestId) return;
+      _finishPlayback(requestId);
+      _showWeakInternetSnackBar();
+    } finally {
+      if (requestId == _playRequestId) _isAyahBusy = false;
+    }
+  }
+
+  Future<void> _playSelectedWord() async {
+    final verse = highlightedWordVerse;
+    final word = highlightedWord;
+    if (verse == null || word == null) return;
+    if (_isWordBusy) {
+      await _stopPlayback();
+      return;
+    }
+
+    _isWordBusy = true;
+    final requestId = ++_playRequestId;
+    _cancelLoadingWatchdog();
+    _activePlayer = null;
+    _activeRiwoya = null;
+    _playbackKind = _PlaybackKind.none;
+    _isPreparingMainPlayback = false;
+    _isAyahBusy = false;
+    if (mounted) setState(() => isloading = true);
+
+    try {
+      await _stopBothPlayersSafely();
+      if (!mounted || requestId != _playRequestId) return;
+      final internet = await _checkInternetSafely(_audioService.checkInternet);
+      if (!mounted || requestId != _playRequestId) return;
+      if (internet == false) {
+        _finishPlayback(requestId);
+        _showNoInternetSnackBar();
+        return;
+      }
+      if (internet == null) {
+        _finishPlayback(requestId);
+        _showWeakInternetSnackBar();
+        return;
+      }
+
+      setState(() {
+        _activePlayer = _audioService.player;
+        _activeRiwoya = 'hafs';
+        _playbackKind = _PlaybackKind.word;
+        isitplay = false;
+        isloading = true;
+      });
+      // لا تبدأ مؤقت التحميل هنا؛ خدمة تشغيل الكلمة قد تحتاج إلى جلب بيانات
+      // أولية قبل أن يظهر حدث loading من المشغل. عند بدء تحميل المشغل نفسه،
+      // سيبدأ المستمع مؤقت الحماية تلقائيًا.
+      await _audioService.playWord(surahNumber, verse, word);
+      if (mounted && requestId == _playRequestId) _finishPlayback(requestId);
+    } on TimeoutException {
+      if (!mounted || requestId != _playRequestId) return;
+      _finishPlayback(requestId);
+      _showWeakInternetSnackBar();
+    } catch (_) {
+      if (!mounted || requestId != _playRequestId) return;
+      _finishPlayback(requestId);
+      _showWeakInternetSnackBar();
+    } finally {
+      if (requestId == _playRequestId) _isWordBusy = false;
+    }
+  }
+
+  Future<void> _downloadCurrentSurah() async {
+    if (isDownloading || isDownloaded) return;
+    if (surahName == null || surahName!.isEmpty) {
+      _showGeneralSnackBar("تعذر تحديد اسم السورة، حاول مرة أخرى");
+      return;
+    }
+
+    final requestedRiwoya = riwoya;
+    final requestedSurah = surahNumber;
+    final requestedName = surahName!;
+    final requestedHafsId = idOfReciterHafs;
+    final requestedQalounId = idOfReciterQaloun;
+    final requestedHafsUrl = urlOfReciterHafs;
+    final requestedQalounUrl = urlOfReciterQaloun;
+
+    setState(() {
+      isDownloading = true;
+      downloadProgress = 0;
+    });
+
+    Object? result;
+    try {
+      if (requestedRiwoya == 'hafs') {
+        result = await _audioService.downloadSurah(
+          requestedHafsUrl,
+          requestedSurah,
+          requestedName,
+          requestedHafsId.toString(),
+          (progress) {
+            if (mounted &&
+                requestedRiwoya == riwoya &&
+                requestedSurah == surahNumber &&
+                requestedHafsId == idOfReciterHafs) {
+              setState(
+                  () => downloadProgress = progress.clamp(0.0, 1.0).toDouble());
+            }
+          },
+        );
+      } else {
+        result = await _audioService2.downloadSurah(
+          requestedQalounUrl,
+          requestedSurah,
+          requestedName,
+          requestedQalounId,
+          (progress) {
+            if (mounted &&
+                requestedRiwoya == riwoya &&
+                requestedSurah == surahNumber &&
+                requestedQalounId == idOfReciterQaloun) {
+              setState(
+                  () => downloadProgress = progress.clamp(0.0, 1.0).toDouble());
+            }
+          },
+        );
+      }
+    } catch (_) {
+      if (mounted)
+        _showGeneralSnackBar("تعذر تنزيل السورة، تحقق من الاتصال وحاول مجددًا");
+    } finally {
+      if (mounted &&
+          requestedRiwoya == riwoya &&
+          requestedSurah == surahNumber &&
+          (requestedRiwoya == 'hafs'
+              ? requestedHafsId == idOfReciterHafs
+              : requestedQalounId == idOfReciterQaloun)) {
+        setState(() {
+          isDownloading = false;
+          isDownloaded = result != null;
+          if (result != null) downloadProgress = 1;
+        });
+        if (result != null) {
+          _showGeneralSnackBar("تم تنزيل السورة بنجاح");
+        }
+      } else if (mounted) {
+        setState(() => isDownloading = false);
+      }
+    }
   }
 
   Widget _buildTafsirOverlay() {
-    if (showTafsir == 0 || highlightedVerse == null) return const SizedBox();
+    final verse = highlightedVerse;
+    if (showTafsir == 0 || verse == null) return const SizedBox.shrink();
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(22.0),
+        padding: const EdgeInsets.all(22),
         child: Stack(
           children: [
             Container(
               height: MediaQuery.of(context).size.height * 0.6,
               decoration: BoxDecoration(
-                  color: whiteColor,
-                  border: Border.all(color: blackColor),
-                  borderRadius: BorderRadius.circular(20)),
+                color: whiteColor,
+                border: Border.all(color: blackColor),
+                borderRadius: BorderRadius.circular(20),
+              ),
               padding: const EdgeInsets.all(22),
               child: FutureBuilder<String?>(
-                future: getTafsir(surahNumber, highlightedVerse!),
+                future: getTafsir(surahNumber, verse),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CustomLoadingScreen2();
+                    return const Center(child: CustomLoadingScreen2());
                   }
+                  final tafsirText = snapshot.data;
                   return SingleChildScrollView(
-                      child: Text(snapshot.data ?? "لا يوجد تفسير",
-                          style: TextStyle(
-                              fontSize: quranfontSize, fontFamily: 'Amiri'),
-                          textAlign: TextAlign.center));
+                    child: Text(
+                      snapshot.hasError ||
+                              tafsirText == null ||
+                              tafsirText.isEmpty
+                          ? "لا يوجد تفسير"
+                          : tafsirText,
+                      style: TextStyle(
+                        fontSize: quranfontSize,
+                        fontFamily: 'Amiri',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  );
                 },
               ),
             ),
             Positioned(
-                right: 0,
-                child: IconButton(
-                    icon: const Icon(Icons.close, size: 38),
-                    onPressed: () => setState(() {
-                          showTafsir = 0;
-                          highlightedVerse = null;
-                        })))
+              right: 0,
+              child: IconButton(
+                icon: const Icon(Icons.close, size: 38),
+                onPressed: () => setState(() => showTafsir = 0),
+              ),
+            ),
           ],
         ),
       ),
@@ -1374,19 +1598,12 @@ class _QuranViewState extends State<QuranView> {
   }
 
   void _showNoInternetSnackBar() {
-    setState(() {
-      highlightedWord = null;
-      highlightedWordVerse = null;
-    });
     if (!mounted) return;
-
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: const CustomSnackBar(
-            text: "الإنترنت غير متوفر",
-          ),
+          content: const CustomSnackBar(text: "الإنترنت غير متوفر"),
           backgroundColor: Colors.transparent,
           elevation: 0,
           padding: EdgeInsets.only(
@@ -1397,18 +1614,13 @@ class _QuranViewState extends State<QuranView> {
   }
 
   void _showWeakInternetSnackBar() {
-    setState(() {
-      highlightedWord = null;
-      highlightedWordVerse = null;
-    });
     if (!mounted) return;
-
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
           content: const CustomSnackBar(
-            text: "الإنترنت ضعيف، يرجى المحاولة مرة أخرى",
+            text: "تعذر تشغيل الصوت أو أن الاتصال بطيء، حاول مرة أخرى",
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -1420,35 +1632,38 @@ class _QuranViewState extends State<QuranView> {
   }
 
   Future<void> copySelectedVerse() async {
-    if (highlightedVerse == null) return;
+    final requestedVerse = highlightedVerse;
+    if (requestedVerse == null) return;
+    final requestedSurah = surahNumber;
+    final requestedRiwoya = riwoya;
 
-    final jsonString = await rootBundle.loadString(
-      'assets/json/quran/$riwoya/surahs/$surahNumber.json',
-    );
+    try {
+      final jsonString = await rootBundle.loadString(
+        'assets/json/quran/$requestedRiwoya/surahs/$requestedSurah.json',
+      );
+      final List<dynamic> data = json.decode(jsonString) as List<dynamic>;
+      Map<String, dynamic>? verseData;
+      for (final item in data) {
+        if (item is Map && item['verse_number'] == requestedVerse) {
+          verseData = Map<String, dynamic>.from(item);
+          break;
+        }
+      }
+      if (verseData == null || verseData['content'] is! String) {
+        if (mounted) _showGeneralSnackBar("تعذر العثور على نص الآية");
+        return;
+      }
 
-    final List<dynamic> data = json.decode(jsonString);
-
-    final verse = data.firstWhere(
-      (e) => e["verse_number"] == highlightedVerse,
-    );
-
-    final String text = verse["content"];
-
-    await Clipboard.setData(
-      ClipboardData(text: text),
-    );
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: CustomSnackBar(
-            text: translation != null && translation!.copy.isNotEmpty
-                ? translation!.copy
-                : "تم نسخ الآية"),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-    );
+      await Clipboard.setData(
+          ClipboardData(text: verseData['content'] as String));
+      if (!mounted) return;
+      _showGeneralSnackBar(
+        translation != null && translation!.copy.isNotEmpty
+            ? translation!.copy
+            : "تم نسخ الآية",
+      );
+    } catch (_) {
+      if (mounted) _showGeneralSnackBar("تعذر نسخ الآية، حاول مرة أخرى");
+    }
   }
 }

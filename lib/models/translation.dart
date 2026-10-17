@@ -127,6 +127,11 @@ class Translation {
   final String developerSupportDescription;
   final String developerSupportHint;
   final String contactViaTelegram;
+  final String contactViaWhatsApp;
+  final String contactViaEmail;
+  final String contactLaunchError;
+  final String contactWhatsAppUsernameMissing;
+  final String contactEmailSubject;
 
   final String copy;
 
@@ -243,6 +248,11 @@ class Translation {
     required this.developerSupportDescription,
     required this.developerSupportHint,
     required this.contactViaTelegram,
+    this.contactViaWhatsApp = 'Contact via WhatsApp',
+    this.contactViaEmail = 'Contact via Email',
+    this.contactLaunchError = 'Could not open the link or app. Please try again.',
+    this.contactWhatsAppUsernameMissing = 'WhatsApp username is not configured.',
+    this.contactEmailSubject = 'Contact about the Risala app',
     required this.copy,
     required this.hadithLangMessage,
     required this.tutorialHadith,
@@ -375,6 +385,11 @@ class Translation {
       developerSupportDescription: data["developerSupportDescription"] ?? "",
       developerSupportHint: data["developerSupportHint"] ?? "",
       contactViaTelegram: data["contactViaTelegram"] ?? "",
+      contactViaWhatsApp: data["contactViaWhatsApp"] ?? "Contact via WhatsApp",
+      contactViaEmail: data["contactViaEmail"] ?? "Contact via Email",
+      contactLaunchError: data["contactLaunchError"] ?? "Could not open the link or app. Please try again.",
+      contactWhatsAppUsernameMissing: data["contactWhatsAppUsernameMissing"] ?? "WhatsApp username is not configured.",
+      contactEmailSubject: data["contactEmailSubject"] ?? "Contact about the Risala app",
 
       copy: data["copy"] ?? "",
       hadithLangMessage: data["hadithLangMessage"] ?? "",

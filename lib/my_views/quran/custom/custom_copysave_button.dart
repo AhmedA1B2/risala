@@ -22,7 +22,7 @@ class CustomCopysaveButton extends StatelessWidget {
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: scandColor,
-              border: Border.all(color: mainColor, width: 2),
+              border: Border.all(color: blackColor, width: 1),
               shape: BoxShape.circle,
             ),
             child: Icon(

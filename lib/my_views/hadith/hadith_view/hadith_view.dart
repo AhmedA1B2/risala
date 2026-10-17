@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_dialogue/custom_dialogue_2.dart';
 import 'package:risala/main.dart';
+import 'package:risala/menu/views/contact_developer_page.dart';
 import 'package:risala/models/translation.dart';
 import 'package:risala/my_views/hadith/custom/custom_chapter_list.dart';
 import 'package:risala/translation/translation.dart';
@@ -70,7 +71,10 @@ class _HadithViewState extends State<HadithView> {
   }
 
   void contactDeveloper() {
-    // أضف هنا إجراء فتح صفحة التواصل أو رابط الدعم.
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ContactDeveloperPage()),
+    );
   }
 
   @override
