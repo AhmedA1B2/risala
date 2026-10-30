@@ -509,10 +509,10 @@ class _QuranViewState extends State<QuranView> {
         if (surahData == null) {
           surahName = '';
         } else if (language == 'ar') {
-          surahName = (surahData!['name'] as String?) ?? '';
+          surahName = (surahData['name'] as String?) ?? '';
         } else {
-          surahName = (surahData!['englishName'] as String?) ??
-              (surahData!['name'] as String?) ??
+          surahName = (surahData['englishName'] as String?) ??
+              (surahData['name'] as String?) ??
               '';
         }
       });

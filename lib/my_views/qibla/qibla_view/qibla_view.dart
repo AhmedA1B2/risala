@@ -28,8 +28,6 @@ class _QiblaViewState extends State<QiblaView> {
   static const String _locationNameKey = 'qibla_last_location_name';
 
   double? _cachedQibla;
-  double? _lastLatitude;
-  double? _lastLongitude;
 
   bool _isLoading = true;
   bool _isSupported = true;
@@ -75,8 +73,6 @@ class _QiblaViewState extends State<QiblaView> {
       return;
     }
 
-    _lastLatitude = latitude;
-    _lastLongitude = longitude;
     _cachedQibla = _calculateQiblaBearing(latitude, longitude);
     _lastLocationName =
         sharedPref.getString(_locationNameKey)?.trim().isNotEmpty == true
@@ -256,8 +252,6 @@ class _QiblaViewState extends State<QiblaView> {
 
     final int lookupGeneration = ++_locationLookupGeneration;
 
-    _lastLatitude = latitude;
-    _lastLongitude = longitude;
     _cachedQibla = _calculateQiblaBearing(latitude, longitude);
     _isUsingSavedLocation = false;
     _lastLocationName = _coordinatesLocationText;
