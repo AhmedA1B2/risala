@@ -49,15 +49,14 @@ class _CustomNotificationState extends State<CustomNotification> {
 //
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        showAddNotificationView == true
-            ? const AddCustomNotification()
-            : Stack(
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.7,
-                    child: ListView.builder(
+    return SafeArea(
+      child: Stack(
+        children: [
+          showAddNotificationView == true
+              ? const AddCustomNotification()
+              : Stack(
+                  children: [
+                    ListView.builder(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 22, vertical: 40),
                       itemCount: savedList.length,
@@ -138,69 +137,69 @@ class _CustomNotificationState extends State<CustomNotification> {
                         );
                       },
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsetsGeometry.all(20),
-                    child: CustomButtonIcon(
-                      iconData: Icons.delete_sweep_sharp,
-                      iconColor: Colors.red,
-                      onPressed: () async {
-                        await NotificationService.instance
-                            .cancelAllNotifications();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const MainView()),
-                        );
-                        setState(() {});
-                      },
+                    Padding(
+                      padding: const EdgeInsetsGeometry.all(20),
+                      child: CustomButtonIcon(
+                        iconData: Icons.delete_sweep_sharp,
+                        iconColor: Colors.red,
+                        onPressed: () async {
+                          await NotificationService.instance
+                              .cancelAllNotifications();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const MainView()),
+                          );
+                          setState(() {});
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            bottom: MediaQuery.of(context).size.height * 0.12,
+            right: showAddNotificationView == true
+                ? MediaQuery.of(context).size.width - 150
+                : 50,
+            left: showAddNotificationView == true
+                ? 50
+                : MediaQuery.of(context).size.width - 150,
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: scandColor,
+                border: Border.all(color: dilutionScandColor, width: 2),
+                shape: BoxShape.circle,
               ),
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          bottom: MediaQuery.of(context).size.height * 0.12,
-          right: showAddNotificationView == true
-              ? MediaQuery.of(context).size.width - 150
-              : 50,
-          left: showAddNotificationView == true
-              ? 50
-              : MediaQuery.of(context).size.width - 150,
-          child: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: scandColor,
-              border: Border.all(color: dilutionScandColor, width: 2),
-              shape: BoxShape.circle,
+              child: showAddNotificationView == true
+                  ? TextButton(
+                      onPressed: () {
+                        setState(() {
+                          showAddNotificationView = false;
+                        });
+                      },
+                      child: const Icon(
+                        Icons.cancel,
+                        size: 36,
+                        color: whiteColor,
+                      ))
+                  : TextButton(
+                      onPressed: () {
+                        setState(() {
+                          showAddNotificationView = true;
+                        });
+                      },
+                      child: const Icon(
+                        Icons.add_alert,
+                        size: 36,
+                        color: whiteColor,
+                      )),
             ),
-            child: showAddNotificationView == true
-                ? TextButton(
-                    onPressed: () {
-                      setState(() {
-                        showAddNotificationView = false;
-                      });
-                    },
-                    child: const Icon(
-                      Icons.cancel,
-                      size: 36,
-                      color: whiteColor,
-                    ))
-                : TextButton(
-                    onPressed: () {
-                      setState(() {
-                        showAddNotificationView = true;
-                      });
-                    },
-                    child: const Icon(
-                      Icons.add_alert,
-                      size: 36,
-                      color: whiteColor,
-                    )),
-          ),
-        )
-      ],
+          )
+        ],
+      ),
     );
   }
 }

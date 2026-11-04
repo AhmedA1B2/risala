@@ -185,84 +185,67 @@ class _CustomChapterListState extends State<CustomChapterList> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: MediaQuery.of(context).size.height * 0.8,
-      child: Stack(
-        children: [
-          FutureBuilder<_ChapterListData>(
-            future: chaptersFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CustomLoadingScreen2();
-              }
+      child: FutureBuilder<_ChapterListData>(
+        future: chaptersFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CustomLoadingScreen2();
+          }
 
-              if (snapshot.hasError) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      selectedLanguage == 'ar'
-                          ? 'حدث خطأ أثناء تحميل البيانات:\n'
-                              '${snapshot.error}'
-                          : 'Error loading data:\n'
-                              '${snapshot.error}',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                );
-              }
-
-              if (!snapshot.hasData) {
-                return Center(
-                  child: Text(
-                    selectedLanguage == 'ar'
-                        ? 'تعذر تحميل بيانات الكتاب.'
-                        : 'Unable to load book data.',
-                  ),
-                );
-              }
-
-              final data = snapshot.data!;
-
-              if (data.chapters.isEmpty) {
-                return Center(
-                  child: Text(
-                    selectedLanguage == 'ar'
-                        ? 'لا توجد أبواب لعرضها.'
-                        : 'No chapters available.',
-                  ),
-                );
-              }
-
-              return Directionality(
-                textDirection: selectedLanguage == 'ar'
-                    ? TextDirection.rtl
-                    : TextDirection.ltr,
-                child: Column(
-                  children: [
-                    buildLanguageSelector(),
-                    Expanded(
-                      child: sizeOfTextBar == 1
-                          ? buildListView(data)
-                          : buildGridView(data),
-                    ),
-                  ],
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  selectedLanguage == 'ar'
+                      ? 'حدث خطأ أثناء تحميل البيانات:\n'
+                          '${snapshot.error}'
+                      : 'Error loading data:\n'
+                          '${snapshot.error}',
+                  textAlign: TextAlign.center,
                 ),
-              );
-            },
-          ),
-
-          // زر العلامة المرجعية.
-          Positioned(
-            bottom: MediaQuery.of(context).size.height * 0.15,
-            right: 20,
-            child: Card(
-              elevation: 1,
-              color: scandColor,
-              child: CustomIconButtonBookmark(
-                onPressed: widget.onPressedCustomIconButtonBookmark,
               ),
+            );
+          }
+
+          if (!snapshot.hasData) {
+            return Center(
+              child: Text(
+                selectedLanguage == 'ar'
+                    ? 'تعذر تحميل بيانات الكتاب.'
+                    : 'Unable to load book data.',
+              ),
+            );
+          }
+
+          final data = snapshot.data!;
+
+          if (data.chapters.isEmpty) {
+            return Center(
+              child: Text(
+                selectedLanguage == 'ar'
+                    ? 'لا توجد أبواب لعرضها.'
+                    : 'No chapters available.',
+              ),
+            );
+          }
+
+          return Directionality(
+            textDirection: selectedLanguage == 'ar'
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+            child: Column(
+              children: [
+                buildLanguageSelector(),
+                Expanded(
+                  child: sizeOfTextBar == 1
+                      ? buildListView(data)
+                      : buildGridView(data),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -274,38 +257,41 @@ class _CustomChapterListState extends State<CustomChapterList> {
   Widget buildLanguageSelector() {
     final isArabic = selectedLanguage == 'ar';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 6,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              isArabic ? 'لغة العرض' : 'Display language',
-              style: Theme.of(context).textTheme.titleSmall,
+    return Card(
+      color: mainColor,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 6,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                isArabic ? 'لغة العرض' : 'Display language',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
             ),
-          ),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: selectedLanguage,
-              isDense: true,
-              borderRadius: BorderRadius.circular(12),
-              items: const [
-                DropdownMenuItem(
-                  value: 'ar',
-                  child: Text('العربية'),
-                ),
-                DropdownMenuItem(
-                  value: 'en',
-                  child: Text('English'),
-                ),
-              ],
-              onChanged: changeLanguage,
+            DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: selectedLanguage,
+                isDense: true,
+                borderRadius: BorderRadius.circular(12),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'ar',
+                    child: Text('العربية'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'en',
+                    child: Text('English'),
+                  ),
+                ],
+                onChanged: changeLanguage,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

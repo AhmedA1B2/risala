@@ -7,7 +7,8 @@ class IconBarItme extends StatefulWidget {
       required this.iconbar,
       this.isonpress,
       this.onPressed,
-      required this.size, required this.isitTheme});
+      required this.size,
+      required this.isitTheme});
 
   final IconData iconbar;
   final Widget? isonpress;
@@ -42,9 +43,6 @@ class _IconBarItmeState extends State<IconBarItme> {
                   : Icon(
                       widget.iconbar,
                       size: widget.size * 1.06,
-                      shadows: const [
-                        Shadow(blurRadius: 5),
-                      ],
                       color: blackColor,
                     ),
               Icon(

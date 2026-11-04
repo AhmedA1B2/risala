@@ -67,40 +67,50 @@ class Translation {
   final String thursday;
   final String friday;
 
-  // الإشعارات والكل
+  // الإشعارات والوقت
   final String all;
   final String addNotificationTitle;
   final String addNotificationBody;
-
-  // حقول الوقت والتواريخ
   final String chooseTime;
   final String time;
   final String days;
 
-  // البوصلة والمظهر
+  // المظهر
   final String appearance;
   final String changeAppearance;
-  final String previewAppearance; // تم التعديل
-  final String glassEffect; // تم التعديل
-  final String chooseColor; // تم التعديل
-  final String morning; // تم التعديل
-  final String evening; // تم التعديل
-  final String prayerTime; // تم التعديل
-  final String sleep; // تم التعديل
-  final String tasbihAndDhikr; // تم التعديل
-  final String wakingUp; // تم التعديل
-  final String adhan; // تم التعديل
-  final String mosque; // تم التعديل
-  final String ablution; // تم التعديل
-  final String homePlace; // تم التعديل
-  final String restroom; // تم التعديل
-  final String food; // تم التعديل
-  final String locationAccessRequired; // تم التعديل
-  final String permissionDeniedSettings; // تم التعديل
-  final String permissionDeniedAppSettings; // تم التعديل
-  final String compassNotSupported; // تم التعديل
-  final String enableLocationService; // تم التعديل
+  final String previewAppearance;
+  final String glassEffect;
+  final String chooseColor;
+  final String morning;
+  final String evening;
+  final String prayerTime;
+  final String sleep;
+  final String tasbihAndDhikr;
+  final String wakingUp;
+  final String adhan;
+  final String mosque;
+  final String ablution;
+  final String homePlace;
+  final String restroom;
+  final String food;
+  final String locationAccessRequired;
+  final String permissionDeniedSettings;
+  final String permissionDeniedAppSettings;
+  final String compassNotSupported;
+  final String enableLocationService;
 
+  // نافذة التعريف بالثيمات الجديدة
+  final String themeDialogTitle;
+  final String themeDialogSubtitle;
+  final String themeDialogDescription;
+  final String themeGoldName;
+  final String themeNightSkyName;
+  final String themeMinecraftNightName;
+  final String themeOceanRainName;
+  final String later;
+  final String applyTheme;
+
+  // الستريك والقرآن
   final String dailyStreak;
   final String dailyStreakDescription;
   final String daysLabel;
@@ -116,12 +126,13 @@ class Translation {
   final String openLocationSettings;
   final String retry;
 
-  // نصوص البوصلة الجديدة (تُقرأ من ملف الترجمات JSON)
+  // نصوص البوصلة الجديدة
   final String qiblaSavedLocation;
   final String qiblaCoordinatesLocation;
   final String qiblaLocationUsed;
   final String qiblaNoSavedLocationError;
 
+  // الدعم والتواصل
   final String contactDeveloper;
   final String developerSupportTitle;
   final String developerSupportDescription;
@@ -132,9 +143,7 @@ class Translation {
   final String contactLaunchError;
   final String contactWhatsAppUsernameMissing;
   final String contactEmailSubject;
-
   final String copy;
-
   final String hadithLangMessage;
 
   Translation({
@@ -186,6 +195,7 @@ class Translation {
     required this.tutorialTasbih,
     required this.tutorialNotifications,
     required this.tutorialCompass,
+    required this.tutorialHadith,
     required this.tutorialHome,
     required this.tutorialMenu,
     required this.confirmLanguageChange,
@@ -224,6 +234,15 @@ class Translation {
     required this.permissionDeniedAppSettings,
     required this.compassNotSupported,
     required this.enableLocationService,
+    this.themeDialogTitle = 'ثيمات جديدة!',
+    this.themeDialogSubtitle = 'اختر المظهر الذي يناسبك',
+    this.themeDialogDescription = 'أضفنا ثيمات جديدة لتخصيص مظهر تطبيق رسالة. اختر الثيم الذي يعجبك، ويمكنك تغييره في أي وقت لاحقًا.',
+    this.themeGoldName = 'الذهبي',
+    this.themeNightSkyName = 'سماء الليل',
+    this.themeMinecraftNightName = 'ليل ماينكرافت',
+    this.themeOceanRainName = 'مطر المحيط',
+    this.later = 'لاحقًا',
+    this.applyTheme = 'تطبيق الثيم',
     required this.dailyStreak,
     required this.dailyStreakDescription,
     required this.daysLabel,
@@ -241,8 +260,7 @@ class Translation {
     this.qiblaSavedLocation = 'Last saved location',
     this.qiblaCoordinatesLocation = 'Location from GPS coordinates',
     this.qiblaLocationUsed = 'Location used',
-    this.qiblaNoSavedLocationError =
-        'Could not determine your current location and no previous location is saved. Check location permission and try again.',
+    this.qiblaNoSavedLocationError = 'Could not determine your current location and no previous location is saved. Check location permission and try again.',
     required this.contactDeveloper,
     required this.developerSupportTitle,
     required this.developerSupportDescription,
@@ -255,145 +273,152 @@ class Translation {
     this.contactEmailSubject = 'Contact about the Risala app',
     required this.copy,
     required this.hadithLangMessage,
-    required this.tutorialHadith,
   });
 
   factory Translation.fromMap(Map<String, dynamic> json, String langCode) {
-    final data = (json is List) ? json[0][langCode][0] : json[langCode][0];
+    final dynamic languageData = json[langCode];
+    final Map<String, dynamic> data;
+
+    if (languageData is List && languageData.isNotEmpty && languageData.first is Map) {
+      data = Map<String, dynamic>.from(languageData.first as Map);
+    } else if (languageData is Map) {
+      data = Map<String, dynamic>.from(languageData);
+    } else {
+      data = <String, dynamic>{};
+    }
+
+    String value(String key, [String fallback = '']) {
+      final result = data[key];
+      return result is String ? result : fallback;
+    }
 
     return Translation(
       key: '',
       text: '',
-      theQuran: data["theQuran"] ?? "",
-      ok: data["ok"] ?? "",
-      languageAndText: data["languageAndText"] ?? "",
-      explanatoryTextForTitle: data["explanatoryTextForTitle"] ?? "",
-      explanatoryTextForAya: data["explanatoryTextForAya"] ?? "",
-      save: data["save"] ?? "",
-      support: data["support"] ?? "",
-      theme: data["theme"] ?? "",
-      numberOfVerses: data["numberOfVerses"] ?? "",
-      turnOff: data["turnOff"] ?? "",
-      turnOn: data["turnOn"] ?? "",
-      error: data["error"] ?? "",
-      playing: data["playing"] ?? "",
-      saved: data["saved"] ?? "",
-      dontSaved: data["dontSaved"] ?? "",
-      verse: data["verse"] ?? "",
-      surah: data["surah"] ?? "",
-      searchHintText: data["searchHintText"] ?? "",
-      adhkar: data["adhkar"] ?? "",
-      yourCurrentLocation: data["yourCurrentLocation"] ?? "",
-      locationServiceIsDisabled: data["locationServiceIsDisabled"] ?? "",
-      locationPermissionDenied: data["locationPermissionDenied"] ?? "",
-      enterCityName: data["enterCityName"] ?? "",
-      cityNotFound: data["cityNotFound"] ?? "",
-      anErrorOccurredWhileSearchingForTheCity:
-          data["anErrorOccurredWhileSearchingForTheCity"] ?? "",
-      gettingLocation: data["gettingLocation"] ?? "",
-      savedLocation: data["SavedLocation"] ?? "",
-      updateSite: data["UpdateSite"] ?? "",
-      gradeDifference: data["gradeDifference"] ?? "",
-      qiblaDirection: data["qiblaDirection"] ?? "",
-      deviceOrientationNotAvailable:
-          data["deviceOrientationNotAvailable"] ?? "",
-      compassCalibration: data["compassCalibration"] ?? "",
-      explanationOfCalibration: data["explanationOfCalibration"] ?? "",
-      alfajr: data["alfajr"] ?? "",
-      alshuruq: data["alshuruq"] ?? "",
-      alzahri: data["alzahri"] ?? "",
-      aleasra: data["aleasra"] ?? "",
-      almaghribi: data["almaghribi"] ?? "",
-      aleashai: data["aleashai"] ?? "",
-      timeForTheNextPrayer: data["timeForTheNextPrayer"] ?? "",
-      prayerTimesIn: data["prayerTimesIn"] ?? "",
-      calculationMethod: data["calculationMethod"] ?? "",
-      almadhhab: data["almadhhab"] ?? "",
-      tutorialTasbih: data["tutorialTasbih"] ?? "",
-      tutorialNotifications: data["tutorialNotifications"] ?? "",
-      tutorialCompass: data["tutorialCompass"] ?? "",
-      tutorialHome: data["tutorialHome"] ?? "",
-      tutorialMenu: data["tutorialMenu"] ?? "",
-      confirmLanguageChange: data["confirmLanguageChange"] ?? "",
-      saturday: data["saturday"] ?? "",
-      sunday: data["sunday"] ?? "",
-      monday: data["monday"] ?? "",
-      tuesday: data["tuesday"] ?? "",
-      wednesday: data["wednesday"] ?? "",
-      thursday: data["thursday"] ?? "",
-      friday: data["friday"] ?? "",
-      all: data["all"] ?? "",
-      addNotificationTitle: data["addNotificationTitle"] ?? "",
-      addNotificationBody: data["addNotificationBody"] ?? "",
-      chooseTime: data["chooseTime"] ?? "",
-      time: data["time"] ?? "",
-      days: data["days"] ?? "",
-      //
-      ablution: data["Ablution"] ?? "",
-      adhan: data["Adhan"] ?? "",
-      appearance: data["Appearance"] ?? "",
-      changeAppearance: data["Change Appearance"] ?? "",
-      chooseColor: data["Choose Color"] ?? "",
-      compassNotSupported:
-          data["This device does not support a compass sensor"] ?? "",
-      enableLocationService:
-          data["Please enable location service from device settings"] ?? "",
-      evening: data["Evening"] ?? "",
-      food: data["Food"] ?? "",
-      glassEffect: data["Glass Effect"] ?? "",
-      homePlace: data["Home"] ?? "",
-      locationAccessRequired:
-          data["Location access must be allowed to use the compass"] ?? "",
-      morning: data["Morning"] ?? "",
-      mosque: data["Mosque"] ?? "",
-      permissionDeniedAppSettings: data[
-              "Permission permanently denied. Please enable it from app settings"] ??
-          "",
-      permissionDeniedSettings: data[
-              "Permission permanently denied. Please enable it from settings"] ??
-          "",
-      prayerTime: data["Prayer"] ?? "",
-      previewAppearance: data["Preview Appearance"] ?? "",
-      restroom: data["Restroom"] ?? "",
-      sleep: data["Sleep"] ?? "",
-      tasbihAndDhikr: data["Tasbih and Dhikr"] ?? "",
-      wakingUp: data["Waking Up"] ?? "",
-
-      dailyStreak: data["dailyStreak"] ?? "",
-      dailyStreakDescription: data["dailyStreakDescription"] ?? "",
-      daysLabel: data["daysLabel"] ?? "",
-      dayLabel: data["dayLabel"] ?? "",
-      okButton: data["okButton"] ?? "",
-      hafsNarration: data["hafsNarration"] ?? "",
-      qaloonNarration: data["qaloonNarration"] ?? "",
-      gpsDisabledForQibla: data["gpsDisabledForQibla"] ?? "",
-      locationPermissionPermanentlyDenied:
-          data["locationPermissionPermanentlyDenied"] ?? "",
-      compassNotSupportedDetailed: data["compassNotSupportedDetailed"] ?? "",
-      compassSetupError: data["compassSetupError"] ?? "",
-      locationDisabled: data["locationDisabled"] ?? "",
-      openLocationSettings: data["openLocationSettings"] ?? "",
-      retry: data["retry"] ?? "",
-      qiblaSavedLocation:
-          data["qiblaSavedLocation"] ?? data["SavedLocation"] ?? "",
-      qiblaCoordinatesLocation: data["qiblaCoordinatesLocation"] ?? "",
-      qiblaLocationUsed: data["qiblaLocationUsed"] ?? "",
-      qiblaNoSavedLocationError:
-          data["qiblaNoSavedLocationError"] ?? data["compassSetupError"] ?? "",
-      contactDeveloper: data["contactDeveloper"] ?? "",
-      developerSupportTitle: data["developerSupportTitle"] ?? "",
-      developerSupportDescription: data["developerSupportDescription"] ?? "",
-      developerSupportHint: data["developerSupportHint"] ?? "",
-      contactViaTelegram: data["contactViaTelegram"] ?? "",
-      contactViaWhatsApp: data["contactViaWhatsApp"] ?? "Contact via WhatsApp",
-      contactViaEmail: data["contactViaEmail"] ?? "Contact via Email",
-      contactLaunchError: data["contactLaunchError"] ?? "Could not open the link or app. Please try again.",
-      contactWhatsAppUsernameMissing: data["contactWhatsAppUsernameMissing"] ?? "WhatsApp username is not configured.",
-      contactEmailSubject: data["contactEmailSubject"] ?? "Contact about the Risala app",
-
-      copy: data["copy"] ?? "",
-      hadithLangMessage: data["hadithLangMessage"] ?? "",
-      tutorialHadith: data["tutorialHadith"] ?? "",
+      theQuran: value('theQuran'),
+      ok: value('ok'),
+      languageAndText: value('languageAndText'),
+      explanatoryTextForTitle: value('explanatoryTextForTitle'),
+      explanatoryTextForAya: value('explanatoryTextForAya'),
+      save: value('save'),
+      support: value('support'),
+      theme: value('theme'),
+      numberOfVerses: value('numberOfVerses'),
+      turnOff: value('turnOff'),
+      turnOn: value('turnOn'),
+      error: value('error'),
+      playing: value('playing'),
+      saved: value('saved'),
+      dontSaved: value('dontSaved'),
+      verse: value('verse'),
+      surah: value('surah'),
+      searchHintText: value('searchHintText'),
+      adhkar: value('adhkar'),
+      yourCurrentLocation: value('yourCurrentLocation'),
+      locationServiceIsDisabled: value('locationServiceIsDisabled'),
+      locationPermissionDenied: value('locationPermissionDenied'),
+      enterCityName: value('enterCityName'),
+      cityNotFound: value('cityNotFound'),
+      anErrorOccurredWhileSearchingForTheCity: value('anErrorOccurredWhileSearchingForTheCity'),
+      gettingLocation: value('gettingLocation'),
+      savedLocation: value('SavedLocation'),
+      updateSite: value('UpdateSite'),
+      gradeDifference: value('gradeDifference'),
+      qiblaDirection: value('qiblaDirection'),
+      deviceOrientationNotAvailable: value('deviceOrientationNotAvailable'),
+      compassCalibration: value('compassCalibration'),
+      explanationOfCalibration: value('explanationOfCalibration'),
+      alfajr: value('alfajr'),
+      alshuruq: value('alshuruq'),
+      alzahri: value('alzahri'),
+      aleasra: value('aleasra'),
+      almaghribi: value('almaghribi'),
+      aleashai: value('aleashai'),
+      timeForTheNextPrayer: value('timeForTheNextPrayer'),
+      prayerTimesIn: value('prayerTimesIn'),
+      calculationMethod: value('calculationMethod'),
+      almadhhab: value('almadhhab'),
+      tutorialTasbih: value('tutorialTasbih'),
+      tutorialNotifications: value('tutorialNotifications'),
+      tutorialCompass: value('tutorialCompass'),
+      tutorialHadith: value('tutorialHadith'),
+      tutorialHome: value('tutorialHome'),
+      tutorialMenu: value('tutorialMenu'),
+      confirmLanguageChange: value('confirmLanguageChange'),
+      saturday: value('saturday'),
+      sunday: value('sunday'),
+      monday: value('monday'),
+      tuesday: value('tuesday'),
+      wednesday: value('wednesday'),
+      thursday: value('thursday'),
+      friday: value('friday'),
+      all: value('all'),
+      addNotificationTitle: value('addNotificationTitle'),
+      addNotificationBody: value('addNotificationBody'),
+      chooseTime: value('chooseTime'),
+      time: value('time'),
+      days: value('days'),
+      appearance: value('Appearance'),
+      changeAppearance: value('Change Appearance'),
+      previewAppearance: value('Preview Appearance'),
+      glassEffect: value('Glass Effect'),
+      chooseColor: value('Choose Color'),
+      morning: value('Morning'),
+      evening: value('Evening'),
+      prayerTime: value('Prayer'),
+      sleep: value('Sleep'),
+      tasbihAndDhikr: value('Tasbih and Dhikr'),
+      wakingUp: value('Waking Up'),
+      adhan: value('Adhan'),
+      mosque: value('Mosque'),
+      ablution: value('Ablution'),
+      homePlace: value('Home'),
+      restroom: value('Restroom'),
+      food: value('Food'),
+      locationAccessRequired: value('Location access must be allowed to use the compass'),
+      permissionDeniedSettings: value('Permission permanently denied. Please enable it from settings'),
+      permissionDeniedAppSettings: value('Permission permanently denied. Please enable it from app settings'),
+      compassNotSupported: value('This device does not support a compass sensor'),
+      enableLocationService: value('Please enable location service from device settings'),
+      themeDialogTitle: value('themeDialogTitle', 'ثيمات جديدة!'),
+      themeDialogSubtitle: value('themeDialogSubtitle', 'اختر المظهر الذي يناسبك'),
+      themeDialogDescription: value('themeDialogDescription', 'أضفنا ثيمات جديدة لتخصيص مظهر تطبيق رسالة. اختر الثيم الذي يعجبك، ويمكنك تغييره في أي وقت لاحقًا.'),
+      themeGoldName: value('themeGoldName', 'الذهبي'),
+      themeNightSkyName: value('themeNightSkyName', 'سماء الليل'),
+      themeMinecraftNightName: value('themeMinecraftNightName', 'ليل ماينكرافت'),
+      themeOceanRainName: value('themeOceanRainName', 'مطر المحيط'),
+      later: value('later', 'لاحقًا'),
+      applyTheme: value('applyTheme', 'تطبيق الثيم'),
+      dailyStreak: value('dailyStreak'),
+      dailyStreakDescription: value('dailyStreakDescription'),
+      daysLabel: value('daysLabel'),
+      dayLabel: value('dayLabel'),
+      okButton: value('okButton'),
+      hafsNarration: value('hafsNarration'),
+      qaloonNarration: value('qaloonNarration'),
+      gpsDisabledForQibla: value('gpsDisabledForQibla'),
+      locationPermissionPermanentlyDenied: value('locationPermissionPermanentlyDenied'),
+      compassNotSupportedDetailed: value('compassNotSupportedDetailed'),
+      compassSetupError: value('compassSetupError'),
+      locationDisabled: value('locationDisabled'),
+      openLocationSettings: value('openLocationSettings'),
+      retry: value('retry'),
+      qiblaSavedLocation: value('qiblaSavedLocation', value('SavedLocation', 'Last saved location')),
+      qiblaCoordinatesLocation: value('qiblaCoordinatesLocation', 'Location from GPS coordinates'),
+      qiblaLocationUsed: value('qiblaLocationUsed', 'Location used'),
+      qiblaNoSavedLocationError: value('qiblaNoSavedLocationError', value('compassSetupError', 'Could not determine your current location.')),
+      contactDeveloper: value('contactDeveloper'),
+      developerSupportTitle: value('developerSupportTitle'),
+      developerSupportDescription: value('developerSupportDescription'),
+      developerSupportHint: value('developerSupportHint'),
+      contactViaTelegram: value('contactViaTelegram'),
+      contactViaWhatsApp: value('contactViaWhatsApp', 'Contact via WhatsApp'),
+      contactViaEmail: value('contactViaEmail', 'Contact via Email'),
+      contactLaunchError: value('contactLaunchError', 'Could not open the link or app. Please try again.'),
+      contactWhatsAppUsernameMissing: value('contactWhatsAppUsernameMissing', 'WhatsApp username is not configured.'),
+      contactEmailSubject: value('contactEmailSubject', 'Contact about the Risala app'),
+      copy: value('copy'),
+      hadithLangMessage: value('hadithLangMessage'),
     );
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:risala/custom/custom_bg/custom_bg_of_home.dart';
+import 'package:risala/custom/custom_bg/custom_minecraft_night_bg.dart';
+import 'package:risala/custom/custom_bg/custom_night_sky_bg.dart';
+import 'package:risala/custom/custom_bg/custom_ocean_rain_bg.dart';
 import 'package:risala/custom/custom_bg/islamic_animated_bg.dart';
 import 'package:risala/custom/custom_bottom_bar/bottom_bar_animation/bottom_bar_animation1.dart';
 import 'package:risala/custom/custom_list_items/custom_list/custom_list1.dart';
@@ -36,6 +39,7 @@ class _HomeViewState extends State<HomeView> {
   double showRightView = 0;
   double topBorderRadius = 10;
   bool isEidToDay = sharedPref.getBool("isToDatEid") ?? false;
+  int themeIndex = sharedPref.getInt("myTheme") ?? 0;
 
   @override
   Widget build(BuildContext context) {
@@ -58,24 +62,75 @@ class _HomeViewState extends State<HomeView> {
                                     ? const SabhuhView()
                                     : const SizedBox(),
               )
-            : CustomBg(
-                topMargin: 0,
-                topBorderRadius: topBorderRadius,
-                child: showRightView == 0
-                    ? CustomList(
-                        onPressedCustomIconButtonBookmark:
-                            widget.onPressedCustomIconButtonBookmark,
+            : themeIndex == 0
+                ? CustomBg(
+                    topMargin: 0,
+                    topBorderRadius: topBorderRadius,
+                    child: showRightView == 0
+                        ? CustomList(
+                            onPressedCustomIconButtonBookmark:
+                                widget.onPressedCustomIconButtonBookmark,
+                          )
+                        : showRightView == 1
+                            ? const HadithView()
+                            : showRightView == 2
+                                ? const QiblaView()
+                                : showRightView == 3
+                                    ? const CustomNotification() //const AdhanView()
+                                    : showRightView == 4
+                                        ? const SabhuhView()
+                                        : const SizedBox(),
+                  )
+                : themeIndex == 1
+                    ? CustomNightSkyBg(
+                        child: showRightView == 0
+                            ? CustomList(
+                                onPressedCustomIconButtonBookmark:
+                                    widget.onPressedCustomIconButtonBookmark,
+                              )
+                            : showRightView == 1
+                                ? const HadithView()
+                                : showRightView == 2
+                                    ? const QiblaView()
+                                    : showRightView == 3
+                                        ? const CustomNotification() //const AdhanView()
+                                        : showRightView == 4
+                                            ? const SabhuhView()
+                                            : const SizedBox(),
                       )
-                    : showRightView == 1
-                        ? const HadithView()
-                        : showRightView == 2
-                            ? const QiblaView()
-                            : showRightView == 3
-                                ? const CustomNotification() //const AdhanView()
-                                : showRightView == 4
-                                    ? const SabhuhView()
-                                    : const SizedBox(),
-              ),
+                    : themeIndex == 2
+                        ? CustomMinecraftNightBg(
+                            child: showRightView == 0
+                                ? CustomList(
+                                    onPressedCustomIconButtonBookmark: widget
+                                        .onPressedCustomIconButtonBookmark,
+                                  )
+                                : showRightView == 1
+                                    ? const HadithView()
+                                    : showRightView == 2
+                                        ? const QiblaView()
+                                        : showRightView == 3
+                                            ? const CustomNotification() //const AdhanView()
+                                            : showRightView == 4
+                                                ? const SabhuhView()
+                                                : const SizedBox(),
+                          )
+                        : CustomOceanRainBg(
+                            child: showRightView == 0
+                                ? CustomList(
+                                    onPressedCustomIconButtonBookmark: widget
+                                        .onPressedCustomIconButtonBookmark,
+                                  )
+                                : showRightView == 1
+                                    ? const HadithView()
+                                    : showRightView == 2
+                                        ? const QiblaView()
+                                        : showRightView == 3
+                                            ? const CustomNotification() //const AdhanView()
+                                            : showRightView == 4
+                                                ? const SabhuhView()
+                                                : const SizedBox(),
+                          ),
         Positioned(
           bottom: 8,
           width: MediaQuery.of(context).size.width,

@@ -117,7 +117,16 @@
                 "qiblaCoordinatesLocation": "موقع محدد بإحداثيات GPS",
                 "qiblaLocationUsed": "الموقع المستخدم",
                 "qiblaNoSavedLocationError": "تعذر تحديد الموقع الحالي ولم يوجد موقع سابق محفوظ. تحقق من صلاحية الموقع وحاول مجددًا.",
-                "hadithLangMessage": "نعتذر منك، ولكن لغتك غير مدعومة حاليًا. يتوفر كتاب صحيح البخاري حاليًا باللغتين العربية والإنجليزية فقط. إذا كان بإمكانك المساعدة في توفير الكتاب بلغتك، أو تعرف شخصًا يمكنه ذلك، فيُرجى التواصل معنا."
+                "hadithLangMessage": "نعتذر منك، ولكن لغتك غير مدعومة حاليًا. يتوفر كتاب صحيح البخاري حاليًا باللغتين العربية والإنجليزية فقط. إذا كان بإمكانك المساعدة في توفير الكتاب بلغتك، أو تعرف شخصًا يمكنه ذلك، فيُرجى التواصل معنا.",
+                "themeDialogTitle": "ثيمات جديدة!",
+                "themeDialogSubtitle": "اختر المظهر الذي يناسبك",
+                "themeDialogDescription": "أضفنا ثيمات جديدة لتخصيص مظهر تطبيق رسالة. اختر الثيم الذي يعجبك، ويمكنك تغييره في أي وقت لاحقًا.",
+                "themeGoldName": "الذهبي",
+                "themeNightSkyName": "سماء الليل",
+                "themeMinecraftNightName": "ليل ماينكرافت",
+                "themeOceanRainName": "مطر المحيط",
+                "later": "لاحقًا",
+                "applyTheme": "تطبيق الثيم"
             }
         ],
         "en": [
@@ -237,7 +246,16 @@
                 "qiblaCoordinatesLocation": "Location from GPS coordinates",
                 "qiblaLocationUsed": "Location used",
                 "qiblaNoSavedLocationError": "Could not determine your current location, and no previous location is saved. Check location permission and try again.",
-                "hadithLangMessage": "We apologize, but your language is not currently supported. Sahih al-Bukhari is currently available only in Arabic and English. If you can help provide the book in your language, or know someone who can, please contact us."
+                "hadithLangMessage": "We apologize, but your language is not currently supported. Sahih al-Bukhari is currently available only in Arabic and English. If you can help provide the book in your language, or know someone who can, please contact us.",
+                "themeDialogTitle": "New Themes!",
+                "themeDialogSubtitle": "Choose the look you like",
+                "themeDialogDescription": "We have added new themes to customize the look of Risala. Choose your favorite theme; you can change it anytime later.",
+                "themeGoldName": "Golden",
+                "themeNightSkyName": "Night Sky",
+                "themeMinecraftNightName": "Minecraft Night",
+                "themeOceanRainName": "Ocean Rain",
+                "later": "Later",
+                "applyTheme": "Apply Theme"
             }
         ],
         "sp": [
@@ -357,7 +375,16 @@
                 "qiblaCoordinatesLocation": "Ubicación obtenida por coordenadas GPS",
                 "qiblaLocationUsed": "Ubicación utilizada",
                 "qiblaNoSavedLocationError": "No se pudo determinar la ubicación actual y no hay una ubicación anterior guardada. Comprueba el permiso de ubicación e inténtalo de nuevo.",
-                "hadithLangMessage": "Lo sentimos, pero tu idioma aún no es compatible. El libro Sahih al-Bujari está disponible actualmente solo en árabe e inglés. Si puedes ayudar a proporcionar el libro en tu idioma, o conoces a alguien que pueda hacerlo, ponte en contacto con nosotros."
+                "hadithLangMessage": "Lo sentimos, pero tu idioma aún no es compatible. El libro Sahih al-Bujari está disponible actualmente solo en árabe e inglés. Si puedes ayudar a proporcionar el libro en tu idioma, o conoces a alguien que pueda hacerlo, ponte en contacto con nosotros.",
+                "themeDialogTitle": "¡Nuevos temas!",
+                "themeDialogSubtitle": "Elige el aspecto que más te guste",
+                "themeDialogDescription": "Hemos añadido nuevos temas para personalizar el aspecto de Risala. Elige tu tema favorito; podrás cambiarlo cuando quieras.",
+                "themeGoldName": "Dorado",
+                "themeNightSkyName": "Cielo nocturno",
+                "themeMinecraftNightName": "Noche de Minecraft",
+                "themeOceanRainName": "Lluvia en el océano",
+                "later": "Más tarde",
+                "applyTheme": "Aplicar tema"
             }
         ],
         "it": [
@@ -477,7 +504,16 @@
                 "qiblaCoordinatesLocation": "Posizione ottenuta dalle coordinate GPS",
                 "qiblaLocationUsed": "Posizione utilizzata",
                 "qiblaNoSavedLocationError": "Impossibile determinare la posizione attuale e non è disponibile una posizione precedente salvata. Controlla il permesso di posizione e riprova.",
-                "hadithLangMessage": "Ci scusiamo, ma la tua lingua non è attualmente supportata. Il libro Sahih al-Bukhari è attualmente disponibile solo in arabo e inglese. Se puoi aiutarci a rendere disponibile il libro nella tua lingua, o conosci qualcuno che possa farlo, contattaci."
+                "hadithLangMessage": "Ci scusiamo, ma la tua lingua non è attualmente supportata. Il libro Sahih al-Bukhari è attualmente disponibile solo in arabo e inglese. Se puoi aiutarci a rendere disponibile il libro nella tua lingua, o conosci qualcuno che possa farlo, contattaci.",
+                "themeDialogTitle": "Nuovi temi!",
+                "themeDialogSubtitle": "Scegli l'aspetto che preferisci",
+                "themeDialogDescription": "Abbiamo aggiunto nuovi temi per personalizzare l'aspetto di Risala. Scegli il tuo tema preferito; potrai cambiarlo in qualsiasi momento.",
+                "themeGoldName": "Dorato",
+                "themeNightSkyName": "Cielo notturno",
+                "themeMinecraftNightName": "Notte Minecraft",
+                "themeOceanRainName": "Pioggia sull'oceano",
+                "later": "Più tardi",
+                "applyTheme": "Applica tema"
             }
         ],
         "in": [
@@ -597,7 +633,16 @@
                 "qiblaCoordinatesLocation": "Lokasi dari koordinat GPS",
                 "qiblaLocationUsed": "Lokasi yang digunakan",
                 "qiblaNoSavedLocationError": "Lokasi saat ini tidak dapat ditentukan dan tidak ada lokasi sebelumnya yang tersimpan. Periksa izin lokasi lalu coba lagi.",
-                "hadithLangMessage": "Mohon maaf, bahasa Anda saat ini belum didukung. Kitab Sahih al-Bukhari saat ini hanya tersedia dalam bahasa Arab dan Inggris. Jika Anda dapat membantu menyediakan kitab ini dalam bahasa Anda, atau mengenal seseorang yang dapat membantu, silakan hubungi kami."
+                "hadithLangMessage": "Mohon maaf, bahasa Anda saat ini belum didukung. Kitab Sahih al-Bukhari saat ini hanya tersedia dalam bahasa Arab dan Inggris. Jika Anda dapat membantu menyediakan kitab ini dalam bahasa Anda, atau mengenal seseorang yang dapat membantu, silakan hubungi kami.",
+                "themeDialogTitle": "Tema Baru!",
+                "themeDialogSubtitle": "Pilih tampilan yang Anda sukai",
+                "themeDialogDescription": "Kami telah menambahkan tema baru untuk menyesuaikan tampilan Risala. Pilih tema favorit Anda; Anda dapat mengubahnya kapan saja nanti.",
+                "themeGoldName": "Emas",
+                "themeNightSkyName": "Langit Malam",
+                "themeMinecraftNightName": "Malam Minecraft",
+                "themeOceanRainName": "Hujan Laut",
+                "later": "Nanti",
+                "applyTheme": "Terapkan Tema"
             }
         ],
         "cn": [
@@ -717,7 +762,16 @@
                 "qiblaCoordinatesLocation": "根据 GPS 坐标确定的位置",
                 "qiblaLocationUsed": "使用的位置",
                 "qiblaNoSavedLocationError": "无法确定当前位置，也没有保存过以前的位置。请检查位置权限后重试。",
-                "hadithLangMessage": "很抱歉，目前尚不支持您的语言。《布哈里圣训实录》目前仅提供阿拉伯语和英语版本。如果您能帮助我们提供您所使用语言的版本，或者认识能够提供帮助的人，请联系我们。"
+                "hadithLangMessage": "很抱歉，目前尚不支持您的语言。《布哈里圣训实录》目前仅提供阿拉伯语和英语版本。如果您能帮助我们提供您所使用语言的版本，或者认识能够提供帮助的人，请联系我们。",
+                "themeDialogTitle": "全新主题！",
+                "themeDialogSubtitle": "选择您喜欢的外观",
+                "themeDialogDescription": "我们为 Risala 添加了新主题，让您可以自定义应用外观。请选择您喜欢的主题，以后也可以随时更改。",
+                "themeGoldName": "金色",
+                "themeNightSkyName": "夜空",
+                "themeMinecraftNightName": "我的世界之夜",
+                "themeOceanRainName": "海洋雨景",
+                "later": "稍后",
+                "applyTheme": "应用主题"
             }
         ],
         "bn": [
@@ -837,7 +891,16 @@
                 "qiblaCoordinatesLocation": "GPS স্থানাঙ্ক থেকে নির্ধারিত অবস্থান",
                 "qiblaLocationUsed": "ব্যবহৃত অবস্থান",
                 "qiblaNoSavedLocationError": "বর্তমান অবস্থান নির্ধারণ করা যায়নি এবং আগের কোনো অবস্থান সংরক্ষিত নেই। অবস্থানের অনুমতি পরীক্ষা করে আবার চেষ্টা করুন।",
-                "hadithLangMessage": "আমরা দুঃখিত, তবে আপনার ভাষা বর্তমানে সমর্থিত নয়। সহিহ আল-বুখারি বর্তমানে শুধুমাত্র আরবি ও ইংরেজি ভাষায় উপলব্ধ। আপনি যদি আপনার ভাষায় বইটি সরবরাহ করতে সাহায্য করতে পারেন, অথবা এমন কাউকে চেনেন যিনি সাহায্য করতে পারেন, তাহলে অনুগ্রহ করে আমাদের সাথে যোগাযোগ করুন।"
+                "hadithLangMessage": "আমরা দুঃখিত, তবে আপনার ভাষা বর্তমানে সমর্থিত নয়। সহিহ আল-বুখারি বর্তমানে শুধুমাত্র আরবি ও ইংরেজি ভাষায় উপলব্ধ। আপনি যদি আপনার ভাষায় বইটি সরবরাহ করতে সাহায্য করতে পারেন, অথবা এমন কাউকে চেনেন যিনি সাহায্য করতে পারেন, তাহলে অনুগ্রহ করে আমাদের সাথে যোগাযোগ করুন।",
+                "themeDialogTitle": "নতুন থিম!",
+                "themeDialogSubtitle": "আপনার পছন্দের চেহারা বেছে নিন",
+                "themeDialogDescription": "রিসালার চেহারা নিজের মতো সাজাতে আমরা নতুন থিম যোগ করেছি। আপনার পছন্দের থিমটি বেছে নিন; পরে যেকোনো সময় পরিবর্তন করতে পারবেন।",
+                "themeGoldName": "সোনালি",
+                "themeNightSkyName": "রাতের আকাশ",
+                "themeMinecraftNightName": "মাইনক্রাফট রাত",
+                "themeOceanRainName": "সমুদ্রের বৃষ্টি",
+                "later": "পরে",
+                "applyTheme": "থিম প্রয়োগ করুন"
             }
         ],
         "ru": [
@@ -957,7 +1020,16 @@
                 "qiblaCoordinatesLocation": "Местоположение по координатам GPS",
                 "qiblaLocationUsed": "Используемое местоположение",
                 "qiblaNoSavedLocationError": "Не удалось определить текущее местоположение, и ранее сохранённого местоположения нет. Проверьте разрешение на доступ к местоположению и повторите попытку.",
-                "hadithLangMessage": "Приносим извинения, но ваш язык пока не поддерживается. Сахих аль-Бухари в настоящее время доступен только на арабском и английском языках. Если вы можете помочь с переводом книги на ваш язык или знаете кого-то, кто может помочь, пожалуйста, свяжитесь с нами."
+                "hadithLangMessage": "Приносим извинения, но ваш язык пока не поддерживается. Сахих аль-Бухари в настоящее время доступен только на арабском и английском языках. Если вы можете помочь с переводом книги на ваш язык или знаете кого-то, кто может помочь, пожалуйста, свяжитесь с нами.",
+                "themeDialogTitle": "Новые темы!",
+                "themeDialogSubtitle": "Выберите оформление по вкусу",
+                "themeDialogDescription": "Мы добавили новые темы, чтобы вы могли настроить внешний вид Risala. Выберите понравившуюся тему; изменить её можно будет в любое время.",
+                "themeGoldName": "Золотая",
+                "themeNightSkyName": "Ночное небо",
+                "themeMinecraftNightName": "Ночь Minecraft",
+                "themeOceanRainName": "Дождь над океаном",
+                "later": "Позже",
+                "applyTheme": "Применить тему"
             }
         ],
         "jp": [
@@ -1077,7 +1149,16 @@
                 "qiblaCoordinatesLocation": "GPS 座標から取得した位置情報",
                 "qiblaLocationUsed": "使用中の位置情報",
                 "qiblaNoSavedLocationError": "現在地を特定できず、保存済みの位置情報もありません。位置情報の権限を確認して、もう一度お試しください。",
-                "hadithLangMessage": "申し訳ありませんが、現在お使いの言語には対応していません。サヒーフ・アル＝ブハーリーは現在、アラビア語と英語のみで利用できます。お使いの言語で本を提供するためにご協力いただける場合、または協力できる方をご存じの場合は、ぜひご連絡ください。"
+                "hadithLangMessage": "申し訳ありませんが、現在お使いの言語には対応していません。サヒーフ・アル＝ブハーリーは現在、アラビア語と英語のみで利用できます。お使いの言語で本を提供するためにご協力いただける場合、または協力できる方をご存じの場合は、ぜひご連絡ください。",
+                "themeDialogTitle": "新しいテーマ！",
+                "themeDialogSubtitle": "お好みの外観を選んでください",
+                "themeDialogDescription": "Risala の外観をカスタマイズできる新しいテーマを追加しました。お好きなテーマを選んでください。テーマは後からいつでも変更できます。",
+                "themeGoldName": "ゴールド",
+                "themeNightSkyName": "夜空",
+                "themeMinecraftNightName": "マインクラフトの夜",
+                "themeOceanRainName": "海の雨",
+                "later": "後で",
+                "applyTheme": "テーマを適用"
             }
         ]
     }

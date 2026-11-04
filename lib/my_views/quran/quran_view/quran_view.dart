@@ -1268,8 +1268,9 @@ class _QuranViewState extends State<QuranView> {
           await _playSelectedAyah(hafs: false);
         } else if (index == 1) {
           final verse = highlightedVerse;
-          if (verse != null)
+          if (verse != null) {
             await saveMyAya(verse, surahNumber, surahName ?? "");
+          }
         } else if (index == 2) {
           setState(() => showTafsir = 1);
         }
