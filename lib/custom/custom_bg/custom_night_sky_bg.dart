@@ -462,7 +462,7 @@ class _NightSkyPainter extends CustomPainter {
           )
           ..strokeWidth = 4.0
           ..strokeCap = StrokeCap.round
-          ..maskFilter = MaskFilter.blur(
+          ..maskFilter = const MaskFilter.blur(
             BlurStyle.normal,
             6,
           ),

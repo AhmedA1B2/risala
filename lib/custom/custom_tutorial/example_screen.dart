@@ -42,10 +42,6 @@ class _ExampleScreenState extends State<ExampleScreen> {
             ElevatedButton(
               key: addKey,
               onPressed: () {
-                // 3. تفعيل الأكواد الخاصة بك أولاً
-                print("تمت إضافة العنصر بنجاح!");
-
-                // 4. الانتقال للخطوة التالية في التعليمات يدوياً
                 tutorial.next();
               },
               child: const Text("إضافة"),
@@ -54,10 +50,6 @@ class _ExampleScreenState extends State<ExampleScreen> {
             ElevatedButton(
               key: deleteKey,
               onPressed: () {
-                // تفعيل كود الحذف
-                print("تم حذف العنصر!");
-
-                // إنهاء التعليمات
                 tutorial.next();
               },
               child: const Text("حذف"),

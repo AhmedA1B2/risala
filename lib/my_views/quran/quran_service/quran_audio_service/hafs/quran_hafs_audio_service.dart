@@ -359,7 +359,7 @@ class QuranHafsAudioService {
             '0',
           );
 
-      final audioUrl = "https://audio.qurancdn.com/wbw/${s}_${v}_${p}.mp3";
+      final audioUrl = "https://audio.qurancdn.com/wbw/${s}_${v}_$p.mp3";
 
       //////////////////////////////////////////////////////
       // Play

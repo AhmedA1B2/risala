@@ -6,6 +6,7 @@ class NotificationHome extends StatefulWidget {
   const NotificationHome({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _NotificationHomeState createState() => _NotificationHomeState();
 }
 

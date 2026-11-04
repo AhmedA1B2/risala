@@ -23,7 +23,7 @@ class _ShowRecitersJsonState extends State<ShowRecitersJson> {
     setState(() => isLoading = true);
     try {
       final auth =
-          'Basic ' + base64Encode(utf8.encode('$clientId:$clientSecret'));
+          'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}';
 
       final response = await http.post(
         Uri.parse(tokenEndpoint),
@@ -77,7 +77,7 @@ class _ShowRecitersJsonState extends State<ShowRecitersJson> {
           }
         });
 
-        print("🔹 Reciters Response:\n$formatted");
+        debugPrint("🔹 Reciters Response:\n$formatted");
       } else {
         setState(() {
           recitersJson = "فشل في جلب البيانات: ${response.statusCode}";
@@ -87,7 +87,7 @@ class _ShowRecitersJsonState extends State<ShowRecitersJson> {
       setState(() {
         recitersJson = "حدث خطأ: $e";
       });
-      print("🔥 Exception: $e");
+      debugPrint("🔥 Exception: $e");
     }
 
     setState(() => isLoading = false);

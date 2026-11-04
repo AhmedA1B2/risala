@@ -1220,8 +1220,9 @@ class _QuranViewState extends State<QuranView> {
             await _playSelectedAyah(hafs: true);
           } else if (index == 1) {
             final verse = highlightedVerse;
-            if (verse != null)
+            if (verse != null) {
               await saveMyAya(verse, surahNumber, surahName ?? "");
+            }
           } else if (index == 2) {
             setState(() => showTafsir = 1);
           }
@@ -1521,8 +1522,9 @@ class _QuranViewState extends State<QuranView> {
         );
       }
     } catch (_) {
-      if (mounted)
+      if (mounted) {
         _showGeneralSnackBar("تعذر تنزيل السورة، تحقق من الاتصال وحاول مجددًا");
+      }
     } finally {
       if (mounted &&
           requestedRiwoya == riwoya &&

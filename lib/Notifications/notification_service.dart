@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -42,7 +43,7 @@ class NotificationService {
     try {
       tz.setLocalLocation(tz.getLocation(cleanTimeZoneName));
     } catch (e) {
-      print("فشل تعيين المنطقة الزمنية: $e");
+      debugPrint("فشل تعيين المنطقة الزمنية: $e");
       tz.setLocalLocation(tz.getLocation('Africa/Tripoli'));
     }
 

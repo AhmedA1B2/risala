@@ -30,7 +30,7 @@ class _ShowVerseJsonState extends State<ShowVerseJson> {
     });
     try {
       final auth =
-          'Basic ' + base64Encode(utf8.encode('$clientId:$clientSecret'));
+          'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}';
 
       final response = await http.post(
         Uri.parse(tokenEndpoint),
@@ -85,7 +85,7 @@ class _ShowVerseJsonState extends State<ShowVerseJson> {
           verseJson = formatted;
         });
 
-        print("🔹 JSON Response for $verseKey:\n$formatted");
+        debugPrint("🔹 JSON Response for $verseKey:\n$formatted");
       } else {
         setState(() {
           verseJson = "فشل في جلب البيانات: ${response.statusCode}";
@@ -95,7 +95,7 @@ class _ShowVerseJsonState extends State<ShowVerseJson> {
       setState(() {
         verseJson = "حدث خطأ: $e";
       });
-      print("🔥 استثناء: $e");
+      debugPrint("🔥 استثناء: $e");
     }
 
     setState(() => isLoading = false);

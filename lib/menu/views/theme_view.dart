@@ -132,26 +132,26 @@ class _ThemeViewState extends State<ThemeView> {
   }
 
   Widget _buildBackgroundLayer(int index) {
-    final emptyChild = const SizedBox.expand();
+    const emptyChild = SizedBox.expand();
 
     late final Widget background;
     switch (index) {
       case 0:
-        background = CustomBg(
+        background = const CustomBg(
           topBorderRadius: 0,
           topMargin: 0,
           child: emptyChild,
         );
         break;
       case 1:
-        background = CustomNightSkyBg(child: emptyChild);
+        background = const CustomNightSkyBg(child: emptyChild);
         break;
       case 2:
-        background = CustomMinecraftNightBg(child: emptyChild);
+        background = const CustomMinecraftNightBg(child: emptyChild);
         break;
       case 3:
       default:
-        background = CustomOceanRainBg(child: emptyChild);
+        background = const CustomOceanRainBg(child: emptyChild);
         break;
     }
 

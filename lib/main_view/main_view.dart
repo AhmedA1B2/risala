@@ -405,6 +405,7 @@ class _MainViewState extends State<MainView> with RouteAware {
       // If displaying the dialog throws an exception, this line is not reached.
       await sharedPref.setBool(_themeDialogSeenKey, true);
       Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (context) => const MainView()),
       );
