@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:risala/custom/custom_icon_button/custom_icon_button_bookmark.dart';
 import 'package:risala/custom/custom_list_items/custom_item/custom_item1.dart';
 import 'package:risala/custom/custom_loading/custom_loading_screen/custom_loading_screen2.dart';
 import 'package:risala/main.dart';
