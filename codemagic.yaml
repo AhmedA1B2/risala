@@ -1,6 +1,7 @@
 workflows:
+  # Unsigned iPhone-device build (the workflow used for the first Runner.app).
   risala-ios-unsigned:
-    name: Risala iOS - First unsigned build
+    name: Risala iOS - Unsigned device build
     max_build_duration: 60
     instance_type: mac_mini_m2
 
@@ -21,4 +22,42 @@ workflows:
 
     artifacts:
       - build/ios/iphoneos/Runner.app
+      - /tmp/xcodebuild_logs/*.log
+
+  # iOS Simulator build for browser-based testing with Appetize or Codemagic App Preview.
+  risala-ios-simulator:
+    name: Risala iOS - Simulator preview
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+
+    environment:
+      flutter: 3.44.4
+      xcode: latest
+      cocoapods: default
+
+    scripts:
+      - name: Show Flutter version
+        script: flutter --version
+
+      - name: Get Flutter dependencies
+        script: flutter pub get
+
+      - name: Allow both iPhone device and simulator platforms
+        script: |
+          PROJECT_FILE="ios/Runner.xcodeproj/project.pbxproj"
+          if grep -q 'SUPPORTED_PLATFORMS = iphoneos;' "$PROJECT_FILE"; then
+            sed -i '' 's/SUPPORTED_PLATFORMS = iphoneos;/SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";/g' "$PROJECT_FILE"
+          fi
+
+      - name: Build iOS Simulator app
+        script: flutter build ios --simulator --debug
+
+      - name: Zip simulator app for Appetize
+        script: |
+          cd build/ios/iphonesimulator
+          zip -r Risala-iOS-Simulator.zip Runner.app
+
+    artifacts:
+      - build/ios/iphonesimulator/Runner.app
+      - build/ios/iphonesimulator/Risala-iOS-Simulator.zip
       - /tmp/xcodebuild_logs/*.log
